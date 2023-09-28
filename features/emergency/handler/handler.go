@@ -46,3 +46,16 @@ func (handler *EmergencyHandler) Add(c echo.Context)error{
 	return c.JSON(http.StatusOK,"success create data emergency")
 
 }
+
+func (handler *EmergencyHandler)Delete(c echo.Context)error{
+	id:=c.Param("emergency_id")
+	idConv,errConv:=strconv.Atoi(id)
+	if errConv != nil{
+		return c.JSON(http.StatusBadRequest,"id not valid")
+	}
+	err:=handler.emergencyHandler.Delete(uint(idConv))
+	if err!= nil{
+		return c.JSON(http.StatusBadRequest,err.Error())
+	}
+	return c.JSON(http.StatusOK,"success delete emsergemcy")
+}

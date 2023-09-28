@@ -12,14 +12,23 @@ type EmergencyService struct {
 	validate         *validator.Validate
 }
 
+// Delete implements emergency.EmergencyServiceInterface.
+func (service *EmergencyService) Delete(id uint) error {
+	err:=service.emergencyService.Delete(id)
+	if err != nil{
+		return err
+	}
+	return nil
+}
+
 // Add implements emergency.EmergencyServiceInterface.
 func (service *EmergencyService) Add(input emergency.EmergencyEntity) error {
-	errValidate:=service.validate.Struct(input)
-	if errValidate != nil{
+	errValidate := service.validate.Struct(input)
+	if errValidate != nil {
 		return errors.New("error validate, receiver_id/longitude/latitude require")
 	}
-	err:=service.emergencyService.Insert(input)
-	if err != nil{
+	err := service.emergencyService.Insert(input)
+	if err != nil {
 		return err
 	}
 	return nil

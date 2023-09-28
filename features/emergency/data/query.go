@@ -11,14 +11,27 @@ type EmergencyData struct {
 	db *gorm.DB
 }
 
-// Insert implements emergency.EmergencyDataInterface.
-func (repo *EmergencyData) Insert(input emergency.EmergencyEntity) error {
-	inputModel:= EntityToModel(input)
-	tx:=repo.db.Create(&inputModel)
+// Delete implements emergency.EmergencyDataInterface.
+func (repo *EmergencyData) Delete(id uint) error {
+	var inputModel Emergency
+	tx:=repo.db.Delete(&inputModel,id)
 	if tx.Error != nil{
-		return errors.New("failed create data emergency")
+		return errors.New("fail delete emergency")
 	}
 	if tx.RowsAffected==0{
+		return errors.New("id not found")
+	}
+	return nil
+}
+
+// Insert implements emergency.EmergencyDataInterface.
+func (repo *EmergencyData) Insert(input emergency.EmergencyEntity) error {
+	inputModel := EntityToModel(input)
+	tx := repo.db.Create(&inputModel)
+	if tx.Error != nil {
+		return errors.New("failed create data emergency")
+	}
+	if tx.RowsAffected == 0 {
 		return errors.New("row not affected")
 	}
 	return nil

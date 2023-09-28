@@ -14,4 +14,5 @@ func InitRouter(db *gorm.DB,c *echo.Echo){
 	serviceE:=sE.New(dataE)
 	handlerE:=hE.New(serviceE)
 	c.POST("users/:receiver_id/emergencies",handlerE.Add)
+	c.DELETE("/emergencies/:emergency_id",handlerE.Delete)
 }
