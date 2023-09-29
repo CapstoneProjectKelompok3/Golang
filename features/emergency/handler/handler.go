@@ -96,3 +96,47 @@ func (handler *EmergencyHandler)GetById(c echo.Context)error{
 		"data": response,
 	})	
 }
+
+func (handler *EmergencyHandler) GetAll(c echo.Context)error{
+	var qparams emergency.QueryParams
+	page:= c.QueryParam("page")
+	itemsPerPage:=c.QueryParam("itemsPerPage")
+
+	if itemsPerPage ==""{
+		qparams.IsClassDashboard=false
+	}else{
+		qparams.IsClassDashboard=true
+		itemsConv, errItem := strconv.Atoi(itemsPerPage)
+		if errItem != nil {
+			return c.JSON(http.StatusBadRequest,"item per page not valid")
+		}
+		qparams.ItemsPerPage = itemsConv
+	}
+
+	if page ==""{
+		qparams.Page=1
+	}else{
+		pageConv, errPage := strconv.Atoi(page)
+		if errPage != nil {
+			return c.JSON(http.StatusBadRequest,"page not valid")
+		}
+		qparams.Page = pageConv
+	}
+	// name:=c.QueryParam("searchName")
+	// qparams.SearchName = name
+
+	bol,data,err:=handler.emergencyHandler.GetAll(qparams)
+	if err != nil{
+		return c.JSON(http.StatusInternalServerError,err.Error())
+	}
+	var response []EmergencyResponse
+	for _,v:=range data{
+		response = append(response, EntityToResponse(v))
+	}
+
+	return c.JSON(http.StatusOK,map[string]any{
+		"message":"success get all emergency",
+		"data": response,
+		"next_page":bol,
+	})
+}
