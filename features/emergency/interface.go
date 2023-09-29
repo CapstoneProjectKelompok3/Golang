@@ -17,10 +17,12 @@ type EmergencyDataInterface interface{
 	Insert(input EmergencyEntity)(error)
 	Delete(id uint)(error)
 	Update(input EmergencyEntity, id uint)(error)
+	SelectById(id uint)(EmergencyEntity,error)
 }
 
 type EmergencyServiceInterface interface{
 	Add(input EmergencyEntity)(error)
 	Delete(id uint)(error)
 	Edit(input EmergencyEntity,id uint)error
+	GetById(id uint)(EmergencyEntity,error)
 }

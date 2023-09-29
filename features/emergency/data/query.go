@@ -11,14 +11,25 @@ type EmergencyData struct {
 	db *gorm.DB
 }
 
+// SelectById implements emergency.EmergencyDataInterface.
+func (repo *EmergencyData) SelectById(id uint) (emergency.EmergencyEntity, error) {
+	var inputModel Emergency
+	tx:=repo.db.First(&inputModel,id)
+	if tx.Error != nil{
+		return emergency.EmergencyEntity{},errors.New("fail emergency by id")
+	}
+	output:=ModelToEntity(inputModel)
+	return output,nil
+}
+
 // Update implements emergency.EmergencyDataInterface.
 func (repo *EmergencyData) Update(input emergency.EmergencyEntity, id uint) error {
-	inputModel:=EntityToModel(input)
-	tx:=repo.db.Model(&Emergency{}).Where("id=?",id).Updates(inputModel)
-	if tx.Error != nil{
+	inputModel := EntityToModel(input)
+	tx := repo.db.Model(&Emergency{}).Where("id=?", id).Updates(inputModel)
+	if tx.Error != nil {
 		return errors.New("update emergency fail")
 	}
-	if tx.RowsAffected == 0{
+	if tx.RowsAffected == 0 {
 		return errors.New("id not found")
 	}
 	return nil
