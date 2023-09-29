@@ -12,10 +12,19 @@ type EmergencyService struct {
 	validate         *validator.Validate
 }
 
+// Edit implements emergency.EmergencyServiceInterface.
+func (repo *EmergencyService) Edit(input emergency.EmergencyEntity, id uint) error {
+	err:=repo.emergencyService.Update(input,id)
+	if err != nil{
+		return err
+	}
+	return nil
+}
+
 // Delete implements emergency.EmergencyServiceInterface.
 func (service *EmergencyService) Delete(id uint) error {
-	err:=service.emergencyService.Delete(id)
-	if err != nil{
+	err := service.emergencyService.Delete(id)
+	if err != nil {
 		return err
 	}
 	return nil
