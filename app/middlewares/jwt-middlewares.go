@@ -15,12 +15,13 @@ func JWTMiddleware() echo.MiddlewareFunc {
 	})
 }
 
-func ExtractTokenUserId(e echo.Context) int {
+func ExtractTokenUserId(e echo.Context) (int,string) {
 	user := e.Get("user").(*jwt.Token)
 	if user.Valid {
 		claims := user.Claims.(jwt.MapClaims)
-		userId := claims["userId"].(float64)
-		return int(userId)
+		userId := claims["id"].(float64)
+		level := claims["level"].(string)
+		return int(userId),level
 	}
-	return 0
+	return 0,""
 }

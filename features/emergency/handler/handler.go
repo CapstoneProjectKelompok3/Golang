@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"project-capston/app/middlewares"
 	"project-capston/features/emergency"
 	"strconv"
 	"strings"
@@ -20,7 +21,7 @@ func New(handler emergency.EmergencyServiceInterface) *EmergencyHandler{
 }
 
 func (handler *EmergencyHandler) Add(c echo.Context)error{
-	idClaller:=5
+	idClaller,_:=middlewares.ExtractTokenUserId(c)
 	idReceiver:=c.Param("receiver_id")
 	idConv,errConv:=strconv.Atoi(idReceiver)
 	if errConv != nil{
@@ -81,6 +82,7 @@ func (handler *EmergencyHandler)Edit(c echo.Context)error{
 }
 
 func (handler *EmergencyHandler)GetById(c echo.Context)error{
+	
 	id:=c.Param("emergency_id")
 	idConv,errConv:=strconv.Atoi(id)
 	if errConv != nil{
