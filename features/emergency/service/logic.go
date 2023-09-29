@@ -12,13 +12,44 @@ type EmergencyService struct {
 	validate         *validator.Validate
 }
 
+// GetAll implements emergency.EmergencyServiceInterface.
+func (service *EmergencyService) GetAll(param emergency.QueryParams) (bool, []emergency.EmergencyEntity, error) {
+	var totalPages int64
+	nextPage :=true
+	count,data,err:=service.emergencyService.SelectAll(param)
+	if err != nil{
+		return true,nil,err
+	}
+	if count == 0 {
+		nextPage = false
+	}
+
+	if param.IsClassDashboard{
+		totalPages =count/int64(param.ItemsPerPage)
+		if count %int64(param.ItemsPerPage) !=0{
+			totalPages +=1
+		}
+		if param.Page == int(totalPages){
+			nextPage = false
+		}
+		if param.Page < param.ItemsPerPage{
+			nextPage=false
+		}
+
+		if data == nil{
+			nextPage=false
+		}
+	}
+	return nextPage,data,nil
+}
+
 // GetById implements emergency.EmergencyServiceInterface.
 func (service *EmergencyService) GetById(id uint) (emergency.EmergencyEntity, error) {
-	data,err:=service.emergencyService.SelectById(id)
-	if err != nil{
-		return emergency.EmergencyEntity{},err
+	data, err := service.emergencyService.SelectById(id)
+	if err != nil {
+		return emergency.EmergencyEntity{}, err
 	}
-	return data,nil
+	return data, nil
 }
 
 // Edit implements emergency.EmergencyServiceInterface.
