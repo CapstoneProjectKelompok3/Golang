@@ -12,10 +12,19 @@ type EmergencyService struct {
 	validate         *validator.Validate
 }
 
+// GetById implements emergency.EmergencyServiceInterface.
+func (service *EmergencyService) GetById(id uint) (emergency.EmergencyEntity, error) {
+	data,err:=service.emergencyService.SelectById(id)
+	if err != nil{
+		return emergency.EmergencyEntity{},err
+	}
+	return data,nil
+}
+
 // Edit implements emergency.EmergencyServiceInterface.
 func (repo *EmergencyService) Edit(input emergency.EmergencyEntity, id uint) error {
-	err:=repo.emergencyService.Update(input,id)
-	if err != nil{
+	err := repo.emergencyService.Update(input, id)
+	if err != nil {
 		return err
 	}
 	return nil

@@ -43,7 +43,7 @@ func (handler *EmergencyHandler) Add(c echo.Context)error{
 			return c.JSON(http.StatusInternalServerError,err.Error())
 		}
 	}
-	return c.JSON(http.StatusOK,"success create data emergency")
+	return c.JSON(http.StatusCreated,"success create data emergency")
 
 }
 
@@ -78,4 +78,21 @@ func (handler *EmergencyHandler)Edit(c echo.Context)error{
 		return c.JSON(http.StatusInternalServerError,err.Error())
 	}
 	return c.JSON(http.StatusOK,"success update emergency")
+}
+
+func (handler *EmergencyHandler)GetById(c echo.Context)error{
+	id:=c.Param("emergency_id")
+	idConv,errConv:=strconv.Atoi(id)
+	if errConv != nil{
+		return c.JSON(http.StatusBadRequest,"id not valid")
+	}
+	data,err:=handler.emergencyHandler.GetById(uint(idConv))
+	if err!= nil{
+		return c.JSON(http.StatusInternalServerError,err.Error())
+	}
+	response:=EntityToResponse(data)
+	return c.JSON(http.StatusOK,map[string]any{
+		"message":"success get emergency by id",
+		"data": response,
+	})	
 }
