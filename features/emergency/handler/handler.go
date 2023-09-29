@@ -59,3 +59,23 @@ func (handler *EmergencyHandler)Delete(c echo.Context)error{
 	}
 	return c.JSON(http.StatusOK,"success delete emsergemcy")
 }
+
+func (handler *EmergencyHandler)Edit(c echo.Context)error{
+	id:=c.Param("emergency_id")
+	idConv,errConv:=strconv.Atoi(id)
+	if errConv != nil{
+		return c.JSON(http.StatusBadRequest,"id not valid")
+	}
+	var input EmergencyRequest
+	errBind:=c.Bind(&input)
+	if errBind != nil{
+		return c.JSON(http.StatusBadRequest,"error bind data")
+	}
+	
+	Entity:=RequestToEntity(input)
+	err:=handler.emergencyHandler.Edit(Entity,uint(idConv))
+	if err != nil{
+		return c.JSON(http.StatusInternalServerError,err.Error())
+	}
+	return c.JSON(http.StatusOK,"success update emergency")
+}

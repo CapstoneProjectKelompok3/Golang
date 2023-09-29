@@ -16,9 +16,11 @@ type EmergencyEntity struct {
 type EmergencyDataInterface interface{
 	Insert(input EmergencyEntity)(error)
 	Delete(id uint)(error)
+	Update(input EmergencyEntity, id uint)(error)
 }
 
 type EmergencyServiceInterface interface{
 	Add(input EmergencyEntity)(error)
 	Delete(id uint)(error)
+	Edit(input EmergencyEntity,id uint)error
 }
