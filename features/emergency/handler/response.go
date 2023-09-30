@@ -12,6 +12,14 @@ type EmergencyResponse struct {
 	ReceiverID uint    `json:"receiver_id,omitempty"`
 	Latitude   float64 `json:"latitude,omitempty"`
 	Longitude  float64 `json:"longitude,omitempty"`
+	Caller     UserResponse `json:"caller,omitempty"`
+	Receiver   UserResponse	`json:"reciver,omitempty"`
+}
+
+type UserResponse struct{
+	ID        		int `json:"id,omitempty"`
+	Name 			string	`json:"name,omitempty"`
+	Level           string `json:"level,omitempty"`
 }
 
 func EntityToResponse(data emergency.EmergencyEntity)EmergencyResponse{
@@ -22,5 +30,15 @@ func EntityToResponse(data emergency.EmergencyEntity)EmergencyResponse{
 		ReceiverID: data.ReceiverID,
 		Latitude:   data.Latitude,
 		Longitude:  data.Longitude,
+		Caller:     UserEntityToResponse(data.Caller),
+		Receiver:   UserEntityToResponse(data.Receiver),
+	}
+}
+
+func UserEntityToResponse(user emergency.UserEntity)UserResponse{
+	return UserResponse{
+		ID:    user.ID,
+		Name:  user.Name,
+		Level: user.Level,
 	}
 }

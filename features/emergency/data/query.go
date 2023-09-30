@@ -2,7 +2,9 @@ package data
 
 import (
 	"errors"
+	usernodejs "project-capston/features/UserNodeJs"
 	"project-capston/features/emergency"
+	"strconv"
 
 	"gorm.io/gorm"
 )
@@ -12,7 +14,7 @@ type EmergencyData struct {
 }
 
 // SelectAll implements emergency.EmergencyDataInterface.
-func (repo *EmergencyData) SelectAll(param emergency.QueryParams) (int64, []emergency.EmergencyEntity, error) {
+func (repo *EmergencyData) SelectAll(param emergency.QueryParams,token string) (int64, []emergency.EmergencyEntity, error) {
 	var inputModel []Emergency
 	var totalEmergency int64
 
@@ -37,22 +39,45 @@ func (repo *EmergencyData) SelectAll(param emergency.QueryParams) (int64, []emer
 	if tx.Error != nil{
 		return 0,nil,errors.New("error get all emergency")
 	}
-
-	var output []emergency.EmergencyEntity
-	for _,V:=range inputModel{
-		output = append(output, ModelToEntity(V))
+	var entity []emergency.EmergencyEntity
+	for _,v:=range inputModel{
+		entity = append(entity, ModelToEntity(v))
 	}
-	return totalEmergency,output,nil
+
+	return totalEmergency,entity,nil
 }
 
 // SelectById implements emergency.EmergencyDataInterface.
-func (repo *EmergencyData) SelectById(id uint) (emergency.EmergencyEntity, error) {
+func (repo *EmergencyData) SelectById(id uint,token string) (emergency.EmergencyEntity, error) {
 	var inputModel Emergency
 	tx := repo.db.First(&inputModel, id)
 	if tx.Error != nil {
 		return emergency.EmergencyEntity{}, errors.New("fail emergency by id")
 	}
-	output := ModelToEntity(inputModel)
+	idCaller:=strconv.Itoa(int(inputModel.CallerID))
+	dataCaller,errUserC:=usernodejs.GetByIdUser(idCaller,token)
+	if errUserC != nil{
+		return emergency.EmergencyEntity{},errUserC
+	}
+
+	idReceiver:=strconv.Itoa(int(inputModel.ReceiverID))
+	dataReceiver,errUserR:=usernodejs.GetByIdUser(idReceiver,token)
+	if errUserR != nil{
+		return emergency.EmergencyEntity{},errUserR
+	}
+
+	userCaller:=UserNodeToUser(dataCaller)
+	userEntityCaller:=UserToUserEntity(userCaller)
+
+	userReceiver:=UserNodeToUser(dataReceiver)
+	userEntityReceiver:=UserToUserEntity(userReceiver)
+
+
+	emergensyUser:=ModelToEmergencyUser(inputModel)
+
+	output := EmergencyUserToEntity(emergensyUser)
+	output.Caller=userEntityCaller
+	output.Receiver=userEntityReceiver
 	return output, nil
 }
 

@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 	"project-capston/app/middlewares"
+	usernodejs "project-capston/features/UserNodeJs"
 	"project-capston/features/emergency"
 	"strconv"
 	"strings"
@@ -88,7 +89,11 @@ func (handler *EmergencyHandler)GetById(c echo.Context)error{
 	if errConv != nil{
 		return c.JSON(http.StatusBadRequest,"id not valid")
 	}
-	data,err:=handler.emergencyHandler.GetById(uint(idConv))
+	token,errToken:=usernodejs.GetTokenHandler(c)
+	if errToken != nil{
+		return c.JSON(http.StatusUnauthorized,"fail get token")
+	}
+	data,err:=handler.emergencyHandler.GetById(uint(idConv),token)
 	if err!= nil{
 		return c.JSON(http.StatusInternalServerError,err.Error())
 	}
@@ -126,8 +131,12 @@ func (handler *EmergencyHandler) GetAll(c echo.Context)error{
 	}
 	// name:=c.QueryParam("searchName")
 	// qparams.SearchName = name
+	token,errToken:=usernodejs.GetTokenHandler(c)
+	if errToken != nil{
+		return c.JSON(http.StatusUnauthorized,"fail get token")
+	}
 
-	bol,data,err:=handler.emergencyHandler.GetAll(qparams)
+	bol,data,err:=handler.emergencyHandler.GetAll(qparams,token)
 	if err != nil{
 		return c.JSON(http.StatusInternalServerError,err.Error())
 	}
