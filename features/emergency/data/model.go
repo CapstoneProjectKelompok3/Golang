@@ -50,6 +50,14 @@ func UserNodeToUser(user usernodejs.User)User{
 	}
 }
 
+func UserEntityToEntity(user emergency.UserEntity)emergency.UserEntity{
+	return emergency.UserEntity{
+		ID:    user.ID,
+		Name:  user.Name,
+		Level: user.Level,
+	}
+}
+
 func ModelToEmergencyUser(emergency Emergency)EmergencyUser{
 	return EmergencyUser{
 		ID:         emergency.ID,

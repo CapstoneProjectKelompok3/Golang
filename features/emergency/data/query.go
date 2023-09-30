@@ -2,6 +2,7 @@ package data
 
 import (
 	"errors"
+	"log"
 	usernodejs "project-capston/features/UserNodeJs"
 	"project-capston/features/emergency"
 	"strconv"
@@ -39,13 +40,54 @@ func (repo *EmergencyData) SelectAll(param emergency.QueryParams,token string) (
 	if tx.Error != nil{
 		return 0,nil,errors.New("error get all emergency")
 	}
-	var entity []emergency.EmergencyEntity
-	for _,v:=range inputModel{
-		entity = append(entity, ModelToEntity(v))
+
+	dataUser,errUser:=usernodejs.GetAllUser(token)
+	if errUser != nil{
+		return 0,nil,errUser
 	}
 
-	return totalEmergency,entity,nil
+	var userModel []User
+	for _,v:=range dataUser{
+		userModel = append(userModel, UserNodeToUser(v))
+	}
+	var userEntity []emergency.UserEntity
+	for _,V:=range userModel{
+		userEntity=append(userEntity, UserToUserEntity(V))
+	}
+	var emergensiUser []EmergencyUser
+	for _,e:=range inputModel{
+		emergensiUser = append(emergensiUser, ModelToEmergencyUser(e))
+	}
+
+	var idReceiver []string
+	for _,v:=range emergensiUser{
+		id:=strconv.Itoa(int(v.ReceiverID))
+		idReceiver = append(idReceiver, id)
+	}
+
+	var emergenciEntity []emergency.EmergencyEntity
+	for i:=0;i<len(emergensiUser);i++{
+		for j:=0;j<len(userEntity);j++{
+			if userEntity[j].ID == int(emergensiUser[i].CallerID) {
+					emergensiUser[i].Caller = User(userEntity[j])
+					log.Println("caller",emergensiUser[i].Caller)
+			}		
+		}
+		for _,v:=range idReceiver{
+			data,_:=usernodejs.GetByIdUser(v,token)
+			user:=UserNodeToUser(data)
+			emergensiUser[i].Receiver=user		
+	}
+	emergenciEntity = append(emergenciEntity, EmergencyUserToEntity(emergensiUser[i]))
+
+	}
+	
+	return totalEmergency,emergenciEntity,nil
+		
 }
+
+
+
 
 // SelectById implements emergency.EmergencyDataInterface.
 func (repo *EmergencyData) SelectById(id uint,token string) (emergency.EmergencyEntity, error) {
