@@ -4,6 +4,7 @@ import "time"
 
 type EmergencyEntity struct {
 	Id         	uint
+	Name string
 	CallerID   	uint `validate:"required"`
 	ReceiverID 	uint `validate:"required"`
 	Latitude   	float64 `validate:"required"`
@@ -13,6 +14,7 @@ type EmergencyEntity struct {
 	DeleteAt 	time.Time
 	Caller     UserEntity
 	Receiver   UserEntity
+	IsClose bool
 }
 
 type UserEntity struct{
