@@ -71,25 +71,20 @@ func (repo *EmergencyData) SelectAll(param emergency.QueryParams,token string) (
 			if userEntity[j].ID == int(emergensiUser[i].CallerID) {
 					emergensiUser[i].Caller = User(userEntity[j])
 					log.Println("caller",emergensiUser[i].Caller)
-			}
-
-		emergenciEntity = append(emergenciEntity, EmergencyUserToEntity(emergensiUser[i]))
-			
+			}		
 		}
-	}
-	for _,v:=range idReceiver{
-		for _,V:=range emergensiUser{
+		for _,v:=range idReceiver{
 			data,_:=usernodejs.GetByIdUser(v,token)
 			user:=UserNodeToUser(data)
-			userEntity:=UserToUserEntity(user)	
-			V.Receiver=User(userEntity)
-			emergenciEntity = append(emergenciEntity, EmergencyUserToEntity(V))
-		}
+			emergensiUser[i].Receiver=user		
+	}
+	emergenciEntity = append(emergenciEntity, EmergencyUserToEntity(emergensiUser[i]))
 
 	}
+	
 	return totalEmergency,emergenciEntity,nil
 		
-	}
+}
 
 
 
