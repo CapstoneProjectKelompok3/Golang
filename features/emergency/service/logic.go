@@ -13,10 +13,10 @@ type EmergencyService struct {
 }
 
 // GetAll implements emergency.EmergencyServiceInterface.
-func (service *EmergencyService) GetAll(param emergency.QueryParams) (bool, []emergency.EmergencyEntity, error) {
+func (service *EmergencyService) GetAll(param emergency.QueryParams,token string) (bool, []emergency.EmergencyEntity, error) {
 	var totalPages int64
 	nextPage :=true
-	count,data,err:=service.emergencyService.SelectAll(param)
+	count,data,err:=service.emergencyService.SelectAll(param,token)
 	if err != nil{
 		return true,nil,err
 	}
@@ -44,8 +44,8 @@ func (service *EmergencyService) GetAll(param emergency.QueryParams) (bool, []em
 }
 
 // GetById implements emergency.EmergencyServiceInterface.
-func (service *EmergencyService) GetById(id uint) (emergency.EmergencyEntity, error) {
-	data, err := service.emergencyService.SelectById(id)
+func (service *EmergencyService) GetById(id uint,token string) (emergency.EmergencyEntity, error) {
+	data, err := service.emergencyService.SelectById(id,token)
 	if err != nil {
 		return emergency.EmergencyEntity{}, err
 	}

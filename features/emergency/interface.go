@@ -11,6 +11,14 @@ type EmergencyEntity struct {
 	CreateAt   	time.Time
 	UpdateAt 	time.Time
 	DeleteAt 	time.Time
+	Caller     UserEntity
+	Receiver   UserEntity
+}
+
+type UserEntity struct{
+	ID        		int
+	Name 			string	
+	Level           string
 }
 
 type QueryParams struct {
@@ -24,14 +32,14 @@ type EmergencyDataInterface interface{
 	Insert(input EmergencyEntity)(error)
 	Delete(id uint)(error)
 	Update(input EmergencyEntity, id uint)(error)
-	SelectById(id uint)(EmergencyEntity,error)
-	SelectAll(param QueryParams)(int64, []EmergencyEntity,error)
+	SelectById(id uint,token string)(EmergencyEntity,error)
+	SelectAll(param QueryParams,token string)(int64, []EmergencyEntity,error)
 }
 
 type EmergencyServiceInterface interface{
 	Add(input EmergencyEntity)(error)
 	Delete(id uint)(error)
 	Edit(input EmergencyEntity,id uint)error
-	GetById(id uint)(EmergencyEntity,error)
-	GetAll(param QueryParams)(bool,[]EmergencyEntity,error)
+	GetById(id uint,token string)(EmergencyEntity,error)
+	GetAll(param QueryParams,token string)(bool,[]EmergencyEntity,error)
 }
