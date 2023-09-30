@@ -3,7 +3,11 @@ package database
 import (
 	"fmt"
 	"project-capston/app/config"
+	driver "project-capston/features/driver/data"
 	emergency "project-capston/features/emergency/data"
+	goverment "project-capston/features/goverment/data"
+	unit "project-capston/features/unit/data"
+	vehicles "project-capston/features/vehicles/data"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -21,5 +25,5 @@ func InitMysql(cfg *config.AppConfig) *gorm.DB {
 }
 
 func InitialMigration(db *gorm.DB) {
-	db.AutoMigrate(&emergency.Emergency{})
+	db.AutoMigrate(&emergency.Emergency{},&driver.Driver{},&goverment.Goverment{},&vehicles.Vehicle{},&unit.Unit{},&unit.UnitHistory{})
 }

@@ -10,10 +10,12 @@ import (
 
 type Emergency struct {
 	gorm.Model
+	Name string
 	CallerID   uint
 	ReceiverID uint
 	Latitude   float64
 	Longitude  float64
+	IsClose bool
 }
 
 type EmergencyUser struct{

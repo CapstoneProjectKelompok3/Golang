@@ -7,6 +7,7 @@ type EmergencyRequest struct {
 	ReceiverID uint    `json:"receiver_id" form:"receiver_id"`
 	Latitude   float64 `json:"latitude" form:"latitude"`
 	Longitude  float64 `json:"longitude" form:"longitude"`
+	IsClose bool
 }
 
 func RequestToEntity(data EmergencyRequest) emergency.EmergencyEntity{
