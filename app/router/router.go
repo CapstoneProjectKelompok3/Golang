@@ -6,13 +6,20 @@ import (
 	hE "project-capston/features/emergency/handler"
 	sE "project-capston/features/emergency/service"
 
+
 	dV "project-capston/features/vehicles/data"
 	hV "project-capston/features/vehicles/handler"
 	sV "project-capston/features/vehicles/service"
 
+	_governmentData "project-capston/features/goverment/data"
+	_governmentHandler "project-capston/features/goverment/handler"
+	_governmentService "project-capston/features/goverment/service"
+
+
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
+
 
 func InitRouter(db *gorm.DB,c *echo.Echo){
 	dataE:=dE.New(db)
@@ -33,4 +40,18 @@ func InitRouter(db *gorm.DB,c *echo.Echo){
 	c.GET("/vehicles/:vehicle_id",handlerV.GetById,middlewares.JWTMiddleware())
 	c.GET("/vehicles",handlerV.GetAll,middlewares.JWTMiddleware())
 	c.DELETE("/vehicles/:vehicle_id",handlerV.Delete,middlewares.JWTMiddleware())
+
+	//Government
+	governmentData := _governmentData.New(db)
+	governmentService := _governmentService.New(governmentData)
+	governmentHandlerAPI := _governmentHandler.New(governmentService)
+
+	c.POST("/governments", governmentHandlerAPI.CreateGovernment, middlewares.JWTMiddleware())
+	c.GET("/governments", governmentHandlerAPI.GetAllGovernment, middlewares.JWTMiddleware())
+	c.GET("/governments/:government_id", governmentHandlerAPI.GetGovernmentById, middlewares.JWTMiddleware())
+	c.PUT("/governments/:government_id", governmentHandlerAPI.UpdateGovernment, middlewares.JWTMiddleware())
+	c.DELETE("/governments/:government_id", governmentHandlerAPI.DeleteGovernment, middlewares.JWTMiddleware())
+
+	c.GET("/get-nearest-government", governmentHandlerAPI.GetNearestGovernment, middlewares.JWTMiddleware())
 }
+
