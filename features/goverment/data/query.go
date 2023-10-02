@@ -2,6 +2,7 @@ package data
 
 import (
 	"project-capston/features/goverment"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -24,4 +25,33 @@ func (repo *governmentQuery) Insert(input goverment.Core) error {
 	}
 
 	return nil
+}
+
+// SelectAll implements goverment.GovernmentDataInterface.
+func (repo *governmentQuery) SelectAll(pageNumber int, pageSize int) ([]goverment.Core, error) {
+	var governmentData []Government
+
+	offset := (pageNumber - 1) * pageSize
+
+	tx := repo.db.Offset(offset).Limit(pageSize).Find(&governmentData)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	var governmentCore []goverment.Core
+
+	for _, value := range governmentData {
+		governmentCore = append(governmentCore, goverment.Core{
+			ID:        value.ID,
+			Name:      value.Name,
+			Type:      value.Type,
+			Address:   value.Address,
+			Latitude:  value.Latitude,
+			Longitude: value.Longitude,
+			CreatedAt: time.Time{},
+			UpdatedAt: time.Time{},
+			DeletedAt: time.Time{},
+		})
+	}
+
+	return governmentCore, nil
 }

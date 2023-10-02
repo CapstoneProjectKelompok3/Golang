@@ -29,3 +29,12 @@ func (service *govermentService) Create(input goverment.Core) error {
 	err := service.governmentData.Insert(input)
 	return err
 }
+
+// GetAll implements goverment.GovernmentServiceInterface.
+func (service *govermentService) GetAll(pageNumber int, pageSize int) ([]goverment.Core, error) {
+	result, err := service.governmentData.SelectAll(pageNumber, pageSize)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

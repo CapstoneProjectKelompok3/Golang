@@ -16,8 +16,10 @@ type Core struct {
 
 type GovernmentDataInterface interface {
 	Insert(input Core) error
+	SelectAll(pageNumber int, pageSize int) ([]Core, error)
 }
 
 type GovernmentServiceInterface interface {
 	Create(input Core) error
+	GetAll(pageNumber int, pageSize int) ([]Core, error)
 }
