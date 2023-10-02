@@ -1,6 +1,7 @@
 package data
 
 import (
+	"errors"
 	"project-capston/features/goverment"
 	"time"
 
@@ -54,4 +55,18 @@ func (repo *governmentQuery) SelectAll(pageNumber int, pageSize int) ([]govermen
 	}
 
 	return governmentCore, nil
+}
+
+// Select implements goverment.GovernmentDataInterface.
+func (repo *governmentQuery) Select(id uint) (goverment.Core, error) {
+	var governmentData Government
+	tx := repo.db.Where("id = ?", id).First(&governmentData)
+	if tx.Error != nil {
+		return goverment.Core{}, tx.Error
+	}
+	if tx.RowsAffected == 0 {
+		return goverment.Core{}, errors.New("data not found")
+	}
+
+	return ModelToCore(governmentData), nil
 }

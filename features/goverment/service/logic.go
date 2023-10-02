@@ -38,3 +38,12 @@ func (service *govermentService) GetAll(pageNumber int, pageSize int) ([]goverme
 	}
 	return result, nil
 }
+
+// GetById implements goverment.GovernmentServiceInterface.
+func (service *govermentService) GetById(id uint) (goverment.Core, error) {
+	result, err := service.governmentData.Select(id)
+	if err != nil {
+		return goverment.Core{}, err
+	}
+	return result, nil
+}

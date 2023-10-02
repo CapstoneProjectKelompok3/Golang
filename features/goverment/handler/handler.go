@@ -69,3 +69,33 @@ func (handler *governmentHandler) GetAllGovernment(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "success read data", governmentResponse))
 }
+
+func (handler *governmentHandler) GetGovernmentById(c echo.Context) error {
+	id := c.Param("government_id")
+
+	idConv, errConv := strconv.Atoi(id)
+	if errConv != nil {
+		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error id not valid", nil))
+	}
+
+	result, err := handler.governmentService.GetById(uint(idConv))
+	if err != nil {
+
+		return c.JSON(http.StatusNotFound, helper.WebResponse(http.StatusNotFound, "data not found", nil))
+	}
+
+	// _, _, userCompanyId := middlewares.ExtractTokenUserId(c)
+	// if idConv != userCompanyId {
+	// 	return c.JSON(http.StatusForbidden, helpers.WebResponse(http.StatusForbidden, exception.ErrForbiddenAccess.Error(), nil))
+	// } else {
+	resultResponse := GovernmentResponse{
+		ID:        result.ID,
+		Name:      result.Name,
+		Type:      result.Type,
+		Address:   result.Address,
+		Latitude:  result.Latitude,
+		Longitude: result.Longitude,
+	}
+	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "success read data", resultResponse))
+	// }
+}
