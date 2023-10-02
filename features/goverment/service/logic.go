@@ -59,3 +59,12 @@ func (service *govermentService) DeleteById(id uint) error {
 	err := service.governmentData.Delete(id)
 	return err
 }
+
+// GetNearestLocation implements goverment.GovernmentServiceInterface.
+func (service *govermentService) GetNearestLocation(latitude float64, longitude float64) ([]goverment.Location, error) {
+	result, err := service.governmentData.SelectNearestLocation(latitude, longitude)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

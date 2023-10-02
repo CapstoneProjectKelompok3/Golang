@@ -70,6 +70,39 @@ func (handler *governmentHandler) GetAllGovernment(c echo.Context) error {
 	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "success read data", governmentResponse))
 }
 
+func (handler *governmentHandler) GetNearestGovernment(c echo.Context) error {
+	// pageNumber, _ := strconv.Atoi(c.QueryParam("page"))
+	// pageSize, _ := strconv.Atoi(c.QueryParam("size"))
+
+	// if pageNumber <= 0 {
+	// 	pageNumber = 1
+	// }
+	// if pageSize <= 0 {
+	// 	pageSize = 100
+	// }
+	const latitude = -6.175392
+	const longitude = 106.827153
+
+	result, err := handler.governmentService.GetNearestLocation(latitude, longitude)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error read data", nil))
+	}
+
+	var governmentResponse []GovernmentNearestResponse
+	for _, value := range result {
+		governmentResponse = append(governmentResponse, GovernmentNearestResponse{
+			ID:   value.ID,
+			Name: value.Name,
+			// Type:      value.Type,
+			// Address:   value.Address,
+			Latitude:  value.Latitude,
+			Longitude: value.Longitude,
+			Distance:  value.Distance,
+		})
+	}
+	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "success display nearest location in radius 10km", governmentResponse))
+}
+
 func (handler *governmentHandler) GetGovernmentById(c echo.Context) error {
 	id := c.Param("government_id")
 
