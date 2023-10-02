@@ -1,5 +1,28 @@
 package usernodejs
 
+type Login struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func MappingLogin(login Login) Login {
+	return Login{
+		Email:    login.Email,
+		Password: login.Password,
+	}
+}
+
+type ResponseData struct {
+	StatusCode int    `json:"status_code"`
+	Result     string `json:"result"`
+	Data       struct {
+		User struct {
+			Level string `json:"level"`
+		} `json:"user"`
+		Token string `json:"token"`
+	} `json:"data"`
+}
+
 type User struct {
 	ID          int      `json:"id"`
 	Email       string   `json:"email"`
