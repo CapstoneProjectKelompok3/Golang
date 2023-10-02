@@ -92,16 +92,17 @@ func (repo *EmergencyData) SelectById(id uint,token string) (emergency.Emergency
 	if tx.Error != nil {
 		return emergency.EmergencyEntity{}, errors.New("fail emergency by id")
 	}
-	idCaller:=strconv.Itoa(int(inputModel.CallerID))
-	dataCaller,errUserC:=usernodejs.GetByIdUser(idCaller,token)
-	if errUserC != nil{
-		return emergency.EmergencyEntity{},errUserC
-	}
 
 	idReceiver:=strconv.Itoa(int(inputModel.ReceiverID))
 	dataReceiver,errUserR:=usernodejs.GetByIdUser(idReceiver,token)
 	if errUserR != nil{
 		return emergency.EmergencyEntity{},errUserR
+	}
+
+	idCaller:=strconv.Itoa(int(inputModel.CallerID))
+	dataCaller,errUserC:=usernodejs.GetByIdUser(idCaller,token)
+	if errUserC != nil{
+		return emergency.EmergencyEntity{},errUserC
 	}
 
 	userCaller:=UserNodeToUser(dataCaller)

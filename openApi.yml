@@ -1,0 +1,334 @@
+openapi: 3.0.0
+info:
+  version: 1.0.2
+  title: HRIS
+  description: The documentation of endpoints for ICCI
+servers:
+  - url: https://hris.belanjalagiyuk.shop
+
+tags:
+  - name: Emergency
+    description: operation about gmergency
+  - name: Goverment
+    description: operation about goverment
+paths:
+  /users/{receiver_id}/emergencies:
+    post:
+      tags:
+        - Emergency
+      summary: create emergency
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: receiver_id
+          description: contain id of the emergency
+          required: true
+          in: path
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/create_emergency"
+      responses:
+        "201":
+          $ref: "#/components/responses/responseSuccessCreate"
+        "400":
+          $ref: "#/components/responses/responseBadRequest"
+        "404":
+          $ref: "#/components/responses/responseNotFound"
+        "500":
+          $ref: "#/components/responses/responseFailedInternal"
+  /emergencies:
+    get:
+      tags:
+        - Emergency
+      summary: create emergency
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: page
+          description: "untuk menentukan page ke berapa"
+          in: query
+          schema:
+            type: number
+        - name: itemsPerPage
+          description: "jumlah users yang ditampilan per halaman"
+          in: query
+          schema:
+            type: number
+      responses:
+        "200":
+          $ref: "#/components/responses/responseGetAllEmergency"
+        "400":
+          $ref: "#/components/responses/responseBadRequest"
+        "404":
+          $ref: "#/components/responses/responseNotFound"
+        "500":
+          $ref: "#/components/responses/responseFailedInternal"
+
+  /emergencies/{emergency_id}:
+    get:
+      tags:
+        - Emergency
+      summary: get emergency by id
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: emergency_id
+          description: contain id of the emergency
+          required: true
+          in: path
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          $ref: "#/components/responses/responseGetByIdEmergency"
+        "400":
+          $ref: "#/components/responses/responseBadRequest"
+        "404":
+          $ref: "#/components/responses/responseNotFound"
+        "500":
+          $ref: "#/components/responses/responseFailedInternal"
+    put:
+      tags:
+        - Emergency
+      summary: edit emergency by id
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: emergency_id
+          description: contain id of the emergency
+          required: true
+          in: path
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/create_emergency"
+      responses:
+        "201":
+          $ref: "#/components/responses/responseSuccess"
+        "400":
+          $ref: "#/components/responses/responseBadRequest"
+        "404":
+          $ref: "#/components/responses/responseNotFound"
+        "500":
+          $ref: "#/components/responses/responseFailedInternal"
+    delete:
+      tags:
+        - Emergency
+      summary: delete emergency by id
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: emergency_id
+          description: contain id of the emergency
+          required: true
+          in: path
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "201":
+          $ref: "#/components/responses/responseSuccess"
+        "400":
+          $ref: "#/components/responses/responseBadRequest"
+        "404":
+          $ref: "#/components/responses/responseNotFound"
+        "500":
+          $ref: "#/components/responses/responseFailedInternal"
+components:
+  securitySchemes:
+    JWTAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "use Token"
+  schemas:
+    create_emergency:
+      type: object
+      properties:
+        latitude:
+          type: number
+          example: -7.66519
+        longitude:
+          type: number
+          example: 111.31629
+
+  responses:
+    responseSuccess:
+      description: failed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              "code":
+                type: integer
+                format: int64
+                example: 200
+              "message":
+                type: string
+                description: A human-readable message describing the result.
+                example: success
+              "data":
+                type: object
+                example: null
+
+    responseSuccessCreate:
+      description: success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              "code":
+                type: integer
+                format: int64
+                example: 201
+              "message":
+                type: string
+                description: A human-readable message describing the result.
+                example: created
+              "data":
+                type: object
+                example: null
+    responseGetAllEmergency:
+      description: success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int64
+                example: 200
+              message:
+                type: string
+                example: "success get all emergency"
+              next:
+                type: boolean
+                example: true
+              data:
+                type: array
+                items:
+                  properties:
+                    id:
+                      type: number
+                    caller_id:
+                      type: number
+                    receiver_id:
+                      type: number
+                    latitude:
+                      type: number
+                    longitude:
+                      type: number
+                example:
+                  - id: 1
+                    caller_id: 2
+                    receiver_id: 3
+                    latitude: -7.66519
+                    longitude: 111.31629
+                  - id: 2
+                    caller_id: 2
+                    receiver_id: 1
+                    latitude: -7.66519
+                    longitude: 111.31629
+
+    responseGetByIdEmergency:
+      description: success
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                type: integer
+                format: int64
+                example: 200
+              message:
+                type: string
+                example: "success get emergency by id"
+              data:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  caller_id:
+                    type: integer
+                    example: 2
+                  receiver_id:
+                    type: integer
+                    example: 3
+                  latitude:
+                    type: number
+                    example: -7.66519
+                  longitude:
+                    type: number
+                    example: 111.31629
+    responseBadRequest:
+      description: failed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              "code":
+                type: integer
+                format: int64
+                example: 400
+              "message":
+                type: string
+                description: A human-readable message describing the result.
+                example: operation failed, request resource not valid
+              "data":
+                type: object
+                example: null
+
+    responseNotFound:
+      description: resouse was not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              "code":
+                type: integer
+                description: HTTP status code (e.g., 200 for success).
+                example: 404
+              "message":
+                type: string
+                description: A human-readable message describing the result.
+                example: operation failed, resource not found
+              "data":
+                type: object
+                example: null
+
+    responseFailedInternal:
+      description: failed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              "code":
+                type: integer
+                format: int64
+                example: 500
+              "message":
+                type: string
+                example: operation failed, internal server error
+              "data":
+                type: object
+                example: null

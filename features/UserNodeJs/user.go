@@ -1,7 +1,9 @@
 package usernodejs
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -101,4 +103,32 @@ func GetAllUser(token string) ([]User, error) {
 	}
 
 	return dataPengguna, nil
+}
+
+func LoginUser(login Login) (string, error) {
+
+	jsonData, err := json.Marshal(login)
+	if err != nil {
+		return "", err
+	}
+	link := fmt.Sprintf("%s/users/login", base_url)
+	request, _ := http.NewRequest("POST", link, bytes.NewBuffer(jsonData))
+	request.Header.Set("Content-Type", "application/json")
+	client := &http.Client{}
+	response, err := client.Do(request)
+	if err != nil {
+		fmt.Printf("the HTTP request failed with error %s\n", err)
+	} else {
+		data, _ := ioutil.ReadAll(response.Body)
+
+		var tokenResp ResponseData
+		err := json.Unmarshal(data, &tokenResp)
+		if err != nil {
+			fmt.Println("Error decoding JSON:", err)
+			return "", errors.New("error unmarshal")
+		}
+		token := tokenResp.Data.Token
+		return token, nil
+	}
+	return "", nil
 }

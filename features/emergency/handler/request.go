@@ -3,6 +3,7 @@ package handler
 import "project-capston/features/emergency"
 
 type EmergencyRequest struct {
+	Name string `json:"name" form:"name"`
 	CallerID   uint    `json:"caller_id" form:"caller_id"`
 	ReceiverID uint    `json:"receiver_id" form:"receiver_id"`
 	Latitude   float64 `json:"latitude" form:"latitude"`

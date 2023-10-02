@@ -7,7 +7,23 @@ type VehicleEntity struct {
 	CreateAt    time.Time
 	UpdateAt    time.Time
 	DeleteAt    time.Time
-	GovermentID uint
-	Plate       string
+	GovermentID uint `validate:"required"`
+	Plate       string `validate:"required"`
 	Status      bool
+}
+
+type VehicleDataInterface interface{
+	Insert(input VehicleEntity)(error)
+	Update(input VehicleEntity,id uint)error
+	SelectById(id uint)(VehicleEntity,error)
+	SelectAll()([]VehicleEntity,error)
+	Delete(id uint)error
+}
+
+type VehicleServiceInterface interface{
+	Add(input VehicleEntity)(error)
+	Edit(input VehicleEntity,id uint)error
+	GetById(id uint)(VehicleEntity,error)
+	GetAll()([]VehicleEntity,error)
+	Delete(id uint)error
 }
