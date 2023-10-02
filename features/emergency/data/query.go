@@ -2,7 +2,6 @@ package data
 
 import (
 	"errors"
-	"log"
 	usernodejs "project-capston/features/UserNodeJs"
 	"project-capston/features/emergency"
 	"strconv"
@@ -41,19 +40,6 @@ func (repo *EmergencyData) SelectAll(param emergency.QueryParams,token string) (
 		return 0,nil,errors.New("error get all emergency")
 	}
 
-	dataUser,errUser:=usernodejs.GetAllUser(token)
-	if errUser != nil{
-		return 0,nil,errUser
-	}
-
-	var userModel []User
-	for _,v:=range dataUser{
-		userModel = append(userModel, UserNodeToUser(v))
-	}
-	var userEntity []emergency.UserEntity
-	for _,V:=range userModel{
-		userEntity=append(userEntity, UserToUserEntity(V))
-	}
 	var emergensiUser []EmergencyUser
 	for _,e:=range inputModel{
 		emergensiUser = append(emergensiUser, ModelToEmergencyUser(e))
@@ -65,18 +51,28 @@ func (repo *EmergencyData) SelectAll(param emergency.QueryParams,token string) (
 		idReceiver = append(idReceiver, id)
 	}
 
+	var idCaller []string
+	for _,v:=range emergensiUser{
+		id:=strconv.Itoa(int(v.CallerID))
+		idCaller = append(idCaller, id)
+	}
 	var emergenciEntity []emergency.EmergencyEntity
 	for i:=0;i<len(emergensiUser);i++{
-		for j:=0;j<len(userEntity);j++{
-			if userEntity[j].ID == int(emergensiUser[i].CallerID) {
-					emergensiUser[i].Caller = User(userEntity[j])
-					log.Println("caller",emergensiUser[i].Caller)
-			}		
-		}
-		for _,v:=range idReceiver{
-			data,_:=usernodejs.GetByIdUser(v,token)
-			user:=UserNodeToUser(data)
-			emergensiUser[i].Receiver=user		
+		for j:=0;j<len(emergensiUser);j++{
+			data,_:=usernodejs.GetByIdUser(idCaller[j],token)
+			idConv,_:=strconv.Atoi(idCaller[j])
+			if uint(idConv)==emergensiUser[i].CallerID{
+				user:=UserNodeToUser(data)
+				emergensiUser[i].Caller=user
+			}			
+	}
+		for k:=0;k<len(emergensiUser);k++{
+			data,_:=usernodejs.GetByIdUser(idReceiver[k],token)
+			idConv,_:=strconv.Atoi(idReceiver[k])
+			if uint(idConv)==emergensiUser[i].ReceiverID{
+				user:=UserNodeToUser(data)
+				emergensiUser[i].Receiver=user	
+			}
 	}
 	emergenciEntity = append(emergenciEntity, EmergencyUserToEntity(emergensiUser[i]))
 
