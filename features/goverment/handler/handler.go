@@ -99,3 +99,22 @@ func (handler *governmentHandler) GetGovernmentById(c echo.Context) error {
 	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "success read data", resultResponse))
 	// }
 }
+
+func (handler *governmentHandler) DeleteGovernment(c echo.Context) error {
+	id := c.Param("government_id")
+	idCompany, errConv := strconv.Atoi(id)
+	if errConv != nil {
+		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error id not valid", nil))
+	}
+
+	err := handler.governmentService.DeleteById(uint(idCompany))
+	if err != nil {
+		if strings.Contains(err.Error(), "validation") {
+			return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, err.Error(), nil))
+		} else {
+			return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error delete data", nil))
+
+		}
+	}
+	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "success delete government", nil))
+}

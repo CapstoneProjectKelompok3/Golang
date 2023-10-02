@@ -47,3 +47,9 @@ func (service *govermentService) GetById(id uint) (goverment.Core, error) {
 	}
 	return result, nil
 }
+
+// DeleteById implements goverment.GovernmentServiceInterface.
+func (service *govermentService) DeleteById(id uint) error {
+	err := service.governmentData.Delete(id)
+	return err
+}

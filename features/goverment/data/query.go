@@ -70,3 +70,13 @@ func (repo *governmentQuery) Select(id uint) (goverment.Core, error) {
 
 	return ModelToCore(governmentData), nil
 }
+
+// Delete implements goverment.GovernmentDataInterface.
+func (repo *governmentQuery) Delete(id uint) error {
+	var governmentGorm Government
+	tx := repo.db.Where("id = ?", id).Delete(&governmentGorm)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
+}
