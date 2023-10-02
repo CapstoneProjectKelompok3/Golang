@@ -100,6 +100,42 @@ func (handler *governmentHandler) GetGovernmentById(c echo.Context) error {
 	// }
 }
 
+func (handler *governmentHandler) UpdateGovernment(c echo.Context) error {
+	id := c.Param("government_id")
+
+	idParam, errConv := strconv.Atoi(id)
+	if errConv != nil {
+		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error data id. data not valid", nil))
+	}
+
+	// _, roleName, userCompanyId := middlewares.ExtractTokenUserId(c)
+	// if roleName == "Non-HR" {
+	// 	return c.JSON(http.StatusForbidden, helpers.WebResponse(http.StatusForbidden, exception.ErrForbiddenAccess.Error(), nil))
+	// }
+	// if idParam != userCompanyId {
+	// 	return c.JSON(http.StatusForbidden, helpers.WebResponse(http.StatusForbidden, exception.ErrForbiddenAccess.Error(), nil))
+	// } else {
+	userInput := new(GovernmentRequest)
+	errBind := c.Bind(&userInput)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error bind data. data not valid", nil))
+	}
+	governmentCore := RequestToCore(*userInput)
+	err := handler.governmentService.EditById(uint(idParam), governmentCore)
+	if err != nil {
+		if strings.Contains(err.Error(), "validation") {
+			return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, err.Error(), nil))
+		} else if strings.Contains(err.Error(), "for key 'governments.name'") {
+			return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "This government name already exist please try again", nil))
+		} else {
+			return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error update data government", nil))
+		}
+	}
+	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "success update data government", nil))
+}
+
+// }
+
 func (handler *governmentHandler) DeleteGovernment(c echo.Context) error {
 	id := c.Param("government_id")
 	idCompany, errConv := strconv.Atoi(id)

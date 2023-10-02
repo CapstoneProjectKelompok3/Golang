@@ -71,6 +71,16 @@ func (repo *governmentQuery) Select(id uint) (goverment.Core, error) {
 	return ModelToCore(governmentData), nil
 }
 
+// Update implements goverment.GovernmentDataInterface.
+func (repo *governmentQuery) Update(id uint, input goverment.Core) error {
+	governmentGorm := CoreToModel(input)
+	tx := repo.db.Model(&Government{}).Where("id = ?", id).Updates(&governmentGorm)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
+}
+
 // Delete implements goverment.GovernmentDataInterface.
 func (repo *governmentQuery) Delete(id uint) error {
 	var governmentGorm Government

@@ -48,6 +48,12 @@ func (service *govermentService) GetById(id uint) (goverment.Core, error) {
 	return result, nil
 }
 
+// EditById implements goverment.GovernmentServiceInterface.
+func (service *govermentService) EditById(id uint, input goverment.Core) error {
+	err := service.governmentData.Update(id, input)
+	return err
+}
+
 // DeleteById implements goverment.GovernmentServiceInterface.
 func (service *govermentService) DeleteById(id uint) error {
 	err := service.governmentData.Delete(id)
