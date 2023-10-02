@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"project-capston/features/goverment"
 	"project-capston/helper"
@@ -57,7 +58,9 @@ func (handler *governmentHandler) GetAllGovernment(c echo.Context) error {
 	}
 
 	var governmentResponse []GovernmentResponse
+	total := 0
 	for _, value := range result {
+		total++
 		governmentResponse = append(governmentResponse, GovernmentResponse{
 			ID:        value.ID,
 			Name:      value.Name,
@@ -67,7 +70,7 @@ func (handler *governmentHandler) GetAllGovernment(c echo.Context) error {
 			Longitude: value.Longitude,
 		})
 	}
-	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "success read data", governmentResponse))
+	return c.JSON(http.StatusOK, helper.WebResponsePagination(http.StatusOK, total, "success read data", governmentResponse))
 }
 
 func (handler *governmentHandler) GetNearestGovernment(c echo.Context) error {
@@ -80,16 +83,28 @@ func (handler *governmentHandler) GetNearestGovernment(c echo.Context) error {
 	// if pageSize <= 0 {
 	// 	pageSize = 100
 	// }
-	const latitude = -6.175392
-	const longitude = 106.827153
+	radius, _ := strconv.ParseFloat(c.QueryParam("radius"), 8)
+	latitude, _ := strconv.ParseFloat(c.QueryParam("latitude"), 8)
+	longitude, _ := strconv.ParseFloat(c.QueryParam("longitude"), 8)
+	fmt.Println(radius)
+	if radius == 0.0 {
+		radius = 10.0
+	}
 
-	result, err := handler.governmentService.GetNearestLocation(latitude, longitude)
+	if latitude == 0.0 || longitude == 0.0 {
+		latitude = -6.175392
+		longitude = 106.827153
+	}
+
+	result, err := handler.governmentService.GetNearestLocation(latitude, longitude, radius)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error read data", nil))
 	}
 
 	var governmentResponse []GovernmentNearestResponse
+	total := 0
 	for _, value := range result {
+		total++
 		governmentResponse = append(governmentResponse, GovernmentNearestResponse{
 			ID:   value.ID,
 			Name: value.Name,
@@ -100,7 +115,7 @@ func (handler *governmentHandler) GetNearestGovernment(c echo.Context) error {
 			Distance:  value.Distance,
 		})
 	}
-	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "success display nearest location in radius 10km", governmentResponse))
+	return c.JSON(http.StatusOK, helper.WebResponsePagination(http.StatusOK, total, "success display nearest location in radius 10km", governmentResponse))
 }
 
 func (handler *governmentHandler) GetGovernmentById(c echo.Context) error {

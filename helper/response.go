@@ -13,3 +13,19 @@ func WebResponse(code int, message string, data interface{}) MapResponse {
 		Data:    data,
 	}
 }
+
+type MapResponsePagination struct {
+	Code      int         `json:"code"`
+	TotalData int         `json:"totalData"`
+	Message   string      `json:"message"`
+	Data      interface{} `json:"data,omitempty"`
+}
+
+func WebResponsePagination(code int, totalData int, message string, data interface{}) MapResponsePagination {
+	return MapResponsePagination{
+		Code:      code,
+		TotalData: totalData,
+		Message:   message,
+		Data:      data,
+	}
+}

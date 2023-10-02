@@ -2,7 +2,6 @@ package data
 
 import (
 	"errors"
-	"fmt"
 	"math"
 	"project-capston/features/goverment"
 	"time"
@@ -60,11 +59,11 @@ func (repo *governmentQuery) SelectAll(pageNumber int, pageSize int) ([]govermen
 }
 
 // SelectNearestLocation implements goverment.GovernmentDataInterface.
-func (repo *governmentQuery) SelectNearestLocation(latitude float64, longitude float64) ([]goverment.Location, error) {
+func (repo *governmentQuery) SelectNearestLocation(latitude float64, longitude float64, radius float64) ([]goverment.Location, error) {
 	var governmentData []Government
 
 	// offset := (pageNumber - 1) * pageSize
-	radius := 10
+	// radius := 10
 
 	// tx := repo.db.Find(&governmentData)
 	tx := repo.db.Where("6371 * ACOS(SIN(RADIANS(?)) * SIN(RADIANS(latitude)) + COS(RADIANS(?)) * COS(RADIANS(latitude)) * COS(RADIANS(? - longitude))) <= ?", latitude, latitude, longitude, radius).Find(&governmentData)
@@ -84,9 +83,9 @@ func (repo *governmentQuery) SelectNearestLocation(latitude float64, longitude f
 	var locations []Location
 	err := repo.db.Raw("SELECT id, name, latitude, longitude, (6371 * ACOS(COS(RADIANS(?)) * COS(RADIANS(latitude)) * COS(RADIANS(longitude) - RADIANS(?)) + SIN(RADIANS(?)) * SIN(RADIANS(latitude)))) AS jarak FROM governments WHERE(6371 * ACOS(SIN(RADIANS(?)) * SIN(RADIANS(latitude)) + COS(RADIANS(?)) * COS(RADIANS(latitude)) * COS(RADIANS(? - longitude))) <= ? AND deleted_at IS NULL) ORDER BY jarak ", latitude, longitude, latitude, latitude, latitude, longitude, radius).Scan(&locations).Error
 
-	for _, location := range locations {
-		fmt.Printf("ID: %d, Nama Lokasi: %s, Latitude: %f, Longitude: %f, Jarak: %f km\n", location.ID, location.Name, location.Latitude, location.Longitude, math.Round(location.Jarak*100)/100)
-	}
+	// for _, location := range locations {
+	// 	fmt.Printf("ID: %d, Nama Lokasi: %s, Latitude: %f, Longitude: %f, Jarak: %f km\n", location.ID, location.Name, location.Latitude, location.Longitude, math.Round(location.Jarak*100)/100)
+	// }
 
 	if err != nil {
 		panic(err)

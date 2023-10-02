@@ -30,7 +30,7 @@ type GovernmentDataInterface interface {
 	Delete(id uint) error
 
 	//get nearest location
-	SelectNearestLocation(latitude float64, longitude float64) ([]Location, error)
+	SelectNearestLocation(latitude float64, longitude float64, radius float64) ([]Location, error)
 }
 
 type GovernmentServiceInterface interface {
@@ -41,5 +41,5 @@ type GovernmentServiceInterface interface {
 	DeleteById(id uint) error
 
 	//get nearest location
-	GetNearestLocation(latitude float64, longitude float64) ([]Location, error)
+	GetNearestLocation(latitude float64, longitude float64, radius float64) ([]Location, error)
 }
