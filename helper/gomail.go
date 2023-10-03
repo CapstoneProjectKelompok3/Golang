@@ -24,7 +24,7 @@ func SendGomailMessage(input MessageGomail) (string, error) {
 	m.SetHeader("From", email_from)
 	m.SetHeader("To", input.EmailReceiver)
 	m.SetHeader("Subject", input.Sucject)
-	htmlBody := HTMLImergency()
+	htmlBody := HTMLImergency(input.Content)
 	m.SetBody("text/html", htmlBody)
 
 	d := gomail.NewDialer("smtp.gmail.com", 587, email_from, pass_app)
@@ -36,17 +36,79 @@ func SendGomailMessage(input MessageGomail) (string, error) {
 	}
 }
 
-func HTMLImergency() string {
+func HTMLImergency(content string) string {
+
 	htmlBody := fmt.Sprintf(`
-        <html>
-            <body>
-                <h1>Tawaran Anda</h1>
-                <p>Ini adalah tawaran dari kami.</p>
-                <a href="%s?accept=true">Terima</a>
-                <a href="%s?accept=false">Tolak</a>
-            </body>
-        </html>
-    `, actionURL, actionURL)
+	<!DOCTYPE html>
+	<html>
+	<head>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				background-color: #f5f5f5;
+				margin: 0;
+				padding: 0;
+			}
+			h1 {
+				color: #333;
+			}
+			p {
+				color: #555;
+			}
+			h3 {
+				color: #333;
+			}
+			table {
+				margin-top: 20px;
+			}
+			td {
+				padding: 10px;
+			}
+    
+		 a.accept-button {
+       		 background-color: #008000;
+       		 color: #fff; 
+       		 text-decoration: none;
+       		 padding: 10px 20px;
+       		 border-radius: 5px;
+    	}
+    
+    	a.reject-button {
+    	    background-color: #FF0000;
+    	    color: #fff; /* Warna teks tombol Tolak */
+    	    text-decoration: none;
+    	    padding: 10px 20px;
+    	    border-radius: 5px;
+    	}
+
+    
+    	a.accept-button,
+    	a.reject-button {
+    	    color: #fff;
+    	}
+
+		</style>
+	</head>
+	<body>
+		<h1>Ada keadaan darurat</h1>
+		<p>%s</p>
+		<h3>Konfirmasi Pesan Anda Untuk Menghandel keadaan</h3>
+		<p>Silakan konfirmasi pesan ini dengan mengklik salah satu tombol di bawah ini:</p>
+		<table cellspacing="10" cellpadding="0" border="0">
+			<tr>
+				<td style="padding: 10px;">
+					<a href="%s?accept=true" class="accept-button">Terima</a>
+				</td>
+				<td style="padding: 10px;">
+					<a href="%s?accept=false" class="reject-button">Tolak</a>
+				</td>
+			</tr>
+		</table>
+	</body>
+	</html>
+	
+    `,content, actionURL, actionURL)
+
 	return htmlBody
 }
 
