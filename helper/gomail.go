@@ -6,36 +6,38 @@ import (
 
 	"gopkg.in/gomail.v2"
 )
-type MessageGomail struct{
+
+type MessageGomail struct {
 	EmailReceiver string
-	Sucject string
-	Content string
+	Sucject       string
+	Content       string
 }
+
 const (
-	email_from="agoverment55@gmail.com"
-	pass_app="xsxd htot sdby xikp"
-	actionURL="https://belanjalagiyuk.shop/emergencies/action"
+	email_from = "agoverment55@gmail.com"
+	pass_app   = "xsxd htot sdby xikp"
+	actionURL  = "https://belanjalagiyuk.shop/emergencies/action"
 )
 
-func SendGomailMessage(input MessageGomail) (string,error) {
+func SendGomailMessage(input MessageGomail) (string, error) {
 	m := gomail.NewMessage()
-	m.SetHeader("From", email_from)           
-	m.SetHeader("To", input.EmailReceiver)                    
-	m.SetHeader("Subject", input.Sucject)                   
-	htmlBody:= HTMLImergency()
+	m.SetHeader("From", email_from)
+	m.SetHeader("To", input.EmailReceiver)
+	m.SetHeader("Subject", input.Sucject)
+	htmlBody := HTMLImergency()
 	m.SetBody("text/html", htmlBody)
 
 	d := gomail.NewDialer("smtp.gmail.com", 587, email_from, pass_app)
 
 	if err := d.DialAndSend(m); err != nil {
-		return "",errors.New("gagal mengirim email")
+		return "", errors.New("gagal mengirim email")
 	} else {
-		return "Email terkirim",nil
+		return "Email terkirim", nil
 	}
 }
 
-func HTMLImergency()string{
-    htmlBody := fmt.Sprintf(`
+func HTMLImergency() string {
+	htmlBody := fmt.Sprintf(`
         <html>
             <body>
                 <h1>Tawaran Anda</h1>
@@ -49,19 +51,16 @@ func HTMLImergency()string{
 }
 
 func SendResponseEmail(emailAddress, responseMessage string) error {
-    m := gomail.NewMessage()
-    m.SetHeader("From", email_from)
-    m.SetHeader("To", emailAddress)
-    m.SetHeader("Subject", "Action Response")
-    m.SetBody("text/plain", responseMessage)
+	m := gomail.NewMessage()
+	m.SetHeader("From", email_from)
+	m.SetHeader("To", emailAddress)
+	m.SetHeader("Subject", "Action Response")
+	m.SetBody("text/plain", responseMessage)
 
-    d := gomail.NewDialer("smtp.gmail.com", 587, email_from, pass_app)
+	d := gomail.NewDialer("smtp.gmail.com", 587, email_from, pass_app)
 
-    if err := d.DialAndSend(m); err != nil {
-        return errors.New("send response failed")
-    }
-    return nil
+	if err := d.DialAndSend(m); err != nil {
+		return errors.New("send response failed")
+	}
+	return nil
 }
-
-
-
