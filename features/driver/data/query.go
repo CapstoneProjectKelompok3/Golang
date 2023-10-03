@@ -1,6 +1,7 @@
 package data
 
 import (
+	"errors"
 	"fmt"
 	"project-capston/app/middlewares"
 	"project-capston/features/driver"
@@ -87,4 +88,42 @@ func (repo *driverQuery) SelectAll(pageNumber int, pageSize int) ([]driver.Drive
 
 	return driverCore, nil
 
+}
+
+// Login implements driver.DriverDataInterface.
+func (repo *driverQuery) Login(email string, password string) (dataLogin driver.Core, err error) {
+	var data Driver
+
+	repo.db.Raw("SELECT * FROM drivers WHERE email=?", email).Scan(&data)
+	samePassword := middlewares.CheckPassword(password, data.Password)
+
+	fmt.Println("is same", samePassword)
+	fmt.Println("is same", password)
+	fmt.Println("data password", data.Password)
+
+	if samePassword {
+		fmt.Println("isi data", data.Password)
+		// repo.db.Raw("SELECT * FROM users WHERE email=?", email).Scan(&data)
+		// fmt.Println("data", data)
+		query := `
+		SELECT *FROM drivers WHERE email=? AND password=?
+		`
+		fmt.Println("Query", query)
+
+		tx := repo.db.Where("email = ? and password = ?", email, data.Password).Find(&data)
+
+		if tx.Error != nil {
+			return driver.Core{}, tx.Error
+		}
+
+		if tx.RowsAffected == 0 {
+			return driver.Core{}, errors.New("data not found")
+		}
+	} else {
+		return driver.Core{}, errors.New("data not found")
+	}
+
+	dataLogin = ModelToCore(data)
+
+	return dataLogin, nil
 }

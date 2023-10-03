@@ -79,7 +79,7 @@ func (handler *DriverHandler) GetAllDriver(c echo.Context) error {
 
 			GovermentName: value.GovermentName,
 			Fullname:      value.Fullname,
-			Toker:         value.Token,
+			Token:         value.Token,
 			Status:        status,
 			DrivingStatus: value.DrivingStatus,
 			VehicleID:     value.VehicleID,
@@ -88,4 +88,44 @@ func (handler *DriverHandler) GetAllDriver(c echo.Context) error {
 		})
 	}
 	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "success read data", driverResponse))
+}
+
+func (handler *DriverHandler) Login(c echo.Context) error {
+	userInput := new(LoginDriverRequest)
+
+	errBind := c.Bind(&userInput)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error bind data. data not valid", nil))
+	}
+
+	dataLogin, token, err := handler.driverService.Login(userInput.Email, userInput.Password)
+
+	if err != nil {
+		if strings.Contains(err.Error(), "validation") {
+			return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, err.Error(), nil))
+		} else {
+			return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error login", nil))
+
+		}
+	}
+
+	// response := LoginResponse{
+	// 	Id: dataLogin.Id,
+	// 	// GovermentName: data,
+	// 	Fullname:      dataLogin.Fullname,
+	// 	Token:         token,
+	// 	Status:        dataLogin.Status,
+	// 	DrivingStatus: dataLogin.DrivingStatus,
+	// 	VehicleID:     dataLogin.VehicleID,
+	// 	Latitude:      dataLogin.Latitude,
+	// 	Longitude:     dataLogin.Longitude,
+	// }
+
+	response := map[string]any{
+		"token":   token,
+		"user_id": dataLogin.Id,
+		"name":    dataLogin.Fullname,
+	}
+
+	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusCreated, "driver success login", response))
 }

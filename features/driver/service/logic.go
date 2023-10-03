@@ -2,6 +2,8 @@ package service
 
 import (
 	"errors"
+	"fmt"
+	"project-capston/app/middlewares"
 	"project-capston/features/driver"
 
 	"github.com/go-playground/validator/v10"
@@ -37,4 +39,20 @@ func (service *driverService) GetAll(pageNumber int, pageSize int) ([]driver.Dri
 		return nil, err
 	}
 	return result, nil
+}
+
+// Login implements driver.DriverServiceInterface.
+func (service *driverService) Login(email string, password string) (dataLogin driver.Core, token string, err error) {
+	dataLogin, err = service.driverData.Login(email, password)
+	fmt.Println("email", email)
+	fmt.Println("email", password)
+	fmt.Println("dataLogin", dataLogin)
+	if err != nil {
+		return driver.Core{}, "", err
+	}
+	token, err = middlewares.CreateToken(dataLogin.Id)
+	if err != nil {
+		return driver.Core{}, "", err
+	}
+	return dataLogin, token, nil
 }

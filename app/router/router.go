@@ -14,7 +14,6 @@ import (
 	_governmentHandler "project-capston/features/goverment/handler"
 	_governmentService "project-capston/features/goverment/service"
 
-
 	_driverData "project-capston/features/driver/data"
 	_driverHandler "project-capston/features/driver/handler"
 	_driverService "project-capston/features/driver/service"
@@ -23,21 +22,21 @@ import (
 	"gorm.io/gorm"
 )
 
-func InitRouter(db *gorm.DB,c *echo.Echo){
-	dataE:=dE.New(db)
-	serviceE:=sE.New(dataE)
-	handlerE:=hE.New(serviceE)
-	c.POST("users/:receiver_id/emergencies",handlerE.Add,middlewares.JWTMiddleware())
-	c.DELETE("/emergencies/:emergency_id",handlerE.Delete,middlewares.JWTMiddleware())
-	c.PUT("/emergencies/:emergency_id",handlerE.Edit,middlewares.JWTMiddleware())
-	c.GET("/emergencies/:emergency_id",handlerE.GetById,middlewares.JWTMiddleware())
-	c.GET("/emergencies",handlerE.GetAll,middlewares.JWTMiddleware())
-	
-	c.GET("/emergencies/action",handlerE.ActionLogic)
+func InitRouter(db *gorm.DB, c *echo.Echo) {
+	dataE := dE.New(db)
+	serviceE := sE.New(dataE)
+	handlerE := hE.New(serviceE)
+	c.POST("users/:receiver_id/emergencies", handlerE.Add, middlewares.JWTMiddleware())
+	c.DELETE("/emergencies/:emergency_id", handlerE.Delete, middlewares.JWTMiddleware())
+	c.PUT("/emergencies/:emergency_id", handlerE.Edit, middlewares.JWTMiddleware())
+	c.GET("/emergencies/:emergency_id", handlerE.GetById, middlewares.JWTMiddleware())
+	c.GET("/emergencies", handlerE.GetAll, middlewares.JWTMiddleware())
 
-	dataV:=dV.New(db)
-	serviceV:=sV.New(dataV)
-	handlerV:=hV.New(serviceV)
+	c.GET("/emergencies/action", handlerE.ActionLogic)
+
+	dataV := dV.New(db)
+	serviceV := sV.New(dataV)
+	handlerV := hV.New(serviceV)
 
 	c.POST("/vehicles", handlerV.Add, middlewares.JWTMiddleware())
 	c.PUT("/vehicles/:vehicle_id", handlerV.Edit, middlewares.JWTMiddleware())
@@ -52,7 +51,7 @@ func InitRouter(db *gorm.DB,c *echo.Echo){
 
 	c.POST("/governments", governmentHandlerAPI.CreateGovernment, middlewares.JWTMiddleware())
 	c.GET("/governments", governmentHandlerAPI.GetAllGovernment)
-	c.GET("/governments/:government_id", governmentHandlerAPI.GetGovernmentById, middlewares.JWTMiddleware())
+	c.GET("/governments/:government_id", governmentHandlerAPI.GetGovernmentById)
 	c.PUT("/governments/:government_id", governmentHandlerAPI.UpdateGovernment, middlewares.JWTMiddleware())
 	c.DELETE("/governments/:government_id", governmentHandlerAPI.DeleteGovernment, middlewares.JWTMiddleware())
 
@@ -65,4 +64,5 @@ func InitRouter(db *gorm.DB,c *echo.Echo){
 
 	c.POST("/drivers", driverHandlerAPI.CreateDriver)
 	c.GET("/drivers", driverHandlerAPI.GetAllDriver)
+	c.POST("/login-drivers", driverHandlerAPI.Login)
 }
