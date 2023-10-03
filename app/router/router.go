@@ -52,8 +52,8 @@ func InitRouter(db *gorm.DB, c *echo.Echo) {
 	c.POST("/governments", governmentHandlerAPI.CreateGovernment)
 	c.GET("/governments", governmentHandlerAPI.GetAllGovernment)
 	c.GET("/governments/:government_id", governmentHandlerAPI.GetGovernmentById)
-	c.PUT("/governments/:government_id", governmentHandlerAPI.UpdateGovernment, middlewares.JWTMiddleware())
-	c.DELETE("/governments/:government_id", governmentHandlerAPI.DeleteGovernment, middlewares.JWTMiddleware())
+	c.PUT("/governments/:government_id", governmentHandlerAPI.UpdateGovernment)
+	c.DELETE("/governments/:government_id", governmentHandlerAPI.DeleteGovernment)
 
 	c.GET("/get-nearest-government", governmentHandlerAPI.GetNearestGovernment, middlewares.JWTMiddleware())
 
