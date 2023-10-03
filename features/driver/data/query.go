@@ -3,6 +3,7 @@ package data
 import (
 	"errors"
 	"fmt"
+	"math"
 	"project-capston/app/middlewares"
 	"project-capston/features/driver"
 	goverment "project-capston/features/goverment/data"
@@ -136,23 +137,76 @@ func (repo *driverQuery) KerahkanDriver(police int, hospital int, firestation in
 		Driver
 		DriverID uint
 		goverment.Government
+		Distance float64
 	}
 
-	tx := repo.db.Table("drivers").
-		Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
-		Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
-		Scan(&driversWithGovernments)
+	fmt.Println("Jmlh Police ", police)
+	fmt.Println("Jmlh Police ", hospital)
+
+	if police >= 0 && hospital >= 0 {
+		// tx := repo.db.Table("drivers").
+		// 	Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
+		// 	Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
+		// 	Where("governments.type='police' LIMIT ?", police).
+		// 	Where("governments.type='hospital' LIMIT ?", hospital).
+		// 	Scan(&driversWithGovernments)
+
+		// if tx.Error != nil {
+		// 	return nil, tx.Error
+		// }
+
+		query1 := `
+		SELECT
+				(6371 * acos(cos(radians(drivers.latitude)) * cos(radians(-6.304990)) * cos(radians(106.820500) - radians(drivers.longitude)) + sin(radians(drivers.latitude)) * sin(radians(-6.304990)))) AS distance,
+			drivers.*,governments.type
+			FROM
+				drivers
+			INNER JOIN 
+						governments ON governments.id = drivers.goverment_id
+			where governments.type='police' AND status=true
+			ORDER BY distance LIMIT
+		`
+
+		query2 := `
+		SELECT
+				(6371 * acos(cos(radians(drivers.latitude)) * cos(radians(-6.304990)) * cos(radians(106.820500) - radians(drivers.longitude)) + sin(radians(drivers.latitude)) * sin(radians(-6.304990)))) AS distance,
+			drivers.*,governments.type
+			FROM
+				drivers
+			INNER JOIN 
+						governments ON governments.id = drivers.goverment_id
+			where governments.type='hospital' AND status=true
+			ORDER BY distance LIMIT 
+		 `
+
+		police_query := fmt.Sprintf("%s%d", query1, police)
+		hospital_query := fmt.Sprintf("%s%d", query2, hospital)
+
+		tx := repo.db.Raw(fmt.Sprintf("(%s) UNION ALL (%s)", police_query, hospital_query)).Scan(&driversWithGovernments)
+		fmt.Println("adasdds", tx)
+		if tx.Error != nil {
+			return nil, tx.Error
+		}
+
+	} else if police >= 0 {
+		tx := repo.db.Table("drivers").
+			Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
+			Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
+			Where("governments.type='police' LIMIT ?", police).
+			Scan(&driversWithGovernments)
+		if tx.Error != nil {
+			return nil, tx.Error
+		}
+	}
 
 	for _, u := range driversWithGovernments {
 		fmt.Printf("ID : %d,Nama: %s, Email: %s\n", u.DriverID, u.Name, u.Email)
+		repo.db.Exec("UPDATE drivers SET token = ? WHERE id = ? ", "Terima Kasus", u.DriverID)
 		// for _, o := range u.D {
 		// 	fmt.Printf("  Pesanan: %s\n", o.Product)
 		// }
 	}
 	// tx := repo.db.Offset(offset).Limit(pageSize).Find(&driverData)
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
 
 	var driverCore []driver.DriverCore
 
@@ -170,6 +224,7 @@ func (repo *driverQuery) KerahkanDriver(police int, hospital int, firestation in
 			DrivingStatus: value.DrivingStatus,
 			VehicleID:     value.VehicleID,
 			Latitude:      value.Driver.Latitude,
+			Distance:      math.Floor(value.Distance*100) / 100,
 			Longitude:     value.Driver.Longitude,
 			CreatedAt:     time.Time{},
 			UpdatedAt:     time.Time{},

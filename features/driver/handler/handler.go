@@ -128,39 +128,19 @@ func (handler *DriverHandler) Login(c echo.Context) error {
 
 func (handler *DriverHandler) KerahkanDriver(c echo.Context) error {
 	totalPolice := c.QueryParam("police")
-	totalPoliceConv, errConv := strconv.Atoi(totalPolice)
-
-	if errConv != nil {
-		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error police unit is not  valid", nil))
-	}
+	totalPoliceConv, _ := strconv.Atoi(totalPolice)
 
 	totalHospital := c.QueryParam("hospital")
-	totalHospitalConv, errConvHospital := strconv.Atoi(totalHospital)
-
-	if errConvHospital != nil {
-		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error hospital unit is not  valid", nil))
-	}
+	totalHospitalConv, _ := strconv.Atoi(totalHospital)
 
 	totalFirestation := c.QueryParam("firestation")
-	totalFirestationConv, errConvFirestation := strconv.Atoi(totalFirestation)
-
-	if errConvFirestation != nil {
-		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error firestation unit is not not valid", nil))
-	}
+	totalFirestationConv, _ := strconv.Atoi(totalFirestation)
 
 	totalDishub := c.QueryParam("dishub")
-	totalDishubConv, errConvDishub := strconv.Atoi(totalDishub)
-
-	if errConvDishub != nil {
-		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error dishub unit is not not valid", nil))
-	}
+	totalDishubConv, _ := strconv.Atoi(totalDishub)
 
 	totalSAR := c.QueryParam("SAR")
-	totalSARConv, errConvSAR := strconv.Atoi(totalSAR)
-
-	if errConvSAR != nil {
-		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error SAR unit is not not valid", nil))
-	}
+	totalSARConv, _ := strconv.Atoi(totalSAR)
 
 	result, err := handler.driverService.KerahkanDriver(totalPoliceConv, totalHospitalConv, totalFirestationConv, totalDishubConv, totalSARConv)
 
@@ -168,15 +148,14 @@ func (handler *DriverHandler) KerahkanDriver(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error read data", nil))
 	}
 
-	var driverResponse []DriverResponse
+	var driverResponse []DriverAvailableResponse
 
 	totalData := 0
 
 	for _, value := range result {
 		totalData++
-		driverResponse = append(driverResponse, DriverResponse{
-			Id: value.Id,
-
+		driverResponse = append(driverResponse, DriverAvailableResponse{
+			Id:            value.Id,
 			GovermentName: value.GovermentName,
 			GovermentType: value.GovermentType,
 			Email:         value.Email,
@@ -187,6 +166,7 @@ func (handler *DriverHandler) KerahkanDriver(c echo.Context) error {
 			VehicleID:     value.VehicleID,
 			Latitude:      value.Latitude,
 			Longitude:     value.Longitude,
+			Radius:        value.Distance,
 		})
 	}
 	return c.JSON(http.StatusOK, helper.WebResponsePagination(http.StatusOK, totalData, "kerahkan driver", driverResponse))

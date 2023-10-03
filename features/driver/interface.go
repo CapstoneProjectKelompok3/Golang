@@ -32,6 +32,7 @@ type DriverCore struct {
 	VehicleID     uint
 	Latitude      float64
 	Longitude     float64
+	Distance      float64
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     time.Time
