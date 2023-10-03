@@ -67,7 +67,7 @@ func (handler *DriverHandler) GetAllDriver(c echo.Context) error {
 	var driverResponse []DriverResponse
 
 	for _, value := range result {
-		fmt.Println("Status", value.Status)
+
 		var status string
 		if value.Status {
 			status = "available"
@@ -75,9 +75,11 @@ func (handler *DriverHandler) GetAllDriver(c echo.Context) error {
 			status = "not_available"
 		}
 		driverResponse = append(driverResponse, DriverResponse{
-			Id:            value.Id,
-			GovermentID:   value.GovermentID,
+			Id: value.Id,
+
+			GovermentName: value.GovermentName,
 			Fullname:      value.Fullname,
+			Toker:         value.Token,
 			Status:        status,
 			DrivingStatus: value.DrivingStatus,
 			VehicleID:     value.VehicleID,

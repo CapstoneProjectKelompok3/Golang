@@ -19,12 +19,29 @@ type Core struct {
 	DeletedAt     time.Time
 }
 
+type DriverCore struct {
+	Id            uint
+	Fullname      string
+	Email         string
+	Password      string
+	Token         string
+	GovermentName string
+	Status        bool
+	DrivingStatus string
+	VehicleID     uint
+	Latitude      float64
+	Longitude     float64
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	DeletedAt     time.Time
+}
+
 type DriverDataInterface interface {
 	Insert(input Core) error
-	SelectAll(pageNumber int, pageSize int) ([]Core, error)
+	SelectAll(pageNumber int, pageSize int) ([]DriverCore, error)
 }
 
 type DriverServiceInterface interface {
 	Create(input Core) error
-	GetAll(pageNumber int, pageSize int) ([]Core, error)
+	GetAll(pageNumber int, pageSize int) ([]DriverCore, error)
 }

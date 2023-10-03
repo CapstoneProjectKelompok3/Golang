@@ -31,7 +31,7 @@ func (service *driverService) Create(input driver.Core) error {
 }
 
 // GetAll implements driver.DriverServiceInterface.
-func (service *driverService) GetAll(pageNumber int, pageSize int) ([]driver.Core, error) {
+func (service *driverService) GetAll(pageNumber int, pageSize int) ([]driver.DriverCore, error) {
 	result, err := service.driverData.SelectAll(pageNumber, pageSize)
 	if err != nil {
 		return nil, err
