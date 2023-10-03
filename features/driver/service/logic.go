@@ -29,3 +29,12 @@ func (service *driverService) Create(input driver.Core) error {
 	err := service.driverData.Insert(input)
 	return err
 }
+
+// GetAll implements driver.DriverServiceInterface.
+func (service *driverService) GetAll(pageNumber int, pageSize int) ([]driver.Core, error) {
+	result, err := service.driverData.SelectAll(pageNumber, pageSize)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

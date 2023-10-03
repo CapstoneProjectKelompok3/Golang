@@ -21,8 +21,10 @@ type Core struct {
 
 type DriverDataInterface interface {
 	Insert(input Core) error
+	SelectAll(pageNumber int, pageSize int) ([]Core, error)
 }
 
 type DriverServiceInterface interface {
 	Create(input Core) error
+	GetAll(pageNumber int, pageSize int) ([]Core, error)
 }
