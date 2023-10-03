@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"project-capston/app/middlewares"
 	usernodejs "project-capston/features/UserNodeJs"
@@ -150,4 +151,14 @@ func (handler *EmergencyHandler) GetAll(c echo.Context)error{
 		"data": response,
 		"next_page":bol,
 	})
+}
+
+func (handler *EmergencyHandler)ActionLogic(c echo.Context)error{
+	accept:=c.QueryParam("accept")
+	fmt.Println("accept",accept)
+	err:=handler.emergencyHandler.ActionGmail(accept)
+	if err != nil{
+		return c.JSON(http.StatusInternalServerError,err.Error())
+	}
+	return c.JSON(http.StatusOK,"action tersimpan")
 }
