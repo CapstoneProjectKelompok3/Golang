@@ -26,6 +26,7 @@ type DriverCore struct {
 	Password      string
 	Token         string
 	GovermentName string
+	GovermentType string
 	Status        bool
 	DrivingStatus string
 	VehicleID     uint
@@ -40,6 +41,7 @@ type DriverDataInterface interface {
 	Insert(input Core) error
 	SelectAll(pageNumber int, pageSize int) ([]DriverCore, error)
 	Login(email string, password string) (dataLogin Core, err error)
+	KerahkanDriver(police int, hospital int, firestation int, dishub int, SAR int) ([]DriverCore, error)
 	// Logout(email string, password string) (dataLogin Core, err error)
 }
 
@@ -47,5 +49,6 @@ type DriverServiceInterface interface {
 	Create(input Core) error
 	GetAll(pageNumber int, pageSize int) ([]DriverCore, error)
 	Login(email string, password string) (dataLogin Core, token string, err error)
+	KerahkanDriver(police int, hospital int, firestation int, dishub int, SAR int) ([]DriverCore, error)
 	// Logout(email string, password string) (dataLogin Core, err error)
 }

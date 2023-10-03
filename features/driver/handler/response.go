@@ -3,6 +3,7 @@ package handler
 type DriverResponse struct {
 	Id            uint    `json:"id,omitempty"`
 	GovermentName string  `json:"goverment_name,omitempty"`
+	GovermentType string  `json:"goverment_type,omitempty"`
 	Email         string  `json:"email"`
 	Fullname      string  `json:"fullname,omitempty"`
 	Token         string  `json:"token,omitempty"`

@@ -16,7 +16,7 @@ func WebResponse(code int, message string, data interface{}) MapResponse {
 
 type MapResponsePagination struct {
 	Code      int         `json:"code"`
-	TotalData int         `json:"totalData"`
+	TotalData int         `json:"total_data"`
 	Message   string      `json:"message"`
 	Data      interface{} `json:"data,omitempty"`
 }

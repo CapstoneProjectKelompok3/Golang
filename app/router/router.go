@@ -50,7 +50,7 @@ func InitRouter(db *gorm.DB, c *echo.Echo) {
 	governmentHandlerAPI := _governmentHandler.New(governmentService)
 
 	c.POST("/governments", governmentHandlerAPI.CreateGovernment)
-	c.GET("/governments", governmentHandlerAPI.GetAllGovernment)
+	c.GET("/governments", governmentHandlerAPI.GetAllGovernment, middlewares.JWTMiddleware())
 	c.GET("/governments/:government_id", governmentHandlerAPI.GetGovernmentById)
 	c.PUT("/governments/:government_id", governmentHandlerAPI.UpdateGovernment)
 	c.DELETE("/governments/:government_id", governmentHandlerAPI.DeleteGovernment)
@@ -65,4 +65,5 @@ func InitRouter(db *gorm.DB, c *echo.Echo) {
 	c.POST("/drivers", driverHandlerAPI.CreateDriver)
 	c.GET("/drivers", driverHandlerAPI.GetAllDriver)
 	c.POST("/login-drivers", driverHandlerAPI.Login)
+	c.GET("/kerahkan-drivers", driverHandlerAPI.KerahkanDriver)
 }

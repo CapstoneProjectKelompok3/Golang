@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"project-capston/app/middlewares"
 	"project-capston/features/driver"
 
@@ -44,9 +43,6 @@ func (service *driverService) GetAll(pageNumber int, pageSize int) ([]driver.Dri
 // Login implements driver.DriverServiceInterface.
 func (service *driverService) Login(email string, password string) (dataLogin driver.Core, token string, err error) {
 	dataLogin, err = service.driverData.Login(email, password)
-	fmt.Println("email", email)
-	fmt.Println("email", password)
-	fmt.Println("dataLogin", dataLogin)
 	if err != nil {
 		return driver.Core{}, "", err
 	}
@@ -55,4 +51,13 @@ func (service *driverService) Login(email string, password string) (dataLogin dr
 		return driver.Core{}, "", err
 	}
 	return dataLogin, token, nil
+}
+
+// KerahkanDriver implements driver.DriverServiceInterface.
+func (service *driverService) KerahkanDriver(police int, hospital int, firestation int, dishub int, SAR int) ([]driver.DriverCore, error) {
+	result, err := service.driverData.KerahkanDriver(police, hospital, firestation, dishub, SAR)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

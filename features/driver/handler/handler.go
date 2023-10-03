@@ -66,12 +66,13 @@ func (handler *DriverHandler) GetAllDriver(c echo.Context) error {
 	}
 	var driverResponse []DriverResponse
 
+	totalData := 0
 	for _, value := range result {
-
+		totalData++
 		driverResponse = append(driverResponse, DriverResponse{
-			Id: value.Id,
-
+			Id:            value.Id,
 			GovermentName: value.GovermentName,
+			GovermentType: value.GovermentType,
 			Email:         value.Email,
 			Fullname:      value.Fullname,
 			Token:         value.Token,
@@ -82,7 +83,7 @@ func (handler *DriverHandler) GetAllDriver(c echo.Context) error {
 			Longitude:     value.Longitude,
 		})
 	}
-	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "success read data", driverResponse))
+	return c.JSON(http.StatusOK, helper.WebResponsePagination(http.StatusOK, totalData, "success read data", driverResponse))
 }
 
 func (handler *DriverHandler) Login(c echo.Context) error {
@@ -123,4 +124,70 @@ func (handler *DriverHandler) Login(c echo.Context) error {
 	// }
 
 	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusCreated, "driver success login", response))
+}
+
+func (handler *DriverHandler) KerahkanDriver(c echo.Context) error {
+	totalPolice := c.QueryParam("police")
+	totalPoliceConv, errConv := strconv.Atoi(totalPolice)
+
+	if errConv != nil {
+		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error police unit is not  valid", nil))
+	}
+
+	totalHospital := c.QueryParam("hospital")
+	totalHospitalConv, errConvHospital := strconv.Atoi(totalHospital)
+
+	if errConvHospital != nil {
+		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error hospital unit is not  valid", nil))
+	}
+
+	totalFirestation := c.QueryParam("firestation")
+	totalFirestationConv, errConvFirestation := strconv.Atoi(totalFirestation)
+
+	if errConvFirestation != nil {
+		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error firestation unit is not not valid", nil))
+	}
+
+	totalDishub := c.QueryParam("dishub")
+	totalDishubConv, errConvDishub := strconv.Atoi(totalDishub)
+
+	if errConvDishub != nil {
+		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error dishub unit is not not valid", nil))
+	}
+
+	totalSAR := c.QueryParam("SAR")
+	totalSARConv, errConvSAR := strconv.Atoi(totalSAR)
+
+	if errConvSAR != nil {
+		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error SAR unit is not not valid", nil))
+	}
+
+	result, err := handler.driverService.KerahkanDriver(totalPoliceConv, totalHospitalConv, totalFirestationConv, totalDishubConv, totalSARConv)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error read data", nil))
+	}
+
+	var driverResponse []DriverResponse
+
+	totalData := 0
+
+	for _, value := range result {
+		totalData++
+		driverResponse = append(driverResponse, DriverResponse{
+			Id: value.Id,
+
+			GovermentName: value.GovermentName,
+			GovermentType: value.GovermentType,
+			Email:         value.Email,
+			Fullname:      value.Fullname,
+			Token:         value.Token,
+			Status:        value.Status,
+			DrivingStatus: value.DrivingStatus,
+			VehicleID:     value.VehicleID,
+			Latitude:      value.Latitude,
+			Longitude:     value.Longitude,
+		})
+	}
+	return c.JSON(http.StatusOK, helper.WebResponsePagination(http.StatusOK, totalData, "kerahkan driver", driverResponse))
 }

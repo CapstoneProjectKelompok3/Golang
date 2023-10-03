@@ -48,12 +48,12 @@ func (repo *driverQuery) SelectAll(pageNumber int, pageSize int) ([]driver.Drive
 	}
 
 	tx := repo.db.Table("drivers").
-		Select("drivers.* ,drivers.id AS DriverID, governments.name").
+		Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
 		Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
 		Scan(&driversWithGovernments)
 
 	for _, u := range driversWithGovernments {
-		fmt.Printf("ID : %d,Nama: %s, Email: %s\n", u.DriverID, u.Name, u.Email)
+		fmt.Printf("ID : %d,Nama: %s, Type: %s\n", u.DriverID, u.Name, u.Government.Type)
 		// for _, o := range u.D {
 		// 	fmt.Printf("  Pesanan: %s\n", o.Product)
 		// }
@@ -73,6 +73,7 @@ func (repo *driverQuery) SelectAll(pageNumber int, pageSize int) ([]driver.Drive
 			Password:      value.Password,
 			Token:         value.Token,
 			GovermentName: value.Government.Name,
+			GovermentType: value.Government.Type,
 			// GovermentID: value.GovermentID,
 			// GovernmentName:value.Go
 			Status:        value.Status,
@@ -127,4 +128,54 @@ func (repo *driverQuery) Login(email string, password string) (dataLogin driver.
 	dataLogin = ModelToCore(data)
 
 	return dataLogin, nil
+}
+
+// KerahkanDriver implements driver.DriverDataInterface.
+func (repo *driverQuery) KerahkanDriver(police int, hospital int, firestation int, dishub int, SAR int) ([]driver.DriverCore, error) {
+	var driversWithGovernments []struct {
+		Driver
+		DriverID uint
+		goverment.Government
+	}
+
+	tx := repo.db.Table("drivers").
+		Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
+		Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
+		Scan(&driversWithGovernments)
+
+	for _, u := range driversWithGovernments {
+		fmt.Printf("ID : %d,Nama: %s, Email: %s\n", u.DriverID, u.Name, u.Email)
+		// for _, o := range u.D {
+		// 	fmt.Printf("  Pesanan: %s\n", o.Product)
+		// }
+	}
+	// tx := repo.db.Offset(offset).Limit(pageSize).Find(&driverData)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	var driverCore []driver.DriverCore
+
+	for _, value := range driversWithGovernments {
+
+		driverCore = append(driverCore, driver.DriverCore{
+			Id:            value.DriverID,
+			Fullname:      value.Fullname,
+			Email:         value.Email,
+			Password:      value.Password,
+			Token:         value.Token,
+			GovermentName: value.Government.Name,
+			GovermentType: value.Government.Type,
+			Status:        value.Status,
+			DrivingStatus: value.DrivingStatus,
+			VehicleID:     value.VehicleID,
+			Latitude:      value.Driver.Latitude,
+			Longitude:     value.Driver.Longitude,
+			CreatedAt:     time.Time{},
+			UpdatedAt:     time.Time{},
+			DeletedAt:     time.Time{},
+		})
+	}
+
+	return driverCore, nil
 }
