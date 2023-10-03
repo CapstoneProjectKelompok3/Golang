@@ -4,6 +4,7 @@ import (
 	"errors"
 	usernodejs "project-capston/features/UserNodeJs"
 	"project-capston/features/emergency"
+
 	"strconv"
 
 	"gorm.io/gorm"
@@ -13,110 +14,117 @@ type EmergencyData struct {
 	db *gorm.DB
 }
 
+// ActionGmail implements emergency.EmergencyDataInterface.
+func (repo *EmergencyData) ActionGmail(input string) error {
+	var inputModel HistoryAdmin
+	inputModel.Status=input
+	tx:=repo.db.Create(&inputModel)
+	if tx.Error!=nil{
+		return tx.Error
+	}
+	return nil
+}
+
 // SelectAll implements emergency.EmergencyDataInterface.
-func (repo *EmergencyData) SelectAll(param emergency.QueryParams,token string) (int64, []emergency.EmergencyEntity, error) {
+func (repo *EmergencyData) SelectAll(param emergency.QueryParams, token string) (int64, []emergency.EmergencyEntity, error) {
 	var inputModel []Emergency
 	var totalEmergency int64
 
-	query:=repo.db
+	query := repo.db
 
-	if param.IsClassDashboard{
-		offset := (param.Page-1)*param.ItemsPerPage
+	if param.IsClassDashboard {
+		offset := (param.Page - 1) * param.ItemsPerPage
 		// if param.SearchName !=""{
 		// 	query=query.Where("caller_id like ? or receiver_id=?","%"+param.SearchName+"%","%"+param.SearchName+"%")
 		// }
-		tx:=query.Find(&inputModel)
-		if tx.Error != nil{
+		tx := query.Find(&inputModel)
+		if tx.Error != nil {
 			return 0, nil, errors.New("failed get count emergency")
 		}
-		totalEmergency=tx.RowsAffected
-		query=query.Offset(offset).Limit(param.ItemsPerPage)
+		totalEmergency = tx.RowsAffected
+		query = query.Offset(offset).Limit(param.ItemsPerPage)
 	}
 	// if param.SearchName !=""{
 	// 	query=query.Where("caller_id like ? or receiver_id=?","%"+param.SearchName+"%","%"+param.SearchName+"%")
 	// }
-	tx:=query.Find(&inputModel)
-	if tx.Error != nil{
-		return 0,nil,errors.New("error get all emergency")
+	tx := query.Find(&inputModel)
+	if tx.Error != nil {
+		return 0, nil, errors.New("error get all emergency")
 	}
 
 	var emergensiUser []EmergencyUser
-	for _,e:=range inputModel{
+	for _, e := range inputModel {
 		emergensiUser = append(emergensiUser, ModelToEmergencyUser(e))
 	}
 
 	var idReceiver []string
-	for _,v:=range emergensiUser{
-		id:=strconv.Itoa(int(v.ReceiverID))
+	for _, v := range emergensiUser {
+		id := strconv.Itoa(int(v.ReceiverID))
 		idReceiver = append(idReceiver, id)
 	}
 
 	var idCaller []string
-	for _,v:=range emergensiUser{
-		id:=strconv.Itoa(int(v.CallerID))
+	for _, v := range emergensiUser {
+		id := strconv.Itoa(int(v.CallerID))
 		idCaller = append(idCaller, id)
 	}
 	var emergenciEntity []emergency.EmergencyEntity
-	for i:=0;i<len(emergensiUser);i++{
-		for j:=0;j<len(emergensiUser);j++{
-			data,_:=usernodejs.GetByIdUser(idCaller[j],token)
-			idConv,_:=strconv.Atoi(idCaller[j])
-			if uint(idConv)==emergensiUser[i].CallerID{
-				user:=UserNodeToUser(data)
-				emergensiUser[i].Caller=user
-			}			
-	}
-		for k:=0;k<len(emergensiUser);k++{
-			data,_:=usernodejs.GetByIdUser(idReceiver[k],token)
-			idConv,_:=strconv.Atoi(idReceiver[k])
-			if uint(idConv)==emergensiUser[i].ReceiverID{
-				user:=UserNodeToUser(data)
-				emergensiUser[i].Receiver=user	
+	for i := 0; i < len(emergensiUser); i++ {
+		for j := 0; j < len(emergensiUser); j++ {
+			data, _ := usernodejs.GetByIdUser(idCaller[j], token)
+			idConv, _ := strconv.Atoi(idCaller[j])
+			if uint(idConv) == emergensiUser[i].CallerID {
+				user := UserNodeToUser(data)
+				emergensiUser[i].Caller = user
 			}
-	}
-	emergenciEntity = append(emergenciEntity, EmergencyUserToEntity(emergensiUser[i]))
+		}
+		for k := 0; k < len(emergensiUser); k++ {
+			data, _ := usernodejs.GetByIdUser(idReceiver[k], token)
+			idConv, _ := strconv.Atoi(idReceiver[k])
+			if uint(idConv) == emergensiUser[i].ReceiverID {
+				user := UserNodeToUser(data)
+				emergensiUser[i].Receiver = user
+			}
+		}
+		emergenciEntity = append(emergenciEntity, EmergencyUserToEntity(emergensiUser[i]))
 
 	}
-	
-	return totalEmergency,emergenciEntity,nil
-		
+
+	return totalEmergency, emergenciEntity, nil
+
 }
 
-
-
-
 // SelectById implements emergency.EmergencyDataInterface.
-func (repo *EmergencyData) SelectById(id uint,token string) (emergency.EmergencyEntity, error) {
+func (repo *EmergencyData) SelectById(id uint, token string) (emergency.EmergencyEntity, error) {
 	var inputModel Emergency
 	tx := repo.db.First(&inputModel, id)
 	if tx.Error != nil {
 		return emergency.EmergencyEntity{}, errors.New("fail emergency by id")
 	}
 
-	idReceiver:=strconv.Itoa(int(inputModel.ReceiverID))
-	dataReceiver,errUserR:=usernodejs.GetByIdUser(idReceiver,token)
-	if errUserR != nil{
-		return emergency.EmergencyEntity{},errUserR
+	idReceiver := strconv.Itoa(int(inputModel.ReceiverID))
+	dataReceiver, errUserR := usernodejs.GetByIdUser(idReceiver, token)
+	if errUserR != nil {
+		return emergency.EmergencyEntity{}, errUserR
 	}
 
-	idCaller:=strconv.Itoa(int(inputModel.CallerID))
-	dataCaller,errUserC:=usernodejs.GetByIdUser(idCaller,token)
-	if errUserC != nil{
-		return emergency.EmergencyEntity{},errUserC
+	idCaller := strconv.Itoa(int(inputModel.CallerID))
+	dataCaller, errUserC := usernodejs.GetByIdUser(idCaller, token)
+	if errUserC != nil {
+		return emergency.EmergencyEntity{}, errUserC
 	}
 
-	userCaller:=UserNodeToUser(dataCaller)
-	userEntityCaller:=UserToUserEntity(userCaller)
+	userCaller := UserNodeToUser(dataCaller)
+	userEntityCaller := UserToUserEntity(userCaller)
 
-	userReceiver:=UserNodeToUser(dataReceiver)
-	userEntityReceiver:=UserToUserEntity(userReceiver)
+	userReceiver := UserNodeToUser(dataReceiver)
+	userEntityReceiver := UserToUserEntity(userReceiver)
 
-
-	emergensyUser:=ModelToEmergencyUser(inputModel)
+	emergensyUser := ModelToEmergencyUser(inputModel)
 
 	output := EmergencyUserToEntity(emergensyUser)
-	output.Caller=userEntityCaller
-	output.Receiver=userEntityReceiver
+	output.Caller = userEntityCaller
+	output.Receiver = userEntityReceiver
 	return output, nil
 }
 

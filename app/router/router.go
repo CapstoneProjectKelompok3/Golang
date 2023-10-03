@@ -6,7 +6,6 @@ import (
 	hE "project-capston/features/emergency/handler"
 	sE "project-capston/features/emergency/service"
 
-
 	dV "project-capston/features/vehicles/data"
 	hV "project-capston/features/vehicles/handler"
 	sV "project-capston/features/vehicles/service"
@@ -14,7 +13,6 @@ import (
 	_governmentData "project-capston/features/goverment/data"
 	_governmentHandler "project-capston/features/goverment/handler"
 	_governmentService "project-capston/features/goverment/service"
-
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -30,6 +28,8 @@ func InitRouter(db *gorm.DB,c *echo.Echo){
 	c.PUT("/emergencies/:emergency_id",handlerE.Edit,middlewares.JWTMiddleware())
 	c.GET("/emergencies/:emergency_id",handlerE.GetById,middlewares.JWTMiddleware())
 	c.GET("/emergencies",handlerE.GetAll,middlewares.JWTMiddleware())
+	
+	c.GET("/emergencies/action",handlerE.ActionLogic)
 
 	dataV:=dV.New(db)
 	serviceV:=sV.New(dataV)

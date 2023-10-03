@@ -18,6 +18,12 @@ type Emergency struct {
 	IsClose bool
 }
 
+type HistoryAdmin struct{
+	gorm.Model
+	AdminId uint
+	Status string
+}
+
 type EmergencyUser struct{
 	ID        		uint			
 	CreatedAt 		time.Time

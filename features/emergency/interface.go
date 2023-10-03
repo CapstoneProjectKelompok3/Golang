@@ -36,6 +36,7 @@ type EmergencyDataInterface interface{
 	Update(input EmergencyEntity, id uint)(error)
 	SelectById(id uint,token string)(EmergencyEntity,error)
 	SelectAll(param QueryParams,token string)(int64, []EmergencyEntity,error)
+	ActionGmail(input string)error
 }
 
 type EmergencyServiceInterface interface{
@@ -44,4 +45,5 @@ type EmergencyServiceInterface interface{
 	Edit(input EmergencyEntity,id uint)error
 	GetById(id uint,token string)(EmergencyEntity,error)
 	GetAll(param QueryParams,token string)(bool,[]EmergencyEntity,error)
+	ActionGmail(input string)error
 }
