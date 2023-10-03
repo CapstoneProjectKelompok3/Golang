@@ -109,23 +109,23 @@ func (handler *DriverHandler) Login(c echo.Context) error {
 		}
 	}
 
-	// response := LoginResponse{
-	// 	Id: dataLogin.Id,
-	// 	// GovermentName: data,
-	// 	Fullname:      dataLogin.Fullname,
-	// 	Token:         token,
-	// 	Status:        dataLogin.Status,
-	// 	DrivingStatus: dataLogin.DrivingStatus,
-	// 	VehicleID:     dataLogin.VehicleID,
-	// 	Latitude:      dataLogin.Latitude,
-	// 	Longitude:     dataLogin.Longitude,
-	// }
-
-	response := map[string]any{
-		"token":   token,
-		"user_id": dataLogin.Id,
-		"name":    dataLogin.Fullname,
+	response := LoginResponse{
+		Id: dataLogin.Id,
+		// GovermentName: dataLogin.G,
+		Fullname:      dataLogin.Fullname,
+		Token:         token,
+		Status:        dataLogin.Status,
+		DrivingStatus: dataLogin.DrivingStatus,
+		VehicleID:     dataLogin.VehicleID,
+		Latitude:      dataLogin.Latitude,
+		Longitude:     dataLogin.Longitude,
 	}
+
+	// response := map[string]any{
+	// 	"token":   token,
+	// 	"user_id": dataLogin.Id,
+	// 	"name":    dataLogin.Fullname,
+	// }
 
 	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusCreated, "driver success login", response))
 }
