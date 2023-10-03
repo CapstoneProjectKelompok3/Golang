@@ -12,40 +12,49 @@ type EmergencyService struct {
 	validate         *validator.Validate
 }
 
+// ActionGmail implements emergency.EmergencyServiceInterface.
+func (service *EmergencyService) ActionGmail(input string) error {
+	err:=service.emergencyService.ActionGmail(input)
+	if err!= nil{
+		return err
+	}
+	return nil
+}
+
 // GetAll implements emergency.EmergencyServiceInterface.
-func (service *EmergencyService) GetAll(param emergency.QueryParams,token string) (bool, []emergency.EmergencyEntity, error) {
+func (service *EmergencyService) GetAll(param emergency.QueryParams, token string) (bool, []emergency.EmergencyEntity, error) {
 	var totalPages int64
-	nextPage :=true
-	count,data,err:=service.emergencyService.SelectAll(param,token)
-	if err != nil{
-		return true,nil,err
+	nextPage := true
+	count, data, err := service.emergencyService.SelectAll(param, token)
+	if err != nil {
+		return true, nil, err
 	}
 	if count == 0 {
 		nextPage = false
 	}
 
-	if param.IsClassDashboard{
-		totalPages =count/int64(param.ItemsPerPage)
-		if count %int64(param.ItemsPerPage) !=0{
-			totalPages +=1
+	if param.IsClassDashboard {
+		totalPages = count / int64(param.ItemsPerPage)
+		if count%int64(param.ItemsPerPage) != 0 {
+			totalPages += 1
 		}
-		if param.Page == int(totalPages){
+		if param.Page == int(totalPages) {
 			nextPage = false
 		}
-		if param.Page < param.ItemsPerPage{
-			nextPage=false
+		if param.Page < param.ItemsPerPage {
+			nextPage = false
 		}
 
-		if data == nil{
-			nextPage=false
+		if data == nil {
+			nextPage = false
 		}
 	}
-	return nextPage,data,nil
+	return nextPage, data, nil
 }
 
 // GetById implements emergency.EmergencyServiceInterface.
-func (service *EmergencyService) GetById(id uint,token string) (emergency.EmergencyEntity, error) {
-	data, err := service.emergencyService.SelectById(id,token)
+func (service *EmergencyService) GetById(id uint, token string) (emergency.EmergencyEntity, error) {
+	data, err := service.emergencyService.SelectById(id, token)
 	if err != nil {
 		return emergency.EmergencyEntity{}, err
 	}
