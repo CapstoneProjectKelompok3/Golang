@@ -40,10 +40,12 @@ type DriverDataInterface interface {
 	Insert(input Core) error
 	SelectAll(pageNumber int, pageSize int) ([]DriverCore, error)
 	Login(email string, password string) (dataLogin Core, err error)
+	// Logout(email string, password string) (dataLogin Core, err error)
 }
 
 type DriverServiceInterface interface {
 	Create(input Core) error
 	GetAll(pageNumber int, pageSize int) ([]DriverCore, error)
 	Login(email string, password string) (dataLogin Core, token string, err error)
+	// Logout(email string, password string) (dataLogin Core, err error)
 }

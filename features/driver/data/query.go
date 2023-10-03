@@ -111,6 +111,7 @@ func (repo *driverQuery) Login(email string, password string) (dataLogin driver.
 		fmt.Println("Query", query)
 
 		tx := repo.db.Where("email = ? and password = ?", email, data.Password).Find(&data)
+		repo.db.Exec("UPDATE drivers SET status=1 WHERE email=?", email)
 
 		if tx.Error != nil {
 			return driver.Core{}, tx.Error

@@ -68,19 +68,14 @@ func (handler *DriverHandler) GetAllDriver(c echo.Context) error {
 
 	for _, value := range result {
 
-		var status string
-		if value.Status {
-			status = "available"
-		} else {
-			status = "not_available"
-		}
 		driverResponse = append(driverResponse, DriverResponse{
 			Id: value.Id,
 
 			GovermentName: value.GovermentName,
+			Email:         value.Email,
 			Fullname:      value.Fullname,
 			Token:         value.Token,
-			Status:        status,
+			Status:        value.Status,
 			DrivingStatus: value.DrivingStatus,
 			VehicleID:     value.VehicleID,
 			Latitude:      value.Latitude,

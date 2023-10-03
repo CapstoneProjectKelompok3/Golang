@@ -3,9 +3,10 @@ package handler
 type DriverResponse struct {
 	Id            uint    `json:"id,omitempty"`
 	GovermentName string  `json:"goverment_name,omitempty"`
+	Email         string  `json:"email"`
 	Fullname      string  `json:"fullname,omitempty"`
 	Token         string  `json:"token,omitempty"`
-	Status        string  `json:"status,omitempty"`
+	Status        bool    `json:"status"`
 	DrivingStatus string  `json:"driving_status,omitempty"`
 	VehicleID     uint    `json:"vehicle_id,omitempty"`
 	Latitude      float64 `json:"latitude,omitempty"`
@@ -17,7 +18,7 @@ type LoginResponse struct {
 	GovermentName string  `json:"goverment_name,omitempty"`
 	Fullname      string  `json:"fullname,omitempty"`
 	Token         string  `json:"token,omitempty"`
-	Status        bool    `json:"status,omitempty"`
+	Status        bool    `json:"status"`
 	DrivingStatus string  `json:"driving_status,omitempty"`
 	VehicleID     uint    `json:"vehicle_id,omitempty"`
 	Latitude      float64 `json:"latitude,omitempty"`
