@@ -50,6 +50,7 @@ func (repo *driverQuery) SelectProfile(id int) (driver.DriverCore, error) {
 
 	driverCore.Id = driversWithGovernments.DriverID
 	driverCore.Fullname = driversWithGovernments.Driver.Fullname
+	driverCore.Status = driversWithGovernments.Status
 	driverCore.Email = driversWithGovernments.Driver.Email
 	driverCore.Token = driversWithGovernments.Token
 	driverCore.GovermentName = driversWithGovernments.Government.Name
@@ -526,17 +527,27 @@ func (repo *driverQuery) AcceptOrRejectOrder(IsAccepted bool, idDriver int) erro
 	//4. Cek apakah drivers punya order atau tidak dari token kasus didalam tabel
 	if driversWithGovernments.Token != "" {
 		if IsAccepted {
-			tx := repo.db.Exec("UPDATE drivers SET status=false,driving_status='on_trip' WHERE id=?", idDriver) // proses query insert
-			if tx.Error != nil {
-				return tx.Error
-			}
+			if driversWithGovernments.DrivingStatus != "on_trip" {
+				tx := repo.db.Exec("UPDATE drivers SET status=false,driving_status='on_trip' WHERE id=?", idDriver) // proses query insert
+				if tx.Error != nil {
+					return tx.Error
+				}
 
-			if tx.Error != nil {
-				panic("Failed to update user")
-			}
+				if tx.Error != nil {
+					panic("Failed to update user")
+				}
 
-			rowsAffected := tx.RowsAffected
-			fmt.Printf("Rows affected: %d\n", rowsAffected)
+				rowsAffected := tx.RowsAffected
+				fmt.Printf("Rows affected: %d\n", rowsAffected)
+			} else {
+				err := errors.New("Sorry But Now you are on the way you cannot receive order again")
+
+				// Melemparkan error
+				if err != nil {
+					fmt.Println(err.Error())
+				}
+				return err
+			}
 		} else {
 			//5 Ubah status = true driving_status=on_cancel
 			tx := repo.db.Exec("UPDATE drivers SET status=true,driving_status='on_cancel' WHERE id=?", idDriver) // proses query insert
