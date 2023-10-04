@@ -55,10 +55,10 @@ func (service *driverService) Login(email string, password string) (dataLogin dr
 
 // AcceptOrRejectOrder implements driver.DriverServiceInterface.
 func (service *driverService) AcceptOrRejectOrder(IsAccepted bool, idDriver int) error {
-	errValidate := service.validate.Struct(IsAccepted)
-	if errValidate != nil {
-		return errors.New("validation error" + errValidate.Error())
-	}
+	// errValidate := service.validate.Struct(IsAccepted)
+	// if errValidate != nil {
+	// 	return errors.New("validation error" + errValidate.Error())
+	// }
 
 	err := service.driverData.AcceptOrRejectOrder(IsAccepted, idDriver)
 	return err

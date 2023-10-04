@@ -135,8 +135,10 @@ func (repo *driverQuery) SelectAll(pageNumber int, pageSize int) ([]driver.Drive
 
 // AcceptOrRejectOrder implements driver.DriverDataInterface.
 func (repo *driverQuery) AcceptOrRejectOrder(IsAccepted bool, idDriver int) error {
+	fmt.Println("IS ACC", IsAccepted)
+	fmt.Println("sdkadlad", idDriver)
 	if IsAccepted {
-		tx := repo.db.Exec("UPDATE drivers SET status=false,driving_status=on_trip WHERE id=?", idDriver) // proses query insert
+		tx := repo.db.Exec("UPDATE drivers SET status=false,driving_status='on_trip' WHERE id=?", idDriver) // proses query insert
 		if tx.Error != nil {
 			return tx.Error
 		}
@@ -148,17 +150,26 @@ func (repo *driverQuery) AcceptOrRejectOrder(IsAccepted bool, idDriver int) erro
 		rowsAffected := tx.RowsAffected
 		fmt.Printf("Rows affected: %d\n", rowsAffected)
 	} else {
-		tx := repo.db.Exec("UPDATE drivers SET status=true,driving_status=on_cancel WHERE id=?", idDriver) // proses query insert
+		tx := repo.db.Exec("UPDATE drivers SET status=true,driving_status='on_cancel' WHERE id=?", idDriver) // proses query insert
+
 		if tx.Error != nil {
 			return tx.Error
 		}
 
-		if tx.Error != nil {
-			panic("Failed to update user")
+		var driversWithGovernments struct {
+			Driver
+			DriverID uint
+			goverment.Government
 		}
 
-		rowsAffected := tx.RowsAffected
-		fmt.Printf("Rows affected: %d\n", rowsAffected)
+		repo.db.Table("drivers").
+			Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
+			Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
+			Where("drivers.id=?", idDriver).
+			Scan(&driversWithGovernments)
+
+		fmt.Printf("ID : %d,Nama: %s, Type: %s \n", driversWithGovernments.DriverID, driversWithGovernments.Name, driversWithGovernments.Government.Type)
+
 	}
 
 	return nil
