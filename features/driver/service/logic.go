@@ -53,6 +53,17 @@ func (service *driverService) Login(email string, password string) (dataLogin dr
 	return dataLogin, token, nil
 }
 
+// AcceptOrRejectOrder implements driver.DriverServiceInterface.
+func (service *driverService) AcceptOrRejectOrder(IsAccepted bool, idDriver int) error {
+	errValidate := service.validate.Struct(IsAccepted)
+	if errValidate != nil {
+		return errors.New("validation error" + errValidate.Error())
+	}
+
+	err := service.driverData.AcceptOrRejectOrder(IsAccepted, idDriver)
+	return err
+}
+
 // KerahkanDriver implements driver.DriverServiceInterface.
 func (service *driverService) KerahkanDriver(lat string, long string, police int, hospital int, firestation int, dishub int, SAR int) ([]driver.DriverCore, error) {
 	result, err := service.driverData.KerahkanDriver(lat, long, police, hospital, firestation, dishub, SAR)
@@ -63,7 +74,7 @@ func (service *driverService) KerahkanDriver(lat string, long string, police int
 }
 
 // SelectProfile implements driver.DriverServiceInterface.
-func (service *driverService) GetProfile(id int) (driver.Core, error) {
+func (service *driverService) GetProfile(id int) (driver.DriverCore, error) {
 	result, err := service.driverData.SelectProfile(id)
 	return result, err
 }

@@ -15,6 +15,10 @@ type LatLonRequest struct {
 	Longitude float64 `json:"longitude"`
 }
 
+type AcceptOrRejectOrderRequest struct {
+	IsAccepted bool `json:"is_accepted"`
+}
+
 type DriverRequest struct {
 	GovernmentID  uint    `json:"government_id" form:"government_id"`
 	Fullname      string  `json:"fullname" form:"fullname"`

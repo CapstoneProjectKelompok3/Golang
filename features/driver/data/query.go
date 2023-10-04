@@ -18,21 +18,43 @@ type driverQuery struct {
 }
 
 // SelectProfile implements driver.DriverDataInterface.
-func (repo *driverQuery) SelectProfile(id int) (driver.Core, error) {
-	var driverData Driver
+func (repo *driverQuery) SelectProfile(id int) (driver.DriverCore, error) {
+	var driversWithGovernments struct {
+		Driver
+		DriverID uint
+		goverment.Government
+	}
 
-	tx := repo.db.First(&driverData, id).Scan(&driverData) //
+	tx := repo.db.Table("drivers").
+		Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
+		Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
+		Where("drivers.id=?", id).
+		Scan(&driversWithGovernments)
+
+	// tx := repo.db.First(&driverData, id).Scan(&driverData) //
 
 	if tx.Error != nil {
-		return driver.Core{}, tx.Error
+		return driver.DriverCore{}, tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return driver.Core{}, errors.New("data not found")
+		return driver.DriverCore{}, errors.New("data not found")
 	}
 
-	var driversCore = ModelToCore(driverData)
+	// var driversCore = ModelToCore(driversWithGovernments)
 
-	return driversCore, nil
+	var driverCore driver.DriverCore
+
+	driverCore.Id = driversWithGovernments.DriverID
+	driverCore.Fullname = driversWithGovernments.Driver.Fullname
+	driverCore.Email = driversWithGovernments.Driver.Email
+	driverCore.Token = driversWithGovernments.Token
+	driverCore.GovermentName = driversWithGovernments.Government.Name
+	driverCore.GovermentType = driversWithGovernments.Government.Type
+	driverCore.DrivingStatus = driversWithGovernments.DrivingStatus
+	driverCore.Latitude = driversWithGovernments.Driver.Latitude
+	driverCore.Longitude = driversWithGovernments.Driver.Longitude
+
+	return driverCore, nil
 }
 
 func New(db *gorm.DB) driver.DriverDataInterface {
@@ -109,6 +131,37 @@ func (repo *driverQuery) SelectAll(pageNumber int, pageSize int) ([]driver.Drive
 
 	return driverCore, nil
 
+}
+
+// AcceptOrRejectOrder implements driver.DriverDataInterface.
+func (repo *driverQuery) AcceptOrRejectOrder(IsAccepted bool, idDriver int) error {
+	if IsAccepted {
+		tx := repo.db.Exec("UPDATE drivers SET status=false,driving_status=on_trip WHERE id=?", idDriver) // proses query insert
+		if tx.Error != nil {
+			return tx.Error
+		}
+
+		if tx.Error != nil {
+			panic("Failed to update user")
+		}
+
+		rowsAffected := tx.RowsAffected
+		fmt.Printf("Rows affected: %d\n", rowsAffected)
+	} else {
+		tx := repo.db.Exec("UPDATE drivers SET status=true,driving_status=on_cancel WHERE id=?", idDriver) // proses query insert
+		if tx.Error != nil {
+			return tx.Error
+		}
+
+		if tx.Error != nil {
+			panic("Failed to update user")
+		}
+
+		rowsAffected := tx.RowsAffected
+		fmt.Printf("Rows affected: %d\n", rowsAffected)
+	}
+
+	return nil
 }
 
 // Login implements driver.DriverDataInterface.

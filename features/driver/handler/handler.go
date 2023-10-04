@@ -196,17 +196,46 @@ func (handler *DriverHandler) GetProfileDriver(c echo.Context) error {
 
 	driverResponse := DriverResponse{
 		Id:            result.Id,
-		GovermentName: "",
-		GovermentType: "",
+		GovermentName: result.GovermentName,
+		GovermentType: result.GovermentType,
 		Email:         result.Email,
 		Fullname:      result.Fullname,
 		Token:         result.Token,
 		Status:        result.Status,
 		DrivingStatus: result.DrivingStatus,
 		VehicleID:     result.VehicleID,
-		Latitude:      0,
-		Longitude:     0,
+		Latitude:      result.Latitude,
+		Longitude:     result.Longitude,
 	}
 
 	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "success get my profile", driverResponse))
+}
+
+var message string
+
+func (handler *DriverHandler) DriverAcceptOrRejectOrder(c echo.Context) error {
+	idToken := middlewares.ExtractTokenDriverId(c)
+
+	fmt.Println(idToken)
+
+	driverInput := new(AcceptOrRejectOrderRequest)
+
+	errBind := c.Bind(&driverInput)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error bind data. data not valid", nil))
+	}
+
+	if driverInput.IsAccepted {
+		message = "Success Accepted order"
+	} else {
+		message = "Success Rejected order"
+	}
+
+	err := handler.driverService.AcceptOrRejectOrder(driverInput.IsAccepted, idToken)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error read data", nil))
+	}
+
+	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, message, nil))
 }
