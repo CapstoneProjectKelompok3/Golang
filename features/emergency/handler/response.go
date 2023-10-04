@@ -28,6 +28,7 @@ func EntityToResponse(data emergency.EmergencyEntity)EmergencyResponse{
 	return EmergencyResponse{
 		Id:         data.Id,
 		CreateAt:   data.CreateAt,
+		Name: data.Name,
 		CallerID:   data.CallerID,
 		ReceiverID: data.ReceiverID,
 		Latitude:   data.Latitude,
