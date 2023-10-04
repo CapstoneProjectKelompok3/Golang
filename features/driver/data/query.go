@@ -223,7 +223,8 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 		INNER JOIN 
 				governments ON governments.id = drivers.goverment_id
 		where governments.type='police' AND status=true AND driving_status='on_ready'
-	   LIMIT
+		ORDER BY distance ASC
+	    LIMIT
 		`
 
 		query1 := sub_query1a + lat + sub_query1b + lon + sub_query1c + lat + sub_query1d
@@ -245,6 +246,7 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 		INNER JOIN 
 				governments ON governments.id = drivers.goverment_id
 		where governments.type='hospital' AND status=true AND driving_status='on_ready'
+		ORDER BY distance ASC
 	   LIMIT
 		`
 
@@ -267,6 +269,7 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 		INNER JOIN 
 				governments ON governments.id = drivers.goverment_id
 		where governments.type='firestation' AND status=true AND driving_status='on_ready'
+		ORDER BY distance ASC
 	   LIMIT
 		`
 
@@ -303,6 +306,7 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 		INNER JOIN 
 				governments ON governments.id = drivers.goverment_id
 		where governments.type='police' AND status=true AND driving_status='on_ready'
+		ORDER BY distance ASC
 	   LIMIT
 		`
 
@@ -325,6 +329,7 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 		INNER JOIN 
 				governments ON governments.id = drivers.goverment_id
 		where governments.type='hospital' AND status=true AND driving_status='on_ready'
+		ORDER BY distance ASC
 	   LIMIT
 		`
 
@@ -360,11 +365,48 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 		INNER JOIN 
 				governments ON governments.id = drivers.goverment_id
 		where governments.type='police' AND status=true AND driving_status='on_ready'
+		ORDER BY distance ASC
 	   LIMIT
 		`
 		query := sub_query1a + lat + sub_query1b + lon + sub_query1c + lat + sub_query1d
 
 		sql := fmt.Sprintf("%s%d", query, police)
+
+		tx := repo.db.Raw(sql).Scan(&driversWithGovernments)
+
+		// fmt.Println("adasdds", tx)
+		if tx.Error != nil {
+			return nil, tx.Error
+		}
+
+		if tx.Error != nil {
+			return nil, tx.Error
+		}
+	} else if hospital >= 0 {
+
+		sub_query1a := `
+		SELECT
+				(6371 * acos(cos(radians(drivers.latitude)) * cos(radians(`
+
+		sub_query1b := `)) * 
+				cos(radians(`
+
+		sub_query1c := `) - radians(drivers.longitude)) + sin(radians(drivers.latitude)) *
+	            sin(radians(`
+
+		sub_query1d := `)))) AS distance,
+			    drivers.*,governments.type,governments.name,drivers.id AS DriverID
+		FROM
+				drivers
+		INNER JOIN 
+				governments ON governments.id = drivers.goverment_id
+		where governments.type='hospital' AND status=true AND driving_status='on_ready'
+		ORDER BY distance ASC
+	   LIMIT
+		`
+		query := sub_query1a + lat + sub_query1b + lon + sub_query1c + lat + sub_query1d
+
+		sql := fmt.Sprintf("%s%d", query, hospital)
 
 		tx := repo.db.Raw(sql).Scan(&driversWithGovernments)
 
