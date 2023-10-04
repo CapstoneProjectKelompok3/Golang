@@ -26,7 +26,7 @@ func InitRouter(db *gorm.DB, c *echo.Echo) {
 	dataE := dE.New(db)
 	serviceE := sE.New(dataE)
 	handlerE := hE.New(serviceE)
-	c.POST("users/:receiver_id/emergencies", handlerE.Add, middlewares.JWTMiddleware())
+	c.POST("/users/:receiver_id/emergencies", handlerE.Add, middlewares.JWTMiddleware())
 	c.DELETE("/emergencies/:emergency_id", handlerE.Delete, middlewares.JWTMiddleware())
 	c.PUT("/emergencies/:emergency_id", handlerE.Edit, middlewares.JWTMiddleware())
 	c.GET("/emergencies/:emergency_id", handlerE.GetById, middlewares.JWTMiddleware())

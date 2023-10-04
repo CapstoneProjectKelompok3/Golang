@@ -29,6 +29,7 @@ func (handler *EmergencyHandler) Add(c echo.Context)error{
 	if errConv != nil{
 		return c.JSON(http.StatusBadRequest,"id not valid")
 	}
+
 	var input EmergencyRequest
 	errBind:=c.Bind(&input)
 	if errBind != nil{
@@ -38,7 +39,11 @@ func (handler *EmergencyHandler) Add(c echo.Context)error{
 	entity.CallerID=uint(idClaller)
 	entity.ReceiverID=uint(idConv)
 
-	err:=handler.emergencyHandler.Add(entity)
+	token,errToken:=usernodejs.GetTokenHandler(c)
+	if errToken != nil{
+		return c.JSON(http.StatusUnauthorized,"fail get token")
+	}
+	err:=handler.emergencyHandler.Add(entity,token)
 	if err != nil{
 		if strings.Contains(err.Error(),"validation"){
 			return c.JSON(http.StatusBadRequest,err.Error())
@@ -69,6 +74,7 @@ func (handler *EmergencyHandler)Edit(c echo.Context)error{
 	if errConv != nil{
 		return c.JSON(http.StatusBadRequest,"id not valid")
 	}
+	idUser,level:=middlewares.ExtractTokenUserId(c)
 	var input EmergencyRequest
 	errBind:=c.Bind(&input)
 	if errBind != nil{
@@ -76,7 +82,7 @@ func (handler *EmergencyHandler)Edit(c echo.Context)error{
 	}
 	
 	Entity:=RequestToEntity(input)
-	err:=handler.emergencyHandler.Edit(Entity,uint(idConv))
+	err:=handler.emergencyHandler.Edit(Entity,uint(idConv),level,uint(idUser))
 	if err != nil{
 		return c.JSON(http.StatusInternalServerError,err.Error())
 	}
