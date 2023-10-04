@@ -5,10 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"math"
 	"project-capston/app/middlewares"
 	"project-capston/features/driver"
 	goverment "project-capston/features/goverment/data"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -59,12 +61,6 @@ func (repo *driverQuery) DriverOnTrip(id int, lat float64, long float64) (driver
 		goverment.Government
 	}
 
-	// tx := repo.db.Table("drivers").
-	// 	Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
-	// 	Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
-	// 	Where("drivers.id=?", id).
-	// 	Scan(&driversWithGovernments)
-
 	sub_query1a := `
 		SELECT
 				(6371 * acos(cos(radians(`
@@ -97,8 +93,6 @@ func (repo *driverQuery) DriverOnTrip(id int, lat float64, long float64) (driver
 
 	tx := repo.db.Raw(sql).Scan(&driversWithGovernments)
 
-	// tx := repo.db.First(&driverData, id).Scan(&driverData) //
-
 	if tx.Error != nil {
 		return driver.DriverCore{}, tx.Error
 	}
@@ -125,6 +119,49 @@ func (repo *driverQuery) DriverOnTrip(id int, lat float64, long float64) (driver
 	driverCore.Distance = driversWithGovernments.Distance
 
 	fmt.Println("Driver Core", driverCore.Distance)
+
+	// // Mengubah []float64 menjadi string
+	// dataStr := make([]string, len(data))
+	// for i, v := range data {
+	// 	dataStr[i] = strconv.FormatFloat(v, 'f', -1, 64)
+	// }
+
+	// // Marshal data ke format JSON (opsional)
+	// dataJSON, err := json.Marshal(dataStr)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// Key Redis untuk menyimpan nilai float
+	key := "myFloatValue"
+
+	// Nilai float yang ingin Anda simpan
+	floatValue := driverCore.Distance
+
+	// Konversi float menjadi string
+	stringValue := strconv.FormatFloat(floatValue, 'f', -1, 64)
+
+	// Simpan nilai string dalam Redis
+	err := redisClient.Set(ctx, key, stringValue, 0).Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Nilai float %f berhasil disimpan di Redis dengan key: %s\n", floatValue, key)
+
+	// Mengambil nilai dari Redis dan mengonversinya kembali ke float
+	storedValue, err := redisClient.Get(ctx, key).Result()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Mengonversi nilai string kembali ke float
+	convertedValue, err := strconv.ParseFloat(storedValue, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Nilai float yang diambil dari Redis: %f\n", convertedValue)
 
 	return driverCore, nil
 }
