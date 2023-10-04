@@ -15,7 +15,7 @@ type Driver struct {
 	Token         string `gorm:"type:varchar(255);unique_index"`
 	GovermentID   uint
 	Status        bool
-	DrivingStatus string `gorm:"type:enum('on_ready','on_demand','on_trip','on_finished');column:driving_status;default:on_ready"`
+	DrivingStatus string `gorm:"type:enum('on_ready','on_demand','on_trip','on_finished','on_cancel');column:driving_status;default:on_ready"`
 	VehicleID     uint
 	Latitude      float64
 	Longitude     float64

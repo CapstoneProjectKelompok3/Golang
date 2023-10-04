@@ -10,6 +10,11 @@ type LoginDriverRequest struct {
 	Password string `json:"password"`
 }
 
+type LatLonRequest struct {
+	Lat       float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
+
 type DriverRequest struct {
 	GovernmentID  uint    `json:"government_id" form:"government_id"`
 	Fullname      string  `json:"fullname" form:"fullname"`

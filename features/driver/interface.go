@@ -10,7 +10,7 @@ type Core struct {
 	Token         string
 	GovermentID   uint `validate:"required"`
 	Status        bool
-	DrivingStatus string  `gorm:"type:enum('on_ready','on_demand','on_trip','on_finished');column:driving_status;default:on_ready"`
+	DrivingStatus string  `gorm:"type:enum('on_ready','on_demand','on_trip','on_finished','on_cancle');column:driving_status;default:on_ready"`
 	VehicleID     uint    `validate:"required"`
 	Latitude      float64 `validate:"required"`
 	Longitude     float64 `validate:"required"`
@@ -42,7 +42,7 @@ type DriverDataInterface interface {
 	Insert(input Core) error
 	SelectAll(pageNumber int, pageSize int) ([]DriverCore, error)
 	Login(email string, password string) (dataLogin Core, err error)
-	KerahkanDriver(police int, hospital int, firestation int, dishub int, SAR int) ([]DriverCore, error)
+	KerahkanDriver(lat string, long string, police int, hospital int, firestation int, dishub int, SAR int) ([]DriverCore, error)
 	// Logout(email string, password string) (dataLogin Core, err error)
 }
 
@@ -50,6 +50,6 @@ type DriverServiceInterface interface {
 	Create(input Core) error
 	GetAll(pageNumber int, pageSize int) ([]DriverCore, error)
 	Login(email string, password string) (dataLogin Core, token string, err error)
-	KerahkanDriver(police int, hospital int, firestation int, dishub int, SAR int) ([]DriverCore, error)
+	KerahkanDriver(lat string, long string, police int, hospital int, firestation int, dishub int, SAR int) ([]DriverCore, error)
 	// Logout(email string, password string) (dataLogin Core, err error)
 }

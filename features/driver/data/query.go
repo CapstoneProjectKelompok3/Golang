@@ -54,7 +54,7 @@ func (repo *driverQuery) SelectAll(pageNumber int, pageSize int) ([]driver.Drive
 		Scan(&driversWithGovernments)
 
 	for _, u := range driversWithGovernments {
-		fmt.Printf("ID : %d,Nama: %s, Type: %s\n", u.DriverID, u.Name, u.Government.Type)
+		fmt.Printf("ID : %d,Nama: %s, Type: %s \n", u.DriverID, u.Name, u.Government.Type)
 		// for _, o := range u.D {
 		// 	fmt.Printf("  Pesanan: %s\n", o.Product)
 		// }
@@ -132,7 +132,7 @@ func (repo *driverQuery) Login(email string, password string) (dataLogin driver.
 }
 
 // KerahkanDriver implements driver.DriverDataInterface.
-func (repo *driverQuery) KerahkanDriver(police int, hospital int, firestation int, dishub int, SAR int) ([]driver.DriverCore, error) {
+func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hospital int, firestation int, dishub int, SAR int) ([]driver.DriverCore, error) {
 	var driversWithGovernments []struct {
 		Driver
 		DriverID uint
@@ -140,60 +140,173 @@ func (repo *driverQuery) KerahkanDriver(police int, hospital int, firestation in
 		Distance float64
 	}
 
-	fmt.Println("Jmlh Police ", police)
-	fmt.Println("Jmlh Police ", hospital)
-
-	if police >= 0 && hospital >= 0 {
-		// tx := repo.db.Table("drivers").
-		// 	Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
-		// 	Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
-		// 	Where("governments.type='police' LIMIT ?", police).
-		// 	Where("governments.type='hospital' LIMIT ?", hospital).
-		// 	Scan(&driversWithGovernments)
-
-		// if tx.Error != nil {
-		// 	return nil, tx.Error
-		// }
-
-		query1 := `
+	if police >= 0 && hospital >= 0 && firestation >= 0 {
+		sub_query1a := `
 		SELECT
-				(6371 * acos(cos(radians(drivers.latitude)) * cos(radians(-6.304990)) * cos(radians(106.820500) - radians(drivers.longitude)) + sin(radians(drivers.latitude)) * sin(radians(-6.304990)))) AS distance,
-			drivers.*,governments.type
-			FROM
+				(6371 * acos(cos(radians(drivers.latitude)) * cos(radians(`
+
+		sub_query1b := `)) * 
+				cos(radians(`
+
+		sub_query1c := `) - radians(drivers.longitude)) + sin(radians(drivers.latitude)) *
+	            sin(radians(`
+
+		sub_query1d := `)))) AS distance,
+			    drivers.*,governments.type,governments.name,drivers.id AS DriverID
+		FROM
 				drivers
-			INNER JOIN 
-						governments ON governments.id = drivers.goverment_id
-			where governments.type='police' AND status=true
-			ORDER BY distance LIMIT
+		INNER JOIN 
+				governments ON governments.id = drivers.goverment_id
+		where governments.type='police' AND status=true AND driving_status='on_ready'
+	   LIMIT
 		`
 
-		query2 := `
+		query1 := sub_query1a + lat + sub_query1b + lon + sub_query1c + lat + sub_query1d
+
+		sub_query2a := `
 		SELECT
-				(6371 * acos(cos(radians(drivers.latitude)) * cos(radians(-6.304990)) * cos(radians(106.820500) - radians(drivers.longitude)) + sin(radians(drivers.latitude)) * sin(radians(-6.304990)))) AS distance,
-			drivers.*,governments.type
-			FROM
+				(6371 * acos(cos(radians(drivers.latitude)) * cos(radians(`
+
+		sub_query2b := `)) * 
+				cos(radians(`
+
+		sub_query2c := `) - radians(drivers.longitude)) + sin(radians(drivers.latitude)) *
+	            sin(radians(`
+
+		sub_query2d := `)))) AS distance,
+			    drivers.*,governments.type,governments.name,drivers.id AS DriverID
+		FROM
 				drivers
-			INNER JOIN 
-						governments ON governments.id = drivers.goverment_id
-			where governments.type='hospital' AND status=true
-			ORDER BY distance LIMIT 
-		 `
+		INNER JOIN 
+				governments ON governments.id = drivers.goverment_id
+		where governments.type='hospital' AND status=true AND driving_status='on_ready'
+	   LIMIT
+		`
+
+		query2 := sub_query2a + lat + sub_query2b + lon + sub_query2c + lat + sub_query2d
+
+		sub_query3a := `
+		SELECT
+				(6371 * acos(cos(radians(drivers.latitude)) * cos(radians(`
+
+		sub_query3b := `)) * 
+				cos(radians(`
+
+		sub_query3c := `) - radians(drivers.longitude)) + sin(radians(drivers.latitude)) *
+	            sin(radians(`
+
+		sub_query3d := `)))) AS distance,
+			    drivers.*,governments.type,governments.name,drivers.id AS DriverID
+		FROM
+				drivers
+		INNER JOIN 
+				governments ON governments.id = drivers.goverment_id
+		where governments.type='firestation' AND status=true AND driving_status='on_ready'
+	   LIMIT
+		`
+
+		query3 := sub_query3a + lat + sub_query3b + lon + sub_query3c + lat + sub_query3d
+
+		police_query := fmt.Sprintf("%s%d", query1, police)
+		hospital_query := fmt.Sprintf("%s%d", query2, hospital)
+		firestation_query := fmt.Sprintf("%s%d", query3, firestation)
+
+		sql := fmt.Sprintf("(%s) UNION ALL (%s) UNION ALL (%s) %s", police_query, hospital_query, firestation_query, "ORDER BY distance")
+
+		tx := repo.db.Raw(sql).Scan(&driversWithGovernments)
+		fmt.Println("adasdds", tx)
+		if tx.Error != nil {
+			return nil, tx.Error
+		}
+
+	} else if police >= 0 && hospital >= 0 {
+		sub_query1a := `
+		SELECT
+				(6371 * acos(cos(radians(drivers.latitude)) * cos(radians(`
+
+		sub_query1b := `)) * 
+				cos(radians(`
+
+		sub_query1c := `) - radians(drivers.longitude)) + sin(radians(drivers.latitude)) *
+	            sin(radians(`
+
+		sub_query1d := `)))) AS distance,
+			    drivers.*,governments.type,governments.name,drivers.id AS DriverID
+		FROM
+				drivers
+		INNER JOIN 
+				governments ON governments.id = drivers.goverment_id
+		where governments.type='police' AND status=true AND driving_status='on_ready'
+	   LIMIT
+		`
+
+		query1 := sub_query1a + lat + sub_query1b + lon + sub_query1c + lat + sub_query1d
+
+		sub_query2a := `
+		SELECT
+				(6371 * acos(cos(radians(drivers.latitude)) * cos(radians(`
+
+		sub_query2b := `)) * 
+				cos(radians(`
+
+		sub_query2c := `) - radians(drivers.longitude)) + sin(radians(drivers.latitude)) *
+	            sin(radians(`
+
+		sub_query2d := `)))) AS distance,
+			    drivers.*,governments.type,governments.name,drivers.id AS DriverID
+		FROM
+				drivers
+		INNER JOIN 
+				governments ON governments.id = drivers.goverment_id
+		where governments.type='hospital' AND status=true AND driving_status='on_ready'
+	   LIMIT
+		`
+
+		query2 := sub_query2a + lat + sub_query2b + lon + sub_query2c + lat + sub_query2d
 
 		police_query := fmt.Sprintf("%s%d", query1, police)
 		hospital_query := fmt.Sprintf("%s%d", query2, hospital)
 
-		tx := repo.db.Raw(fmt.Sprintf("(%s) UNION ALL (%s)", police_query, hospital_query)).Scan(&driversWithGovernments)
+		sql := fmt.Sprintf("(%s) UNION ALL (%s) %s", police_query, hospital_query, "ORDER BY distance")
+
+		tx := repo.db.Raw(sql).Scan(&driversWithGovernments)
 		fmt.Println("adasdds", tx)
 		if tx.Error != nil {
 			return nil, tx.Error
 		}
 
 	} else if police >= 0 {
-		tx := repo.db.Table("drivers").
-			Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
-			Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
-			Where("governments.type='police' LIMIT ?", police).
-			Scan(&driversWithGovernments)
+
+		sub_query1a := `
+		SELECT
+				(6371 * acos(cos(radians(drivers.latitude)) * cos(radians(`
+
+		sub_query1b := `)) * 
+				cos(radians(`
+
+		sub_query1c := `) - radians(drivers.longitude)) + sin(radians(drivers.latitude)) *
+	            sin(radians(`
+
+		sub_query1d := `)))) AS distance,
+			    drivers.*,governments.type,governments.name,drivers.id AS DriverID
+		FROM
+				drivers
+		INNER JOIN 
+				governments ON governments.id = drivers.goverment_id
+		where governments.type='police' AND status=true AND driving_status='on_ready'
+	   LIMIT
+		`
+		query := sub_query1a + lat + sub_query1b + lon + sub_query1c + lat + sub_query1d
+
+		sql := fmt.Sprintf("%s%d", query, police)
+
+		tx := repo.db.Raw(sql).Scan(&driversWithGovernments)
+
+		fmt.Println("adasdds", tx)
+		if tx.Error != nil {
+			return nil, tx.Error
+		}
+
 		if tx.Error != nil {
 			return nil, tx.Error
 		}
@@ -202,11 +315,18 @@ func (repo *driverQuery) KerahkanDriver(police int, hospital int, firestation in
 	for _, u := range driversWithGovernments {
 		fmt.Printf("ID : %d,Nama: %s, Email: %s\n", u.DriverID, u.Name, u.Email)
 		repo.db.Exec("UPDATE drivers SET token = ? WHERE id = ? ", "Terima Kasus", u.DriverID)
-		// for _, o := range u.D {
-		// 	fmt.Printf("  Pesanan: %s\n", o.Product)
-		// }
+		// Update kolom bertipe ENUM
+		// result := repo.db.Exec("UPDATE drivers SET driving_status='on_demand' WHERE id=?", u.DriverID).Scan(&Driver{})
+		result := repo.db.Model(&Driver{}).Where("id = ?", u.DriverID).Update("driving_status", "on_demand")
+
+		if result.Error != nil {
+			panic("Gagal melakukan UPDATE")
+		}
+
+		// Tampilkan jumlah baris yang terpengaruh
+		rowsAffected := result.RowsAffected
+		fmt.Printf("Jumlah baris yang terpengaruh: %d\n", rowsAffected)
 	}
-	// tx := repo.db.Offset(offset).Limit(pageSize).Find(&driverData)
 
 	var driverCore []driver.DriverCore
 

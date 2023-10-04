@@ -127,6 +127,16 @@ func (handler *DriverHandler) Login(c echo.Context) error {
 }
 
 func (handler *DriverHandler) KerahkanDriver(c echo.Context) error {
+	latLonInput := new(LatLonRequest)
+
+	errBind := c.Bind(&latLonInput)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error bind data. data not valid", nil))
+	}
+
+	lat := fmt.Sprintf("%f", latLonInput.Lat)
+	lon := fmt.Sprintf("%f", latLonInput.Longitude)
+
 	totalPolice := c.QueryParam("police")
 	totalPoliceConv, _ := strconv.Atoi(totalPolice)
 
@@ -142,7 +152,7 @@ func (handler *DriverHandler) KerahkanDriver(c echo.Context) error {
 	totalSAR := c.QueryParam("SAR")
 	totalSARConv, _ := strconv.Atoi(totalSAR)
 
-	result, err := handler.driverService.KerahkanDriver(totalPoliceConv, totalHospitalConv, totalFirestationConv, totalDishubConv, totalSARConv)
+	result, err := handler.driverService.KerahkanDriver(lat, lon, totalPoliceConv, totalHospitalConv, totalFirestationConv, totalDishubConv, totalSARConv)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error read data", nil))

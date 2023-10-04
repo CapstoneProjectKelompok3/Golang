@@ -54,8 +54,8 @@ func (service *driverService) Login(email string, password string) (dataLogin dr
 }
 
 // KerahkanDriver implements driver.DriverServiceInterface.
-func (service *driverService) KerahkanDriver(police int, hospital int, firestation int, dishub int, SAR int) ([]driver.DriverCore, error) {
-	result, err := service.driverData.KerahkanDriver(police, hospital, firestation, dishub, SAR)
+func (service *driverService) KerahkanDriver(lat string, long string, police int, hospital int, firestation int, dishub int, SAR int) ([]driver.DriverCore, error) {
+	result, err := service.driverData.KerahkanDriver(lat, long, police, hospital, firestation, dishub, SAR)
 	if err != nil {
 		return nil, err
 	}
