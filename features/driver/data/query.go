@@ -9,6 +9,7 @@ import (
 	goverment "project-capston/features/goverment/data"
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -330,9 +331,12 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 		}
 	}
 
+	tokenKasus := uuid.New()
+	fmt.Println(tokenKasus)
 	for _, u := range driversWithGovernments {
 		fmt.Printf("ID : %d,Nama: %s, Email: %s\n", u.DriverID, u.Name, u.Email)
-		repo.db.Exec("UPDATE drivers SET token = ? WHERE id = ? ", "Terima Kasus", u.DriverID)
+
+		repo.db.Exec("UPDATE drivers SET token = ? WHERE id = ? ", tokenKasus, u.DriverID)
 		// Update kolom bertipe ENUM
 		// result := repo.db.Exec("UPDATE drivers SET driving_status='on_demand' WHERE id=?", u.DriverID).Scan(&Driver{})
 		result := repo.db.Model(&Driver{}).Where("id = ?", u.DriverID).Update("driving_status", "on_demand")
