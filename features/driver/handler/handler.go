@@ -162,28 +162,7 @@ func (handler *DriverHandler) KerahkanDriver(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error read data", nil))
 	}
 
-	//FUNGSI SIMPAN LAT LONG REDIS
 	var driverResponse []DriverAvailableResponse
-
-	redisClient := middlewares.CreateRedisClient()
-
-	if redisClient == nil {
-		fmt.Println("Gagal terhubung ke Redis")
-		// return c.String(http.StatusInternalServerError, "Gagal terhubung ke Redis")
-	}
-
-	// data := []string{lat, lon}
-
-	// // Simpan array dalam Redis
-	// for _, item := range data {
-	// 	err := redisClient.LPush(ctx, "data_array", item).Err()
-	// 	if err != nil {
-	// 		fmt.Println("Gagal menyimpan array di Redis")
-	// 		// return c.String(http.StatusInternalServerError, "Gagal menyimpan array di Redis")
-	// 	}
-	// }
-
-	// return c.String(http.StatusOK, "Array disimpan di Redis")
 
 	totalData := 0
 
@@ -258,7 +237,7 @@ func (handler *DriverHandler) DriverAcceptOrRejectOrder(c echo.Context) error {
 	err := handler.driverService.AcceptOrRejectOrder(driverInput.IsAccepted, idToken)
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error read data", nil))
+		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusNotFound, err.Error(), nil))
 	}
 
 	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, message, nil))

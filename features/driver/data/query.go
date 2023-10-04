@@ -1,6 +1,8 @@
 package data
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -12,6 +14,8 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
+
+var ctx = context.Background()
 
 type driverQuery struct {
 	db *gorm.DB
@@ -133,48 +137,6 @@ func (repo *driverQuery) SelectAll(pageNumber int, pageSize int) ([]driver.Drive
 
 }
 
-// AcceptOrRejectOrder implements driver.DriverDataInterface.
-func (repo *driverQuery) AcceptOrRejectOrder(IsAccepted bool, idDriver int) error {
-	fmt.Println("IS ACC", IsAccepted)
-	fmt.Println("sdkadlad", idDriver)
-	if IsAccepted {
-		tx := repo.db.Exec("UPDATE drivers SET status=false,driving_status='on_trip' WHERE id=?", idDriver) // proses query insert
-		if tx.Error != nil {
-			return tx.Error
-		}
-
-		if tx.Error != nil {
-			panic("Failed to update user")
-		}
-
-		rowsAffected := tx.RowsAffected
-		fmt.Printf("Rows affected: %d\n", rowsAffected)
-	} else {
-		tx := repo.db.Exec("UPDATE drivers SET status=true,driving_status='on_cancel' WHERE id=?", idDriver) // proses query insert
-
-		if tx.Error != nil {
-			return tx.Error
-		}
-
-		var driversWithGovernments struct {
-			Driver
-			DriverID uint
-			goverment.Government
-		}
-
-		repo.db.Table("drivers").
-			Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
-			Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
-			Where("drivers.id=?", idDriver).
-			Scan(&driversWithGovernments)
-
-		fmt.Printf("ID : %d,Nama: %s, Type: %s \n", driversWithGovernments.DriverID, driversWithGovernments.Name, driversWithGovernments.Government.Type)
-
-	}
-
-	return nil
-}
-
 // Login implements driver.DriverDataInterface.
 func (repo *driverQuery) Login(email string, password string) (dataLogin driver.Core, err error) {
 	var data Driver
@@ -216,6 +178,26 @@ func (repo *driverQuery) Login(email string, password string) (dataLogin driver.
 
 // KerahkanDriver implements driver.DriverDataInterface.
 func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hospital int, firestation int, dishub int, SAR int) ([]driver.DriverCore, error) {
+	//1. Simpan Lat Long di dalam redis
+	redisClient := middlewares.CreateRedisClient()
+
+	if redisClient == nil {
+		fmt.Println("Gagal terhubung ke Redis")
+		// return c.String(http.StatusInternalServerError, "Gagal terhubung ke Redis")
+	}
+
+	data := []string{lat, lon}
+
+	// Simpan array dalam Redis
+	// for _, item := range data {
+	errRedis := redisClient.LPush(ctx, "data_array", data).Err()
+	if errRedis != nil {
+		fmt.Println("Gagal menyimpan array di Redis", errRedis.Error())
+		// return c.String(http.StatusInternalServerError, "Gagal menyimpan array di Redis")
+	} else {
+		fmt.Println("Berhasil menyimpan array di Redis", data)
+	}
+
 	var driversWithGovernments []struct {
 		Driver
 		DriverID uint
@@ -297,6 +279,7 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 		sql := fmt.Sprintf("(%s) UNION ALL (%s) UNION ALL (%s) %s", police_query, hospital_query, firestation_query, "ORDER BY distance")
 
 		tx := repo.db.Raw(sql).Scan(&driversWithGovernments)
+
 		fmt.Println("adasdds", tx)
 		if tx.Error != nil {
 			return nil, tx.Error
@@ -385,7 +368,7 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 
 		tx := repo.db.Raw(sql).Scan(&driversWithGovernments)
 
-		fmt.Println("adasdds", tx)
+		// fmt.Println("adasdds", tx)
 		if tx.Error != nil {
 			return nil, tx.Error
 		}
@@ -395,14 +378,18 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 		}
 	}
 
+	//2. Generate Token Kasus
 	tokenKasus := uuid.New()
+
 	fmt.Println(tokenKasus)
+
 	for _, u := range driversWithGovernments {
 		fmt.Printf("ID : %d,Nama: %s, Email: %s\n", u.DriverID, u.Name, u.Email)
 
+		//3 Update Token
 		repo.db.Exec("UPDATE drivers SET token = ? WHERE id = ? ", tokenKasus, u.DriverID)
-		// Update kolom bertipe ENUM
-		// result := repo.db.Exec("UPDATE drivers SET driving_status='on_demand' WHERE id=?", u.DriverID).Scan(&Driver{})
+
+		//4. Set driving status menjadi on_demand
 		result := repo.db.Model(&Driver{}).Where("id = ?", u.DriverID).Update("driving_status", "on_demand")
 
 		if result.Error != nil {
@@ -417,6 +404,23 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 	var driverCore []driver.DriverCore
 
 	for _, value := range driversWithGovernments {
+
+		dataIdUser := value.DriverID
+		jsonData, err := json.Marshal(dataIdUser)
+		if err != nil {
+			fmt.Println("Error marshaling data:", err)
+
+		}
+		// Simpan array dalam Redis
+		// for _, item := range data {
+		errRedisIdUser := redisClient.LPush(ctx, "id_user", jsonData).Err()
+
+		if errRedisIdUser != nil {
+			fmt.Println("Gagal menyimpan array id user di Redis", errRedisIdUser.Error())
+			// return c.String(http.StatusInternalServerError, "Gagal menyimpan array di Redis")
+		} else {
+			fmt.Println("Berhasil menyimpan array id user di Redis", jsonData)
+		}
 
 		driverCore = append(driverCore, driver.DriverCore{
 			Id:            value.DriverID,
@@ -439,4 +443,135 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 	}
 
 	return driverCore, nil
+}
+
+// AcceptOrRejectOrder implements driver.DriverDataInterface.
+func (repo *driverQuery) AcceptOrRejectOrder(IsAccepted bool, idDriver int) error {
+	//1. Konek Ke redis
+	redisClient := middlewares.CreateRedisClient()
+
+	if redisClient == nil {
+		fmt.Println("Gagal terhubung ke Redis")
+		// return c.String(http.StatusInternalServerError, "Gagal terhubung ke Redis")
+	}
+
+	//2. Membaca data array latitude longitude didalm array redis
+	start := int64(0)
+	end := int64(-1) // Membaca semua elemen dalam array
+	result, errRedis := redisClient.LRange(ctx, "data_array", start, end).Result()
+	if errRedis != nil {
+		fmt.Println("Error reading data from Redis:", errRedis)
+	}
+
+	//2. dapatkan data lat long dari redis
+	fmt.Println("Data dari Redis:", result)
+	fmt.Println("Data dari Redis:", result[0])
+	fmt.Println("Data dari Redis:", result[1])
+
+	var driversWithGovernments struct {
+		Driver
+		DriverID uint
+		goverment.Government
+	}
+
+	//3 Tampilkan data dari driver nya berdasarkan id driver dari JWT TOKEN
+	repo.db.Table("drivers").
+		Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
+		Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
+		Where("drivers.id=?", idDriver).
+		Scan(&driversWithGovernments)
+
+	//4. Cek apakah drivers punya order atau tidak dari token kasus didalam tabel
+	if driversWithGovernments.Token != "" {
+		if IsAccepted {
+			tx := repo.db.Exec("UPDATE drivers SET status=false,driving_status='on_trip' WHERE id=?", idDriver) // proses query insert
+			if tx.Error != nil {
+				return tx.Error
+			}
+
+			if tx.Error != nil {
+				panic("Failed to update user")
+			}
+
+			rowsAffected := tx.RowsAffected
+			fmt.Printf("Rows affected: %d\n", rowsAffected)
+		} else {
+			//5 Ubah status = true driving_status=on_cancel
+			tx := repo.db.Exec("UPDATE drivers SET status=true,driving_status='on_cancel' WHERE id=?", idDriver) // proses query insert
+
+			if tx.Error != nil {
+				return tx.Error
+			}
+
+			//6. Dapatkan Value dari government type sesuai dengan government type user
+			fmt.Printf(" Type: %s \n", driversWithGovernments.Government.Type)
+			governmentType := "'" + driversWithGovernments.Government.Type + "'"
+
+			//7. Tampilkan /dapatkan data driver lain yang telah di assigned dengan filter
+			//query government_status yang sama berdasarkan lokasi terdekat dari history lat long
+			//didalam redis
+
+			sub_query1a := `
+			SELECT
+					(6371 * acos(cos(radians(drivers.latitude)) * cos(radians(`
+
+			sub_query1b := `)) * 
+					cos(radians(`
+
+			sub_query1c := `) - radians(drivers.longitude)) + sin(radians(drivers.latitude)) *
+					sin(radians(`
+
+			sub_query1d := `)))) AS distance,
+					drivers.*,governments.type,governments.name,drivers.id AS DriverID
+			FROM
+					drivers
+			INNER JOIN 
+					governments ON governments.id = drivers.goverment_id
+			where governments.type=`
+
+			sub_query1e := ` AND drivers.status=true AND drivers.driving_status='on_ready'  AND drivers.id !=1
+		   LIMIT
+			`
+			queryOther := sub_query1a + result[0] + sub_query1b + result[1] + sub_query1c + result[0] + sub_query1d + governmentType + sub_query1e
+
+			sqlOther := fmt.Sprintf("%s%d", queryOther, 1)
+
+			var otherDriverWithGovernments struct {
+				Driver
+				DriverID uint
+				goverment.Government
+			}
+
+			//8 Dapatkan serta lempar token dari user login ke user other yang di assigned
+			fmt.Printf(" Type: %s \n", driversWithGovernments.Driver.Token)
+			token := driversWithGovernments.Driver.Token
+			fmt.Println("Token", token)
+
+			otherDriver := &otherDriverWithGovernments
+
+			repo.db.Raw(sqlOther).Scan(otherDriver)
+
+			//9. Tampilkan Driver lain yang di dapatkan
+			fmt.Println("Driver Id lain", otherDriver.Driver.ID)
+
+			sqlAssignedTokenToOTherDriver := "UPDATE drivers SET token=? WHERE ID=?"
+			repo.db.Exec(sqlAssignedTokenToOTherDriver, token, otherDriver.Driver.ID)
+
+			sqlRemoveMyToken := "UPDATE drivers SET token=? WHERE ID=?"
+			repo.db.Exec(sqlRemoveMyToken, "", driversWithGovernments.DriverID)
+
+		}
+
+		return nil
+
+	} else {
+		err := errors.New("Sorry But Now you don't have any order")
+
+		// Melemparkan error
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		return err
+	}
+
 }
