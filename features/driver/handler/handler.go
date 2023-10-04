@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"fmt"
+	"math"
 	"net/http"
 	"project-capston/app/middlewares"
 	"project-capston/features/driver"
@@ -27,8 +28,6 @@ func New(service driver.DriverServiceInterface) *DriverHandler {
 
 func (handler *DriverHandler) CreateDriver(c echo.Context) error {
 	driverInput := new(DriverRequest)
-
-	fmt.Println(driverInput)
 
 	errBind := c.Bind(&driverInput) // mendapatkan data yang dikirim oleh FE melalui request body
 	if errBind != nil {
@@ -212,6 +211,39 @@ func (handler *DriverHandler) GetProfileDriver(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "success get my profile", driverResponse))
+}
+
+func (handler *DriverHandler) DriverOnTrip(c echo.Context) error {
+	idToken := middlewares.ExtractTokenDriverId(c)
+
+	driverInput := new(LatLonRequest)
+
+	errBind := c.Bind(&driverInput)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error bind data. data not valid", nil))
+	}
+
+	result, err := handler.driverService.DriverOnTrip(idToken, driverInput.Lat, driverInput.Longitude)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error read data", nil))
+	}
+
+	driverResponse := DriverAvailableResponse{
+		Id:            result.Id,
+		GovermentName: result.GovermentName,
+		GovermentType: result.GovermentType,
+		Email:         result.Email,
+		Fullname:      result.Fullname,
+		Token:         result.Token,
+		Status:        result.Status,
+		DrivingStatus: result.DrivingStatus,
+		VehicleID:     result.VehicleID,
+		Latitude:      result.Latitude,
+		Longitude:     result.Longitude,
+		Radius:        math.Round(result.Distance/100) * 100,
+	}
+
+	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "success get my position", driverResponse))
 }
 
 var message string

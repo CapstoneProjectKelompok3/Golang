@@ -46,6 +46,7 @@ type DriverDataInterface interface {
 	// Logout(email string, password string) (dataLogin Core, err error)
 	SelectProfile(id int) (DriverCore, error)
 	AcceptOrRejectOrder(IsAccepted bool, idDriver int) error
+	DriverOnTrip(id int, lat float64, long float64) (DriverCore, error)
 }
 
 type DriverServiceInterface interface {
@@ -56,4 +57,5 @@ type DriverServiceInterface interface {
 	// Logout(email string, password string) (dataLogin Core, err error)
 	GetProfile(id int) (DriverCore, error)
 	AcceptOrRejectOrder(IsAccepted bool, idDriver int) error
+	DriverOnTrip(id int, lat float64, long float64) (DriverCore, error)
 }

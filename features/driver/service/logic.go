@@ -78,3 +78,9 @@ func (service *driverService) GetProfile(id int) (driver.DriverCore, error) {
 	result, err := service.driverData.SelectProfile(id)
 	return result, err
 }
+
+// DriverOnTrip implements driver.DriverServiceInterface.
+func (service *driverService) DriverOnTrip(id int, lat float64, long float64) (driver.DriverCore, error) {
+	result, err := service.driverData.DriverOnTrip(id, lat, long)
+	return result, err
+}

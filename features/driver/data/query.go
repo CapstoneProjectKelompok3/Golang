@@ -9,6 +9,7 @@ import (
 	"project-capston/app/middlewares"
 	"project-capston/features/driver"
 	goverment "project-capston/features/goverment/data"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,6 +20,88 @@ var ctx = context.Background()
 
 type driverQuery struct {
 	db *gorm.DB
+}
+
+// DriverOnTrip implements driver.DriverDataInterface.
+func (repo *driverQuery) DriverOnTrip(id int, lat float64, long float64) (driver.DriverCore, error) {
+	latString := strconv.FormatFloat(lat, 'f', -1, 64)
+	lonString := strconv.FormatFloat(lat, 'f', -1, 64)
+
+	result := repo.db.Exec("UPDATE drivers SET latitude=?,longitude=? WHERE id=?", lat, long, id)
+
+	fmt.Println("Result Udate", result)
+
+	// Periksa error
+	if result.Error != nil {
+		fmt.Println("Error executing raw SQL:", result.Error)
+	}
+
+	// Periksa jumlah baris yang terpengaruh
+	fmt.Printf("Jumlah baris yang terpengaruh: %d\n", result.RowsAffected)
+
+	var driversWithGovernments struct {
+		Driver
+		Distance float64
+		DriverID uint
+		goverment.Government
+	}
+
+	// tx := repo.db.Table("drivers").
+	// 	Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
+	// 	Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
+	// 	Where("drivers.id=?", id).
+	// 	Scan(&driversWithGovernments)
+
+	sub_query1a := `
+		SELECT
+				(6371 * acos(cos(radians(drivers.latitude)) * cos(radians(`
+
+	sub_query1b := `)) * 
+				cos(radians(`
+
+	sub_query1c := `) - radians(drivers.longitude)) + sin(radians(drivers.latitude)) *
+	            sin(radians(`
+
+	sub_query1d := `)))) AS Distance,
+			    drivers.*,governments.type,governments.name,drivers.id AS DriverID
+		FROM
+				drivers
+		INNER JOIN 
+				governments ON governments.id = drivers.goverment_id
+		where drivers.id =
+		`
+	query := sub_query1a + latString + sub_query1b + lonString + sub_query1c + latString + sub_query1d
+
+	sql := fmt.Sprintf("%s%d", query, id)
+
+	tx := repo.db.Raw(sql).Scan(&driversWithGovernments)
+
+	// tx := repo.db.First(&driverData, id).Scan(&driverData) //
+
+	if tx.Error != nil {
+		return driver.DriverCore{}, tx.Error
+	}
+	if tx.RowsAffected == 0 {
+		return driver.DriverCore{}, errors.New("data not found")
+	}
+
+	// var driversCore = ModelToCore(driversWithGovernments)
+
+	var driverCore driver.DriverCore
+
+	driverCore.Id = driversWithGovernments.DriverID
+	driverCore.Fullname = driversWithGovernments.Driver.Fullname
+	driverCore.Status = driversWithGovernments.Status
+	driverCore.Email = driversWithGovernments.Driver.Email
+	driverCore.Token = driversWithGovernments.Token
+	driverCore.GovermentName = driversWithGovernments.Government.Name
+	driverCore.GovermentType = driversWithGovernments.Government.Type
+	driverCore.DrivingStatus = driversWithGovernments.DrivingStatus
+	driverCore.Latitude = driversWithGovernments.Driver.Latitude
+	driverCore.Longitude = driversWithGovernments.Driver.Longitude
+	driverCore.Distance = float64(driversWithGovernments.Distance)
+
+	return driverCore, nil
 }
 
 // SelectProfile implements driver.DriverDataInterface.

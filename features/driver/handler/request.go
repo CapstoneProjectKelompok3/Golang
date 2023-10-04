@@ -15,6 +15,11 @@ type LatLonRequest struct {
 	Longitude float64 `json:"longitude"`
 }
 
+// type LatLon struct {
+// 	Lat       float64 `json:"latitude"`
+// 	Longitude float64 `json:"longitude"`
+// }
+
 type AcceptOrRejectOrderRequest struct {
 	IsAccepted bool `json:"is_accepted"`
 }

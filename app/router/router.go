@@ -69,4 +69,5 @@ func InitRouter(db *gorm.DB, c *echo.Echo) {
 
 	c.GET("/driver-profile", driverHandlerAPI.GetProfileDriver, middlewares.JWTMiddleware())
 	c.GET("/driver-accept-or-reject-order", driverHandlerAPI.DriverAcceptOrRejectOrder, middlewares.JWTMiddleware())
+	c.PUT("/driver-ontrip", driverHandlerAPI.DriverOnTrip, middlewares.JWTMiddleware())
 }
