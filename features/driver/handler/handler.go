@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"fmt"
-	"math"
 	"net/http"
 	"project-capston/app/middlewares"
 	"project-capston/features/driver"
@@ -156,7 +155,7 @@ func (handler *DriverHandler) KerahkanDriver(c echo.Context) error {
 	totalSARConv, _ := strconv.Atoi(totalSAR)
 
 	result, err := handler.driverService.KerahkanDriver(lat, lon, totalPoliceConv, totalHospitalConv, totalFirestationConv, totalDishubConv, totalSARConv)
-
+	fmt.Println("Result", result)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error read data", nil))
 	}
@@ -167,6 +166,7 @@ func (handler *DriverHandler) KerahkanDriver(c echo.Context) error {
 
 	for _, value := range result {
 		totalData++
+		fmt.Println("Handler", value.Distance)
 		driverResponse = append(driverResponse, DriverAvailableResponse{
 			Id:            value.Id,
 			GovermentName: value.GovermentName,
@@ -179,10 +179,17 @@ func (handler *DriverHandler) KerahkanDriver(c echo.Context) error {
 			VehicleID:     value.VehicleID,
 			Latitude:      value.Latitude,
 			Longitude:     value.Longitude,
-			Radius:        value.Distance,
+			Distance:      value.Distance,
 		})
 	}
-	return c.JSON(http.StatusOK, helper.WebResponsePagination(http.StatusOK, totalData, "kerahkan driver", driverResponse))
+	if totalData == 0 {
+		return c.JSON(http.StatusOK, helper.WebResponsePagination(http.StatusOK, totalData, "All personil are on duty", nil))
+
+	} else {
+		return c.JSON(http.StatusOK, helper.WebResponsePagination(http.StatusOK, totalData, "Success Find and assign driver", driverResponse))
+
+	}
+
 }
 
 func (handler *DriverHandler) GetProfileDriver(c echo.Context) error {
@@ -228,6 +235,8 @@ func (handler *DriverHandler) DriverOnTrip(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error read data", nil))
 	}
 
+	fmt.Println("Result", result.Distance)
+
 	driverResponse := DriverAvailableResponse{
 		Id:            result.Id,
 		GovermentName: result.GovermentName,
@@ -240,7 +249,7 @@ func (handler *DriverHandler) DriverOnTrip(c echo.Context) error {
 		VehicleID:     result.VehicleID,
 		Latitude:      result.Latitude,
 		Longitude:     result.Longitude,
-		Radius:        math.Round(result.Distance/100) * 100,
+		Distance:      result.Distance,
 	}
 
 	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "success get my position", driverResponse))

@@ -26,7 +26,7 @@ type DriverAvailableResponse struct {
 	VehicleID     uint    `json:"vehicle_id,omitempty"`
 	Latitude      float64 `json:"latitude,omitempty"`
 	Longitude     float64 `json:"longitude,omitempty"`
-	Radius        float64 `json:"radius"`
+	Distance      float64 `json:"radius"`
 }
 
 type LoginResponse struct {

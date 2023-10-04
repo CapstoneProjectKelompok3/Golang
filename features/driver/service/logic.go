@@ -81,6 +81,10 @@ func (service *driverService) GetProfile(id int) (driver.DriverCore, error) {
 
 // DriverOnTrip implements driver.DriverServiceInterface.
 func (service *driverService) DriverOnTrip(id int, lat float64, long float64) (driver.DriverCore, error) {
+	// errValidate := service.validate.Struct(long)
+	// if errValidate != nil {
+	// 	return errors.New("validation error" + errValidate.Error())
+	// }
 	result, err := service.driverData.DriverOnTrip(id, lat, long)
 	return result, err
 }
