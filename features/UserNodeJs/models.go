@@ -28,6 +28,7 @@ type User struct {
 	Email       string   `json:"email"`
 	Username    string   `json:"username"`
 	Level       string   `json:"level"`
+	EmailActive bool     `json:"email_activated"`
 	IsActivated bool     `json:"is_activated"`
 	CreatedAt   string   `json:"created_at"`
 	UpdatedAt   string   `json:"updated_at"`

@@ -4,6 +4,7 @@ import (
 	"errors"
 	usernodejs "project-capston/features/UserNodeJs"
 	"project-capston/features/emergency"
+	"project-capston/helper"
 
 	"strconv"
 
@@ -14,12 +15,34 @@ type EmergencyData struct {
 	db *gorm.DB
 }
 
+// SelectUser implements emergency.EmergencyDataInterface.
+func (repo *EmergencyData) SelectUser(id string,token string) (emergency.UserEntity, error) {
+	data,err:=usernodejs.GetByIdUser(id,token)
+	if err != nil{
+		return emergency.UserEntity{},errors.New("user tidak ditemukan")
+	}
+	dataUser:=UserNodeToUser(data)
+	dataEntity:=UserToUserEntity(dataUser)
+	return dataEntity,nil
+
+}
+
+// SendNotification implements emergency.EmergencyDataInterface.
+func (repo *EmergencyData) SendNotification(input helper.MessageGomailE) (string, error) {
+
+	data, err := helper.SendGomailMessageE(input)
+	if err != nil {
+		return "", err
+	}
+	return data, nil
+}
+
 // ActionGmail implements emergency.EmergencyDataInterface.
 func (repo *EmergencyData) ActionGmail(input string) error {
 	var inputModel HistoryAdmin
-	inputModel.Status=input
-	tx:=repo.db.Create(&inputModel)
-	if tx.Error!=nil{
+	inputModel.Status = input
+	tx := repo.db.Create(&inputModel)
+	if tx.Error != nil {
 		return tx.Error
 	}
 	return nil
@@ -155,16 +178,16 @@ func (repo *EmergencyData) Delete(id uint) error {
 }
 
 // Insert implements emergency.EmergencyDataInterface.
-func (repo *EmergencyData) Insert(input emergency.EmergencyEntity) error {
+func (repo *EmergencyData) Insert(input emergency.EmergencyEntity) (uint,error) {
 	inputModel := EntityToModel(input)
 	tx := repo.db.Create(&inputModel)
 	if tx.Error != nil {
-		return errors.New("failed create data emergency")
+		return 0,errors.New("failed create data emergency")
 	}
 	if tx.RowsAffected == 0 {
-		return errors.New("row not affected")
+		return 0,errors.New("row not affected")
 	}
-	return nil
+	return inputModel.ID,nil
 }
 
 func New(db *gorm.DB) emergency.EmergencyDataInterface {
