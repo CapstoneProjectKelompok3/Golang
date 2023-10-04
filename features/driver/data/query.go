@@ -607,7 +607,7 @@ func (repo *driverQuery) AcceptOrRejectOrder(IsAccepted bool, idDriver int) erro
 			//9. Tampilkan Driver lain yang di dapatkan
 			fmt.Println("Driver Id lain", otherDriver.Driver.ID)
 
-			sqlAssignedTokenToOTherDriver := "UPDATE drivers SET token=? WHERE ID=?"
+			sqlAssignedTokenToOTherDriver := "UPDATE drivers SET token=?,driving_status='on_demand' WHERE ID=?"
 			repo.db.Exec(sqlAssignedTokenToOTherDriver, token, otherDriver.Driver.ID)
 
 			sqlRemoveMyToken := "UPDATE drivers SET token=? WHERE ID=?"
