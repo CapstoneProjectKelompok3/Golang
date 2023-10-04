@@ -44,6 +44,7 @@ type DriverDataInterface interface {
 	Login(email string, password string) (dataLogin Core, err error)
 	KerahkanDriver(lat string, long string, police int, hospital int, firestation int, dishub int, SAR int) ([]DriverCore, error)
 	// Logout(email string, password string) (dataLogin Core, err error)
+	SelectProfile(id int) (Core, error)
 }
 
 type DriverServiceInterface interface {
@@ -52,4 +53,5 @@ type DriverServiceInterface interface {
 	Login(email string, password string) (dataLogin Core, token string, err error)
 	KerahkanDriver(lat string, long string, police int, hospital int, firestation int, dishub int, SAR int) ([]DriverCore, error)
 	// Logout(email string, password string) (dataLogin Core, err error)
+	GetProfile(id int) (Core, error)
 }

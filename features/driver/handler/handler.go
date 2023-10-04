@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"project-capston/app/middlewares"
 	"project-capston/features/driver"
 	"project-capston/helper"
 	"strconv"
@@ -180,4 +181,32 @@ func (handler *DriverHandler) KerahkanDriver(c echo.Context) error {
 		})
 	}
 	return c.JSON(http.StatusOK, helper.WebResponsePagination(http.StatusOK, totalData, "kerahkan driver", driverResponse))
+}
+
+func (handler *DriverHandler) GetProfileDriver(c echo.Context) error {
+	fmt.Println("ID TOKEN")
+	idToken := middlewares.ExtractTokenDriverId(c)
+
+	fmt.Println("ID TOKEN", idToken)
+
+	result, err := handler.driverService.GetProfile(idToken)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error read data", nil))
+	}
+
+	driverResponse := DriverResponse{
+		Id:            result.Id,
+		GovermentName: "",
+		GovermentType: "",
+		Email:         result.Email,
+		Fullname:      result.Fullname,
+		Token:         result.Token,
+		Status:        result.Status,
+		DrivingStatus: result.DrivingStatus,
+		VehicleID:     result.VehicleID,
+		Latitude:      0,
+		Longitude:     0,
+	}
+
+	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "success get my profile", driverResponse))
 }

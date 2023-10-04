@@ -16,6 +16,24 @@ type driverQuery struct {
 	db *gorm.DB
 }
 
+// SelectProfile implements driver.DriverDataInterface.
+func (repo *driverQuery) SelectProfile(id int) (driver.Core, error) {
+	var driverData Driver
+
+	tx := repo.db.First(&driverData, id).Scan(&driverData) //
+
+	if tx.Error != nil {
+		return driver.Core{}, tx.Error
+	}
+	if tx.RowsAffected == 0 {
+		return driver.Core{}, errors.New("data not found")
+	}
+
+	var driversCore = ModelToCore(driverData)
+
+	return driversCore, nil
+}
+
 func New(db *gorm.DB) driver.DriverDataInterface {
 	return &driverQuery{
 		db: db,

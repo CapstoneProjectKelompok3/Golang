@@ -61,3 +61,9 @@ func (service *driverService) KerahkanDriver(lat string, long string, police int
 	}
 	return result, nil
 }
+
+// SelectProfile implements driver.DriverServiceInterface.
+func (service *driverService) GetProfile(id int) (driver.Core, error) {
+	result, err := service.driverData.SelectProfile(id)
+	return result, err
+}

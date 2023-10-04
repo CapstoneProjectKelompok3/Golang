@@ -30,7 +30,20 @@ func ExtractTokenUserId(e echo.Context) (int, string) {
 func CreateToken(userId uint) (string, error) {
 	claims := jwt.MapClaims{}
 	claims["authorized"] = true
+	claims["userId"] = userId
 	claims["exp"] = time.Now().Add(time.Hour * 10).Unix() //Token expires after 1 hour
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte("rahasia"))
+}
+
+func ExtractTokenDriverId(e echo.Context) int {
+	user := e.Get("user").(*jwt.Token)
+	if user.Valid {
+		claims := user.Claims.(jwt.MapClaims)
+		userId := claims["userId"].(float64)
+		// companyId := claims["company_id"].(float64)
+		// roleName := claims["role_name"].(string)
+		return int(userId)
+	}
+	return 0
 }
