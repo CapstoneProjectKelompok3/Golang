@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"project-capston/app/middlewares"
@@ -11,6 +12,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 )
+
+var ctx = context.Background()
 
 type DriverHandler struct {
 	driverService driver.DriverServiceInterface
@@ -159,7 +162,28 @@ func (handler *DriverHandler) KerahkanDriver(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error read data", nil))
 	}
 
+	//FUNGSI SIMPAN LAT LONG REDIS
 	var driverResponse []DriverAvailableResponse
+
+	redisClient := middlewares.CreateRedisClient()
+
+	if redisClient == nil {
+		fmt.Println("Gagal terhubung ke Redis")
+		// return c.String(http.StatusInternalServerError, "Gagal terhubung ke Redis")
+	}
+
+	// data := []string{lat, lon}
+
+	// // Simpan array dalam Redis
+	// for _, item := range data {
+	// 	err := redisClient.LPush(ctx, "data_array", item).Err()
+	// 	if err != nil {
+	// 		fmt.Println("Gagal menyimpan array di Redis")
+	// 		// return c.String(http.StatusInternalServerError, "Gagal menyimpan array di Redis")
+	// 	}
+	// }
+
+	// return c.String(http.StatusOK, "Array disimpan di Redis")
 
 	totalData := 0
 
