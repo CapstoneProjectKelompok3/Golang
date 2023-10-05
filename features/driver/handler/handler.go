@@ -283,3 +283,14 @@ func (handler *DriverHandler) DriverAcceptOrRejectOrder(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, message, nil))
 }
+
+func (handler *DriverHandler)GetCountDriver(c echo.Context)error{
+	count,err:=handler.driverService.GetCountDriver()
+	if err != nil{
+		return c.JSON(http.StatusInternalServerError,err.Error())
+	}
+	return c.JSON(http.StatusOK,map[string]any{
+		"status":"success",
+		"jumlah_petugas":count,
+	})
+}

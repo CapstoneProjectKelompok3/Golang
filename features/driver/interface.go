@@ -55,6 +55,7 @@ type DriverDataInterface interface {
 	AcceptOrRejectOrder(IsAccepted bool, idDriver int) error
 	DriverOnTrip(id int, lat float64, long float64) (DriverCore, error)
 	FinishTrip(id int, status string) error
+	SelectCountDriver()(int64,error)
 }
 
 type DriverServiceInterface interface {
@@ -67,4 +68,5 @@ type DriverServiceInterface interface {
 	AcceptOrRejectOrder(IsAccepted bool, idDriver int) error
 	DriverOnTrip(id int, lat float64, long float64) (DriverCore, error)
 	FinishTrip(id int, status string) error
+	GetCountDriver()(int64,error)
 }
