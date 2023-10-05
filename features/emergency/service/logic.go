@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"fmt"
-	"log"
 	"project-capston/features/emergency"
 	"project-capston/helper"
 	"strconv"
@@ -107,11 +106,6 @@ func (service *EmergencyService) Add(input emergency.EmergencyEntity,token strin
 
 	if dataUser.Level != "admin"{
 		return errors.New("receiver id harus berlevel admin")
-	}
-
-	log.Println("data user",dataUser)
-	if !dataUser.EmailActive{
-		return errors.New("admin yang menangani kasus harus memiliki email yang aktif")
 	}
 
 	idInsert,errInsert := service.emergencyService.Insert(input)

@@ -18,12 +18,13 @@ import (
 	_driverHandler "project-capston/features/driver/handler"
 	_driverService "project-capston/features/driver/service"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
-func InitRouter(db *gorm.DB, c *echo.Echo) {
-	dataE := dE.New(db)
+func InitRouter(db *gorm.DB, c *echo.Echo,redis *redis.Client) {
+	dataE := dE.New(db,redis)
 	serviceE := sE.New(dataE)
 	handlerE := hE.New(serviceE)
 	c.POST("/users/:receiver_id/emergencies", handlerE.Add, middlewares.JWTMiddleware())
