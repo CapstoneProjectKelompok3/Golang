@@ -73,4 +73,5 @@ func InitRouter(db *gorm.DB, c *echo.Echo,redis *redis.Client) {
 	c.GET("/driver/profile", driverHandlerAPI.GetProfileDriver, middlewares.JWTMiddleware())
 	c.GET("/driver/confirm", driverHandlerAPI.DriverAcceptOrRejectOrder, middlewares.JWTMiddleware())
 	c.PUT("/driver/ontrip", driverHandlerAPI.DriverOnTrip, middlewares.JWTMiddleware())
+	c.GET("/drivers/count",driverHandlerAPI.GetCountDriver)
 }

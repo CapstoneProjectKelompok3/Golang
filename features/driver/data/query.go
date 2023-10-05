@@ -23,6 +23,17 @@ type driverQuery struct {
 	db *gorm.DB
 }
 
+// SelectCountDriver implements driver.DriverDataInterface.
+func (repo *driverQuery) SelectCountDriver() (int64, error) {
+	var input []Driver
+	tx:=repo.db.Find(&input)
+	if tx.Error != nil{
+		return 0, errors.New("fail get driver")
+	}
+	count:=tx.RowsAffected
+	return count,nil
+}
+
 // FinishTrip implements driver.DriverDataInterface.
 func (*driverQuery) FinishTrip(id int, status string) error {
 	panic("unimplemented")
