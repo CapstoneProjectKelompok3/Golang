@@ -23,6 +23,11 @@ type driverQuery struct {
 	db *gorm.DB
 }
 
+// FinishTrip implements driver.DriverDataInterface.
+func (*driverQuery) FinishTrip(id int, status string) error {
+	panic("unimplemented")
+}
+
 // DriverOnTrip implements driver.DriverDataInterface.
 func (repo *driverQuery) DriverOnTrip(id int, lat float64, long float64) (driver.DriverCore, error) {
 	redisClient := middlewares.CreateRedisClient()

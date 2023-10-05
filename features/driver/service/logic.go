@@ -88,3 +88,9 @@ func (service *driverService) DriverOnTrip(id int, lat float64, long float64) (d
 	result, err := service.driverData.DriverOnTrip(id, lat, long)
 	return result, err
 }
+
+// FinishTrip implements driver.DriverServiceInterface.
+func (service *driverService) FinishTrip(id int, status string) error {
+	err := service.driverData.FinishTrip(id, status)
+	return err
+}

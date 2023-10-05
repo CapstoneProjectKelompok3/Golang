@@ -64,10 +64,10 @@ func InitRouter(db *gorm.DB, c *echo.Echo) {
 
 	c.POST("/drivers", driverHandlerAPI.CreateDriver)
 	c.GET("/drivers", driverHandlerAPI.GetAllDriver)
-	c.POST("/login-drivers", driverHandlerAPI.Login)
-	c.GET("/kerahkan-drivers", driverHandlerAPI.KerahkanDriver)
+	c.POST("/drivers/login", driverHandlerAPI.Login)
+	c.GET("/drivers/assign", driverHandlerAPI.KerahkanDriver)
 
-	c.GET("/driver-profile", driverHandlerAPI.GetProfileDriver, middlewares.JWTMiddleware())
-	c.GET("/driver-accept-or-reject-order", driverHandlerAPI.DriverAcceptOrRejectOrder, middlewares.JWTMiddleware())
-	c.PUT("/driver-ontrip", driverHandlerAPI.DriverOnTrip, middlewares.JWTMiddleware())
+	c.GET("/driver/profile", driverHandlerAPI.GetProfileDriver, middlewares.JWTMiddleware())
+	c.GET("/driver/confirm", driverHandlerAPI.DriverAcceptOrRejectOrder, middlewares.JWTMiddleware())
+	c.PUT("/driver/ontrip", driverHandlerAPI.DriverOnTrip, middlewares.JWTMiddleware())
 }

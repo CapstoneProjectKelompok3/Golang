@@ -38,6 +38,13 @@ type DriverCore struct {
 	DeletedAt     time.Time
 }
 
+type DriverCoreStatus struct {
+	Id            uint
+	Fullname      string
+	Status        bool
+	DrivingStatus string
+}
+
 type DriverDataInterface interface {
 	Insert(input Core) error
 	SelectAll(pageNumber int, pageSize int) ([]DriverCore, error)
@@ -47,6 +54,7 @@ type DriverDataInterface interface {
 	SelectProfile(id int) (DriverCore, error)
 	AcceptOrRejectOrder(IsAccepted bool, idDriver int) error
 	DriverOnTrip(id int, lat float64, long float64) (DriverCore, error)
+	FinishTrip(id int, status string) error
 }
 
 type DriverServiceInterface interface {
@@ -58,4 +66,5 @@ type DriverServiceInterface interface {
 	GetProfile(id int) (DriverCore, error)
 	AcceptOrRejectOrder(IsAccepted bool, idDriver int) error
 	DriverOnTrip(id int, lat float64, long float64) (DriverCore, error)
+	FinishTrip(id int, status string) error
 }
