@@ -21,8 +21,8 @@ type VehicleDataInterface interface{
 }
 
 type VehicleServiceInterface interface{
-	Add(input VehicleEntity)(error)
-	Edit(input VehicleEntity,id uint)error
+	Add(input VehicleEntity,level string)(error)
+	Edit(input VehicleEntity,id uint,level string)error
 	GetById(id uint)(VehicleEntity,error)
 	GetAll()([]VehicleEntity,error)
 	Delete(id uint)error
