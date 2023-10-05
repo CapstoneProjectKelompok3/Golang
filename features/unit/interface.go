@@ -7,22 +7,12 @@ type UnitEntity struct {
 	CreateAt      time.Time
 	UpdateAt      time.Time
 	DeleteAt      time.Time
-	EmergenciesID uint `validate:"required"`
-	VehicleID     uint `validate:"required"`
+	EmergenciesID uint   `validate:"required"`
+	GovermentType string `gorm:"type:enum('Polisi','Rumah Sakit','DISHUB','SAR','Damkar');column:goverment_type"`
+	SumOfUnit     int    `validate:"required"`
 	Emergencies   UserEntity
-	Vehicle       UserEntity
 }
 
-type UnitHistoryEntity struct {
-	Id              uint
-	CreateAt        time.Time
-	UpdateAt        time.Time
-	DeleteAt        time.Time
-	EmergenciesID   uint
-	VehicleID       uint
-	Status          string
-	AlasanPenolakan string
-}
 type UserEntity struct {
 	ID    int
 	Name  string

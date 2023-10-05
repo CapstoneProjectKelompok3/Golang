@@ -18,6 +18,14 @@ import (
 	_driverHandler "project-capston/features/driver/handler"
 	_driverService "project-capston/features/driver/service"
 
+	dU "project-capston/features/unit/data"
+	hU "project-capston/features/unit/handler"
+	sU "project-capston/features/unit/service"
+
+	dH "project-capston/features/history/data"
+	hH "project-capston/features/history/handler"
+	sH "project-capston/features/history/service"
+
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
@@ -70,4 +78,23 @@ func InitRouter(db *gorm.DB, c *echo.Echo) {
 	c.GET("/driver-profile", driverHandlerAPI.GetProfileDriver, middlewares.JWTMiddleware())
 	c.GET("/driver-accept-or-reject-order", driverHandlerAPI.DriverAcceptOrRejectOrder, middlewares.JWTMiddleware())
 	c.PUT("/driver-ontrip", driverHandlerAPI.DriverOnTrip, middlewares.JWTMiddleware())
+
+	dataU := dU.New(db)
+	serviceU := sU.New(dataU)
+	handlerU := hU.New(serviceU)
+	c.POST("units", handlerU.Add, middlewares.JWTMiddleware())
+	c.DELETE("/units/:unit_id", handlerU.Delete, middlewares.JWTMiddleware())
+	c.PUT("/units/:unit_id", handlerU.Edit, middlewares.JWTMiddleware())
+	c.GET("/units/:unit_id", handlerU.GetById, middlewares.JWTMiddleware())
+	c.GET("/units", handlerU.GetAll, middlewares.JWTMiddleware())
+
+	dataH := dH.New(db)
+	serviceH := sH.New(dataH)
+	handlerH := hH.New(serviceH)
+	c.POST("/histories", handlerH.Add, middlewares.JWTMiddleware())
+	c.DELETE("/histories/:history_id", handlerH.Delete, middlewares.JWTMiddleware())
+	c.PUT("/histories/:history_id", handlerH.Edit, middlewares.JWTMiddleware())
+	c.GET("/histories/:history_id", handlerH.GetById, middlewares.JWTMiddleware())
+	c.GET("/histories", handlerH.GetAll, middlewares.JWTMiddleware())
+
 }
