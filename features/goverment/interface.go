@@ -14,6 +14,14 @@ type Core struct {
 	DeletedAt time.Time
 }
 
+type UnitCount struct{
+	RumahSakit int64
+	Pemadam int64
+	Kepolisian int64
+	SAR int64
+	Dishub int64
+}
+
 type Location struct {
 	ID        uint
 	Name      string
@@ -31,6 +39,8 @@ type GovernmentDataInterface interface {
 
 	//get nearest location
 	SelectNearestLocation(latitude float64, longitude float64, radius float64) ([]Location, error)
+
+	SelectCountUnit()(UnitCount,error)
 }
 
 type GovernmentServiceInterface interface {
@@ -42,4 +52,6 @@ type GovernmentServiceInterface interface {
 
 	//get nearest location
 	GetNearestLocation(latitude float64, longitude float64, radius float64) ([]Location, error)
+
+	GetCountUnit(level string)(UnitCount,error)
 }
