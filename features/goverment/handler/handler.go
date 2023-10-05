@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"project-capston/app/middlewares"
 	"project-capston/features/goverment"
 	"project-capston/helper"
 	"strconv"
@@ -201,4 +202,17 @@ func (handler *governmentHandler) DeleteGovernment(c echo.Context) error {
 		}
 	}
 	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "success delete government", nil))
+}
+
+func (handler *governmentHandler) CountUnit(c echo.Context)error{
+	_,level:=middlewares.ExtractTokenUserId(c)
+	data,err:=handler.governmentService.GetCountUnit(level)
+	if err!=nil{
+		return c.JSON(http.StatusInternalServerError,err.Error())
+	}
+	response:=MappingCountUnit(data)
+	return c.JSON(http.StatusOK,map[string]any{
+		"status":"success",
+		"data":response,
+	})
 }

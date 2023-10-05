@@ -59,6 +59,8 @@ func InitRouter(db *gorm.DB, c *echo.Echo,redis *redis.Client) {
 
 	c.GET("/get-nearest-government", governmentHandlerAPI.GetNearestGovernment, middlewares.JWTMiddleware())
 
+	c.GET("/governments/count",governmentHandlerAPI.CountUnit,middlewares.JWTMiddleware())
+
 	//Teguh Government
 	driverData := _driverData.New(db)
 	driverService := _driverService.New(driverData)
