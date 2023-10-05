@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"project-capston/app/middlewares"
 	"project-capston/features/vehicles"
 	"strconv"
 
@@ -14,13 +15,14 @@ type VehicleHandler struct {
 
 func (handler *VehicleHandler)Add(c echo.Context)error{
 
+	_,level:=middlewares.ExtractTokenUserId(c)
 	var input VehicleRequest
 	errBind:=c.Bind(&input)
 	if errBind != nil{
 		return c.JSON(http.StatusBadRequest,"error bind data")
 	}
 	entity:=RequestToEntity(input)
-	err:=handler.vehicleHandler.Add(entity)
+	err:=handler.vehicleHandler.Add(entity,level)
 	if err != nil{
 		return c.JSON(http.StatusInternalServerError,err.Error())
 	}
@@ -33,13 +35,14 @@ func (handler *VehicleHandler)Edit(c echo.Context)error{
 	if errConv != nil{
 		return c.JSON(http.StatusBadRequest,"id not valid")
 	}
+	_,level:=middlewares.ExtractTokenUserId(c)
 	var input VehicleRequest
 	errBind:=c.Bind(&input)
 	if errBind != nil{
 		return c.JSON(http.StatusBadRequest,"id not valid")
 	}
 	entity:=RequestToEntity(input)
-	err:=handler.vehicleHandler.Edit(entity,uint(idConv))
+	err:=handler.vehicleHandler.Edit(entity,uint(idConv),level)
 	if err != nil{
 		return c.JSON(http.StatusInternalServerError,err.Error())
 	}
