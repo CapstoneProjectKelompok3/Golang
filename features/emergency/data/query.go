@@ -18,19 +18,30 @@ import (
 )
 
 type EmergencyData struct {
-	db *gorm.DB
+	db    *gorm.DB
 	redis *redis.Client
 }
 
-// SelectUser implements emergency.EmergencyDataInterface.
-func (repo *EmergencyData) SelectUser(id string,token string) (emergency.UserEntity, error) {
-	data,err:=usernodejs.GetByIdUser(id,token)
-	if err != nil{
-		return emergency.UserEntity{},errors.New("user tidak ditemukan")
+// SumEmergency implements emergency.EmergencyDataInterface.
+func (repo *EmergencyData) SumEmergency() (int64, error) {
+	var inputModel []Emergency
+	tx:=repo.db.Find(&inputModel)
+	if tx.Error != nil{
+		return 0,errors.New("error get all data")
 	}
-	dataUser:=UserNodeToUser(data)
-	dataEntity:=UserToUserEntity(dataUser)
-	return dataEntity,nil
+	count:=tx.RowsAffected
+	return count,nil
+}
+
+// SelectUser implements emergency.EmergencyDataInterface.
+func (repo *EmergencyData) SelectUser(id string, token string) (emergency.UserEntity, error) {
+	data, err := usernodejs.GetByIdUser(id, token)
+	if err != nil {
+		return emergency.UserEntity{}, errors.New("user tidak ditemukan")
+	}
+	dataUser := UserNodeToUser(data)
+	dataEntity := UserToUserEntity(dataUser)
+	return dataEntity, nil
 
 }
 
@@ -105,24 +116,24 @@ func (repo *EmergencyData) SelectAll(param emergency.QueryParams, token string) 
 	var userReceiverRedis User
 	for i := 0; i < len(emergensiUser); i++ {
 		for j := 0; j < len(emergensiUser); j++ {
-			redisKey := fmt.Sprintf("user:%s",idCaller[j])
+			redisKey := fmt.Sprintf("user:%s", idCaller[j])
 
 			cachedData, err := repo.redis.Get(ctx, redisKey).Result()
 			if err == nil {
 				var userRedis User
 				if err := json.Unmarshal([]byte(cachedData), &userRedis); err != nil {
-					return 0,nil, err
+					return 0, nil, err
 				}
 				log.Println("Data ditemukan di Redis cache")
-				userCallRedis=userRedis
+				userCallRedis = userRedis
 			} else if err != redis.Nil {
-				return 0,nil, err
-			}else{
+				return 0, nil, err
+			} else {
 				data, _ := usernodejs.GetByIdUser(idCaller[j], token)
-				user:=UserNodeToUser(data)
+				user := UserNodeToUser(data)
 				jsonData, err := json.Marshal(user)
 				if err != nil {
-					return 0,nil, err
+					return 0, nil, err
 				}
 				errSet := repo.redis.Set(ctx, redisKey, jsonData, 24*time.Hour).Err()
 				if errSet != nil {
@@ -130,33 +141,33 @@ func (repo *EmergencyData) SelectAll(param emergency.QueryParams, token string) 
 				} else {
 					log.Println("Data disimpan di Redis cache")
 				}
-				userCallRedis=user
+				userCallRedis = user
 			}
-			
+
 			idConv, _ := strconv.Atoi(idCaller[j])
 			if uint(idConv) == emergensiUser[i].CallerID {
 				emergensiUser[i].Caller = userCallRedis
 			}
 		}
 		for k := 0; k < len(emergensiUser); k++ {
-			redisKey := fmt.Sprintf("user:%s",idReceiver[k])
+			redisKey := fmt.Sprintf("user:%s", idReceiver[k])
 
 			cachedData, err := repo.redis.Get(ctx, redisKey).Result()
 			if err == nil {
 				var userRedis User
 				if err := json.Unmarshal([]byte(cachedData), &userRedis); err != nil {
-					return 0,nil, err
+					return 0, nil, err
 				}
 				log.Println("Data ditemukan di Redis cache")
-				userReceiverRedis=userRedis
+				userReceiverRedis = userRedis
 			} else if err != redis.Nil {
-				return 0,nil, err
-			}else{
+				return 0, nil, err
+			} else {
 				data, _ := usernodejs.GetByIdUser(idReceiver[k], token)
-				user:=UserNodeToUser(data)
+				user := UserNodeToUser(data)
 				jsonData, err := json.Marshal(user)
 				if err != nil {
-					return 0,nil, err
+					return 0, nil, err
 				}
 				errSet := repo.redis.Set(ctx, redisKey, jsonData, 24*time.Hour).Err()
 				if errSet != nil {
@@ -164,11 +175,11 @@ func (repo *EmergencyData) SelectAll(param emergency.QueryParams, token string) 
 				} else {
 					log.Println("Data disimpan di Redis cache")
 				}
-				userReceiverRedis=user				
+				userReceiverRedis = user
 			}
 			idConv, _ := strconv.Atoi(idReceiver[k])
 			if uint(idConv) == emergensiUser[i].ReceiverID {
-				emergensiUser[i].Receiver =userReceiverRedis
+				emergensiUser[i].Receiver = userReceiverRedis
 			}
 		}
 		emergenciEntity = append(emergenciEntity, EmergencyUserToEntity(emergensiUser[i]))
@@ -240,21 +251,21 @@ func (repo *EmergencyData) Delete(id uint) error {
 }
 
 // Insert implements emergency.EmergencyDataInterface.
-func (repo *EmergencyData) Insert(input emergency.EmergencyEntity) (uint,error) {
+func (repo *EmergencyData) Insert(input emergency.EmergencyEntity) (uint, error) {
 	inputModel := EntityToModel(input)
 	tx := repo.db.Create(&inputModel)
 	if tx.Error != nil {
-		return 0,errors.New("failed create data emergency")
+		return 0, errors.New("failed create data emergency")
 	}
 	if tx.RowsAffected == 0 {
-		return 0,errors.New("row not affected")
+		return 0, errors.New("row not affected")
 	}
-	return inputModel.ID,nil
+	return inputModel.ID, nil
 }
 
 func New(db *gorm.DB, redis *redis.Client) emergency.EmergencyDataInterface {
 	return &EmergencyData{
-		db: db,
+		db:    db,
 		redis: redis,
 	}
 }

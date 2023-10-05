@@ -34,6 +34,7 @@ func InitRouter(db *gorm.DB, c *echo.Echo,redis *redis.Client) {
 	c.GET("/emergencies", handlerE.GetAll, middlewares.JWTMiddleware())
 
 	c.GET("/emergencies/action", handlerE.ActionLogic)
+	c.GET("/emergencies/count", handlerE.CountEmergency)
 
 	dataV := dV.New(db)
 	serviceV := sV.New(dataV)

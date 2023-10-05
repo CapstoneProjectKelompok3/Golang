@@ -168,3 +168,14 @@ func (handler *EmergencyHandler)ActionLogic(c echo.Context)error{
 	}
 	return c.JSON(http.StatusOK,"action tersimpan")
 }
+
+func (handler *EmergencyHandler)CountEmergency(c echo.Context)error{
+	count,err:=handler.emergencyHandler.SumEmergency()
+	if err != nil{
+		return c.JSON(http.StatusInternalServerError,err.Error())
+	}
+	return c.JSON(http.StatusOK,map[string]any{
+		"status":"success",
+		"jumlah_kasus":count,
+	})
+}

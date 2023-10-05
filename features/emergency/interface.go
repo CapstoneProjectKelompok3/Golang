@@ -44,6 +44,7 @@ type EmergencyDataInterface interface{
 	SendNotification(input helper.MessageGomailE)(string,error)
 	ActionGmail(input string)(error)
 	SelectUser(id string,token string) (UserEntity, error)
+	SumEmergency()(int64,error)
 }
 
 type EmergencyServiceInterface interface{
@@ -53,4 +54,5 @@ type EmergencyServiceInterface interface{
 	GetById(id uint,token string)(EmergencyEntity,error)
 	GetAll(param QueryParams,token string)(bool,[]EmergencyEntity,error)
 	ActionGmail(input string)error
+	SumEmergency()(int64,error)
 }
