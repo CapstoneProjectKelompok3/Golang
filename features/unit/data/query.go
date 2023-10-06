@@ -13,6 +13,17 @@ type UnitData struct {
 	db *gorm.DB
 }
 
+// CreateUnit implements unit.UnitDataInterface.
+// func (repo *UnitData) CreateUnit() (uint, error) {
+// 	// helper.InputUnit(input)
+// 	// repo.db.Create()
+// }
+
+// // CreateUnitHistory implements unit.UnitDataInterface.
+// func (*UnitData) CreateUnitHistory(id uint, input unit.UnitHistoryEntity) (uint, error) {
+// 	panic("unimplemented")
+// }
+
 // SelectById implements unit.UnitDataInterface.
 func (repo *UnitData) SelectById(id uint, token string) (unit.UnitEntity, error) {
 	var inputModel Unit

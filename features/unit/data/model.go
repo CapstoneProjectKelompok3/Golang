@@ -12,16 +12,18 @@ import (
 type Unit struct {
 	gorm.Model
 	EmergenciesID uint
-	GovermentType string `gorm:"type:enum('Polisi','Rumah Sakit','DISHUB','SAR','Damkar');column:goverment_type"`
-	SumOfUnit     int
+	VehicleID     uint
+	GovermentType string `gorm:"type:enum('hospital','police','firestation','dishub','SAR');column:type;default:hospital"`
+	SumOfUnit int 
+
 }
 
 type UnitHistory struct {
 	gorm.Model
-	EmergenciesID   uint
-	VehicleID       uint
-	Status          string
-	AlasanPenolakan string
+	UnitID   uint
+	DriverID uint
+	Status  string
+	Reason string
 }
 
 type UnitUser struct {

@@ -11,7 +11,17 @@ type VehicleEntity struct {
 	Plate       string `validate:"required"`
 	Status      bool
 }
-
+type GovernmentEntity struct {
+	ID        uint   
+	Name      string 
+	Type      string 
+	Address   string
+	Latitude  float64
+	Longitude float64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt time.Time
+}
 type VehicleDataInterface interface{
 	Insert(input VehicleEntity)(error)
 	Update(input VehicleEntity,id uint)error
@@ -21,8 +31,8 @@ type VehicleDataInterface interface{
 }
 
 type VehicleServiceInterface interface{
-	Add(input VehicleEntity)(error)
-	Edit(input VehicleEntity,id uint)error
+	Add(input VehicleEntity,level string)(error)
+	Edit(input VehicleEntity,id uint,level string)error
 	GetById(id uint)(VehicleEntity,error)
 	GetAll()([]VehicleEntity,error)
 	Delete(id uint)error

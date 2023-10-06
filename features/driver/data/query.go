@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"math"
 	"project-capston/app/middlewares"
 	"project-capston/features/driver"
@@ -22,10 +23,40 @@ type driverQuery struct {
 	db *gorm.DB
 }
 
+// SelectCountDriver implements driver.DriverDataInterface.
+func (repo *driverQuery) SelectCountDriver() (int64, error) {
+	var input []Driver
+	tx:=repo.db.Find(&input)
+	if tx.Error != nil{
+		return 0, errors.New("fail get driver")
+	}
+	count:=tx.RowsAffected
+	return count,nil
+}
+
+// FinishTrip implements driver.DriverDataInterface.
+func (*driverQuery) FinishTrip(id int, status string) error {
+	panic("unimplemented")
+}
+
 // DriverOnTrip implements driver.DriverDataInterface.
 func (repo *driverQuery) DriverOnTrip(id int, lat float64, long float64) (driver.DriverCore, error) {
-	latString := strconv.FormatFloat(lat, 'f', -1, 64)
-	lonString := strconv.FormatFloat(lat, 'f', -1, 64)
+	redisClient := middlewares.CreateRedisClient()
+
+	start := int64(0)
+	end := int64(-1) // Membaca semua elemen dalam array
+	resultRedis, errRedis := redisClient.LRange(ctx, "data_array", start, end).Result()
+	if errRedis != nil {
+		fmt.Println("Error reading data from Redis:", errRedis)
+	}
+
+	//2. dapatkan data lat long dari redis
+	fmt.Println("Data dari Redis:", resultRedis)
+	fmt.Println("Data dari Redis:", resultRedis[0])
+	fmt.Println("Data dari Redis:", resultRedis[1])
+
+	// latString := strconv.FormatFloat(lat, 'f', -1, 64)
+	// lonString := strconv.FormatFloat(long, 'f', -1, 64)
 
 	result := repo.db.Exec("UPDATE drivers SET latitude=?,longitude=? WHERE id=?", lat, long, id)
 
@@ -46,20 +77,20 @@ func (repo *driverQuery) DriverOnTrip(id int, lat float64, long float64) (driver
 		goverment.Government
 	}
 
-	// tx := repo.db.Table("drivers").
-	// 	Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
-	// 	Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
-	// 	Where("drivers.id=?", id).
-	// 	Scan(&driversWithGovernments)
-
 	sub_query1a := `
 		SELECT
-				(6371 * acos(cos(radians(drivers.latitude)) * cos(radians(`
+				(6371 * acos(cos(radians(`
+
+	sub_query1ab := `)) * cos(radians(`
 
 	sub_query1b := `)) * 
 				cos(radians(`
 
-	sub_query1c := `) - radians(drivers.longitude)) + sin(radians(drivers.latitude)) *
+	sub_query1c := `) - radians(`
+
+	sub_query1cd := `drivers.longitude)) + sin(radians(`
+
+	sub_query1cd1 := `)) *
 	            sin(radians(`
 
 	sub_query1d := `)))) AS Distance,
@@ -70,13 +101,13 @@ func (repo *driverQuery) DriverOnTrip(id int, lat float64, long float64) (driver
 				governments ON governments.id = drivers.goverment_id
 		where drivers.id =
 		`
-	query := sub_query1a + latString + sub_query1b + lonString + sub_query1c + latString + sub_query1d
+	query := sub_query1a + "drivers.latitude" + sub_query1ab + resultRedis[1] + sub_query1b + resultRedis[0] + sub_query1c + sub_query1cd + "drivers.latitude" + sub_query1cd1 + resultRedis[1] + sub_query1d
 
 	sql := fmt.Sprintf("%s%d", query, id)
 
-	tx := repo.db.Raw(sql).Scan(&driversWithGovernments)
+	fmt.Println("Query On Trip", sql)
 
-	// tx := repo.db.First(&driverData, id).Scan(&driverData) //
+	tx := repo.db.Raw(sql).Scan(&driversWithGovernments)
 
 	if tx.Error != nil {
 		return driver.DriverCore{}, tx.Error
@@ -84,6 +115,8 @@ func (repo *driverQuery) DriverOnTrip(id int, lat float64, long float64) (driver
 	if tx.RowsAffected == 0 {
 		return driver.DriverCore{}, errors.New("data not found")
 	}
+
+	fmt.Println("Driver Government Distance", driversWithGovernments.Distance)
 
 	// var driversCore = ModelToCore(driversWithGovernments)
 
@@ -99,7 +132,52 @@ func (repo *driverQuery) DriverOnTrip(id int, lat float64, long float64) (driver
 	driverCore.DrivingStatus = driversWithGovernments.DrivingStatus
 	driverCore.Latitude = driversWithGovernments.Driver.Latitude
 	driverCore.Longitude = driversWithGovernments.Driver.Longitude
-	driverCore.Distance = float64(driversWithGovernments.Distance)
+	driverCore.Distance = driversWithGovernments.Distance
+
+	fmt.Println("Driver Core", driverCore.Distance)
+
+	// // Mengubah []float64 menjadi string
+	// dataStr := make([]string, len(data))
+	// for i, v := range data {
+	// 	dataStr[i] = strconv.FormatFloat(v, 'f', -1, 64)
+	// }
+
+	// // Marshal data ke format JSON (opsional)
+	// dataJSON, err := json.Marshal(dataStr)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// Key Redis untuk menyimpan nilai float
+	key := "myFloatValue"
+
+	// Nilai float yang ingin Anda simpan
+	floatValue := driverCore.Distance
+
+	// Konversi float menjadi string
+	stringValue := strconv.FormatFloat(floatValue, 'f', -1, 64)
+
+	// Simpan nilai string dalam Redis
+	err := redisClient.Set(ctx, key, stringValue, 0).Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Nilai float %f berhasil disimpan di Redis dengan key: %s\n", floatValue, key)
+
+	// Mengambil nilai dari Redis dan mengonversinya kembali ke float
+	storedValue, err := redisClient.Get(ctx, key).Result()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Mengonversi nilai string kembali ke float
+	convertedValue, err := strconv.ParseFloat(storedValue, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Nilai float yang diambil dari Redis: %f\n", convertedValue)
 
 	return driverCore, nil
 }
@@ -289,7 +367,9 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 		Distance float64
 	}
 
-	if police >= 0 && hospital >= 0 && firestation >= 0 {
+	var sql string
+
+	if police > 0 && hospital > 0 && firestation > 0 {
 		sub_query1a := `
 		SELECT
 				(6371 * acos(cos(radians(drivers.latitude)) * cos(radians(`
@@ -363,7 +443,7 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 		hospital_query := fmt.Sprintf("%s%d", query2, hospital)
 		firestation_query := fmt.Sprintf("%s%d", query3, firestation)
 
-		sql := fmt.Sprintf("(%s) UNION ALL (%s) UNION ALL (%s) %s", police_query, hospital_query, firestation_query, "ORDER BY distance")
+		sql = fmt.Sprintf("(%s) UNION ALL (%s) UNION ALL (%s) %s", police_query, hospital_query, firestation_query, "ORDER BY distance")
 
 		tx := repo.db.Raw(sql).Scan(&driversWithGovernments)
 
@@ -372,7 +452,7 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 			return nil, tx.Error
 		}
 
-	} else if police >= 0 && hospital >= 0 {
+	} else if police > 0 && hospital > 0 {
 		sub_query1a := `
 		SELECT
 				(6371 * acos(cos(radians(drivers.latitude)) * cos(radians(`
@@ -423,14 +503,14 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 		hospital_query := fmt.Sprintf("%s%d", query2, hospital)
 
 		sql := fmt.Sprintf("(%s) UNION ALL (%s) %s", police_query, hospital_query, "ORDER BY distance")
-
+		fmt.Println("Query Police Hospital", sql)
 		tx := repo.db.Raw(sql).Scan(&driversWithGovernments)
 		fmt.Println("adasdds", tx)
 		if tx.Error != nil {
 			return nil, tx.Error
 		}
 
-	} else if police >= 0 {
+	} else if police > 0 {
 
 		sub_query1a := `
 		SELECT
@@ -454,7 +534,9 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 		`
 		query := sub_query1a + lat + sub_query1b + lon + sub_query1c + lat + sub_query1d
 
-		sql := fmt.Sprintf("%s%d", query, police)
+		sql = fmt.Sprintf("%s%d", query, police)
+
+		fmt.Println("Query Police", sql)
 
 		tx := repo.db.Raw(sql).Scan(&driversWithGovernments)
 
@@ -466,8 +548,8 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 		if tx.Error != nil {
 			return nil, tx.Error
 		}
-	} else if hospital >= 0 {
-
+	} else if hospital > 0 {
+		fmt.Println("Hospital", hospital)
 		sub_query1a := `
 		SELECT
 				(6371 * acos(cos(radians(drivers.latitude)) * cos(radians(`
@@ -507,7 +589,7 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 	//2. Generate Token Kasus
 	tokenKasus := uuid.New()
 
-	fmt.Println(tokenKasus)
+	fmt.Println("Sql Execute", sql)
 
 	for _, u := range driversWithGovernments {
 		fmt.Printf("ID : %d,Nama: %s, Email: %s\n", u.DriverID, u.Name, u.Email)

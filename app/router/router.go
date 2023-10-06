@@ -10,6 +10,10 @@ import (
 	hV "project-capston/features/vehicles/handler"
 	sV "project-capston/features/vehicles/service"
 
+	dU "project-capston/features/unit/data"
+	hU "project-capston/features/unit/handler"
+	sU "project-capston/features/unit/service"
+
 	_governmentData "project-capston/features/goverment/data"
 	_governmentHandler "project-capston/features/goverment/handler"
 	_governmentService "project-capston/features/goverment/service"
@@ -26,21 +30,25 @@ import (
 	hH "project-capston/features/history/handler"
 	sH "project-capston/features/history/service"
 
+
+	"github.com/go-redis/redis/v8"
+
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
-func InitRouter(db *gorm.DB, c *echo.Echo) {
-	dataE := dE.New(db)
+func InitRouter(db *gorm.DB, c *echo.Echo,redis *redis.Client) {
+	dataE := dE.New(db,redis)
 	serviceE := sE.New(dataE)
 	handlerE := hE.New(serviceE)
-	c.POST("users/:receiver_id/emergencies", handlerE.Add, middlewares.JWTMiddleware())
+	c.POST("/users/:receiver_id/emergencies", handlerE.Add, middlewares.JWTMiddleware())
 	c.DELETE("/emergencies/:emergency_id", handlerE.Delete, middlewares.JWTMiddleware())
 	c.PUT("/emergencies/:emergency_id", handlerE.Edit, middlewares.JWTMiddleware())
 	c.GET("/emergencies/:emergency_id", handlerE.GetById, middlewares.JWTMiddleware())
 	c.GET("/emergencies", handlerE.GetAll, middlewares.JWTMiddleware())
 
 	c.GET("/emergencies/action", handlerE.ActionLogic)
+	c.GET("/emergencies/count", handlerE.CountEmergency)
 
 	dataV := dV.New(db)
 	serviceV := sV.New(dataV)
@@ -57,13 +65,15 @@ func InitRouter(db *gorm.DB, c *echo.Echo) {
 	governmentService := _governmentService.New(governmentData)
 	governmentHandlerAPI := _governmentHandler.New(governmentService)
 
-	c.POST("/governments", governmentHandlerAPI.CreateGovernment)
+	c.POST("/governments", governmentHandlerAPI.CreateGovernment, middlewares.JWTMiddleware())
 	c.GET("/governments", governmentHandlerAPI.GetAllGovernment, middlewares.JWTMiddleware())
-	c.GET("/governments/:government_id", governmentHandlerAPI.GetGovernmentById)
-	c.PUT("/governments/:government_id", governmentHandlerAPI.UpdateGovernment)
-	c.DELETE("/governments/:government_id", governmentHandlerAPI.DeleteGovernment)
+	c.GET("/governments/:government_id", governmentHandlerAPI.GetGovernmentById, middlewares.JWTMiddleware())
+	c.PUT("/governments/:government_id", governmentHandlerAPI.UpdateGovernment, middlewares.JWTMiddleware())
+	c.DELETE("/governments/:government_id", governmentHandlerAPI.DeleteGovernment, middlewares.JWTMiddleware())
 
 	c.GET("/get-nearest-government", governmentHandlerAPI.GetNearestGovernment, middlewares.JWTMiddleware())
+
+	c.GET("/governments/count",governmentHandlerAPI.CountUnit,middlewares.JWTMiddleware())
 
 	//Teguh Government
 	driverData := _driverData.New(db)
@@ -72,12 +82,13 @@ func InitRouter(db *gorm.DB, c *echo.Echo) {
 
 	c.POST("/drivers", driverHandlerAPI.CreateDriver)
 	c.GET("/drivers", driverHandlerAPI.GetAllDriver)
-	c.POST("/login-drivers", driverHandlerAPI.Login)
-	c.GET("/kerahkan-drivers", driverHandlerAPI.KerahkanDriver)
+	c.POST("/drivers/login", driverHandlerAPI.Login)
+	c.GET("/drivers/assign", driverHandlerAPI.KerahkanDriver)
+	c.GET("/driver/profile", driverHandlerAPI.GetProfileDriver, middlewares.JWTMiddleware())
+	c.GET("/driver/confirm", driverHandlerAPI.DriverAcceptOrRejectOrder, middlewares.JWTMiddleware())
+	c.PUT("/driver/ontrip", driverHandlerAPI.DriverOnTrip, middlewares.JWTMiddleware())
+	c.GET("/drivers/count",driverHandlerAPI.GetCountDriver)
 
-	c.GET("/driver-profile", driverHandlerAPI.GetProfileDriver, middlewares.JWTMiddleware())
-	c.GET("/driver-accept-or-reject-order", driverHandlerAPI.DriverAcceptOrRejectOrder, middlewares.JWTMiddleware())
-	c.PUT("/driver-ontrip", driverHandlerAPI.DriverOnTrip, middlewares.JWTMiddleware())
 
 	dataU := dU.New(db)
 	serviceU := sU.New(dataU)
@@ -98,3 +109,4 @@ func InitRouter(db *gorm.DB, c *echo.Echo) {
 	c.GET("/histories", handlerH.GetAll, middlewares.JWTMiddleware())
 
 }
+

@@ -12,12 +12,35 @@ type UnitEntity struct {
 	SumOfUnit     int    `validate:"required"`
 	Emergencies   UserEntity
 }
+type UnitEntit struct{
+	Id            uint
+	CreateAt      time.Time
+	UpdateAt      time.Time
+	DeleteAt      time.Time	
+	EmergenciesID uint
+	VehicleID     uint
+	GovermentType string 
+	SumOfUnit int 
+}
+
+type UnitHistoryEntity struct {
+	Id            uint
+	CreateAt      time.Time
+	UpdateAt      time.Time
+	DeleteAt      time.Time
+	UnitID   uint
+	DriverID uint
+	Status  string
+	Reason string
+}
 
 type UserEntity struct {
 	ID    int
 	Name  string
 	Level string
 }
+
+
 
 type QueryParams struct {
 	Page             int
@@ -32,6 +55,8 @@ type UnitDataInterface interface {
 	Update(input UnitEntity, id uint) error
 	SelectById(id uint, token string) (UnitEntity, error)
 	SelectAll(param QueryParams, token string) (int64, []UnitEntity, error)
+	// CreateUnit()(uint,error)
+	// CreateUnitHistory(id uint, input UnitHistoryEntity)(uint,error)
 }
 
 type UnitServiceInterface interface {
@@ -40,4 +65,5 @@ type UnitServiceInterface interface {
 	Edit(input UnitEntity, id uint) error
 	GetById(id uint, token string) (UnitEntity, error)
 	GetAll(param QueryParams, token string) (bool, []UnitEntity, error)
+	// CreateUnit(id uint, input UnitHistoryEntity)(error)
 }

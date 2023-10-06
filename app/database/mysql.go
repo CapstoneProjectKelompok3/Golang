@@ -26,7 +26,7 @@ func InitMysql(cfg *config.AppConfig) *gorm.DB {
 
 func InitialMigration(db *gorm.DB) {
 	db.AutoMigrate(&emergency.Emergency{})
-	db.AutoMigrate(&emergency.HistoryAdmin{})
+	db.AutoMigrate(&emergency.Unit{})
 	db.AutoMigrate(&government.Government{})
 	db.AutoMigrate(&driver.Driver{})
 	db.AutoMigrate(&unit.Unit{})

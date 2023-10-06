@@ -37,7 +37,10 @@ func (service *VehicleService) GetById(id uint) (vehicles.VehicleEntity, error) 
 }
 
 // Edit implements vehicles.VehicleServiceInterface.
-func (service *VehicleService) Edit(input vehicles.VehicleEntity, id uint) error {
+func (service *VehicleService) Edit(input vehicles.VehicleEntity, id uint,level string) error {
+	if level !="admin"{
+		return errors.New("hanya admin yang dapat mengedit kendaraan")
+	}
 	err := service.vehicleService.Update(input, id)
 	if err != nil {
 		return err
@@ -46,7 +49,11 @@ func (service *VehicleService) Edit(input vehicles.VehicleEntity, id uint) error
 }
 
 // Add implements vehicles.VehicleServiceInterface.
-func (service *VehicleService) Add(input vehicles.VehicleEntity) error {
+func (service *VehicleService) Add(input vehicles.VehicleEntity,level string) error {
+
+	if level !="admin"{
+		return errors.New("hanya admin yang dapat menambah kendaraan")
+	}
 	errValide := service.validate.Struct(input)
 	if errValide != nil {
 		return errors.New("validate, plate dan goverment_id required")

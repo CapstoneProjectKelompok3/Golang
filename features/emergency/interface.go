@@ -1,6 +1,9 @@
 package emergency
 
-import "time"
+import (
+	"project-capston/helper"
+	"time"
+)
 
 type EmergencyEntity struct {
 	Id         	uint
@@ -16,11 +19,22 @@ type EmergencyEntity struct {
 	Receiver   UserEntity
 	IsClose bool
 }
-
+type UnitEntity struct {
+	Id         	uint
+	CreateAt   	time.Time
+	UpdateAt 	time.Time
+	DeleteAt 	time.Time
+	EmergenciesID uint
+	VehicleID     uint
+	GovermentType string
+	SumOfUnit int 
+}
 type UserEntity struct{
 	ID        		int
-	Name 			string	
+	Name 			string
+	Email			string
 	Level           string
+	EmailActive     bool
 }
 
 type QueryParams struct {
@@ -31,19 +45,24 @@ type QueryParams struct {
 }
 
 type EmergencyDataInterface interface{
-	Insert(input EmergencyEntity)(error)
+	Insert(input EmergencyEntity)(uint,error)
+	CreateUnit(input UnitEntity)(uint,error)
 	Delete(id uint)(error)
 	Update(input EmergencyEntity, id uint)(error)
 	SelectById(id uint,token string)(EmergencyEntity,error)
 	SelectAll(param QueryParams,token string)(int64, []EmergencyEntity,error)
-	ActionGmail(input string)error
+	SendNotification(input helper.MessageGomailE)(string,error)
+	ActionGmail(input string)(error)
+	SelectUser(id string,token string) (UserEntity, error)
+	SumEmergency()(int64,error)
 }
 
 type EmergencyServiceInterface interface{
-	Add(input EmergencyEntity)(error)
+	Add(input EmergencyEntity,token string)(error)
 	Delete(id uint)(error)
-	Edit(input EmergencyEntity,id uint)error
+	Edit(input EmergencyEntity,id uint,level string,idUser uint)error
 	GetById(id uint,token string)(EmergencyEntity,error)
 	GetAll(param QueryParams,token string)(bool,[]EmergencyEntity,error)
 	ActionGmail(input string)error
+	SumEmergency()(int64,error)
 }

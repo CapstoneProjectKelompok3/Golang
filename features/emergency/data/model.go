@@ -3,6 +3,7 @@ package data
 import (
 	usernodejs "project-capston/features/UserNodeJs"
 	"project-capston/features/emergency"
+	"project-capston/helper"
 	"time"
 
 	"gorm.io/gorm"
@@ -18,6 +19,14 @@ type Emergency struct {
 	IsClose bool
 }
 
+type Unit struct {
+	gorm.Model
+	EmergenciesID uint
+	VehicleID     uint `gorm:"default:1"`
+	GovermentType string `gorm:"type:enum('hospital','police','firestation','dishub','SAR');column:type;default:hospital"`
+	SumOfUnit int 
+}
+
 type HistoryAdmin struct{
 	gorm.Model
 	AdminId uint
@@ -29,6 +38,7 @@ type EmergencyUser struct{
 	CreatedAt 		time.Time
 	UpdatedAt 		time.Time
 	DeletedAt 		time.Time
+	Name		string
 	CallerID   uint
 	ReceiverID uint
 	Latitude   float64
@@ -41,12 +51,34 @@ type User struct{
 	ID        		int
 	Name 			string	
 	Level           string
+	Email 			string
+	EmailActive		bool
+}
+
+type MessageGomail struct {
+    EmailReceiver string
+    Sucject       string
+    Content       string
+    Name          string
+    Email         string
+}
+
+func MessageGomailToMessage(gmail helper.MessageGomailE)MessageGomail{
+	return MessageGomail{
+		EmailReceiver: gmail.EmailReceiver,
+		Sucject:       gmail.Sucject,
+		Content:       gmail.Content,
+		Name:          gmail.Name,
+		Email:         gmail.Name,
+	}
 }
 func UserToUserEntity(user User)emergency.UserEntity{
 	return emergency.UserEntity{
 		ID:    user.ID,
 		Name:  user.Name,
+		Email: user.Email,
 		Level: user.Level,
+		EmailActive: user.EmailActive,
 	}
 }
 
@@ -55,6 +87,8 @@ func UserNodeToUser(user usernodejs.User)User{
 		ID:    user.ID,
 		Name:  user.Username,
 		Level: user.Level,
+		Email: user.Email,
+		EmailActive: user.EmailActive,
 	}
 }
 
@@ -69,19 +103,21 @@ func UserEntityToEntity(user emergency.UserEntity)emergency.UserEntity{
 func ModelToEmergencyUser(emergency Emergency)EmergencyUser{
 	return EmergencyUser{
 		ID:         emergency.ID,
+		CreatedAt:  emergency.CreatedAt,
+		UpdatedAt:  emergency.UpdatedAt,
+		DeletedAt:  emergency.DeletedAt.Time,
+		Name:       emergency.Name,
 		CallerID:   emergency.CallerID,
 		ReceiverID: emergency.ReceiverID,
 		Latitude:   emergency.Latitude,
 		Longitude:  emergency.Longitude,
-		CreatedAt:   emergency.CreatedAt,
-		UpdatedAt:   emergency.UpdatedAt,
-		DeletedAt:   emergency.DeletedAt.Time,
 	}
 }
 func EmergencyUserToEntity(emergenci EmergencyUser)emergency.EmergencyEntity{
 	return emergency.EmergencyEntity{
 		Id:         emergenci.ID,
 		CallerID:   emergenci.CallerID,
+		Name:       emergenci.Name,	
 		ReceiverID: emergenci.ReceiverID,
 		Latitude:   emergenci.Latitude,
 		Longitude:  emergenci.Longitude,
@@ -98,6 +134,7 @@ func ModelToEntity(emergenci Emergency)emergency.EmergencyEntity{
 		Id:         emergenci.ID,
 		CallerID:   emergenci.CallerID,
 		ReceiverID: emergenci.ReceiverID,
+		Name: emergenci.Name,
 		Latitude:   emergenci.Latitude,
 		Longitude:  emergenci.Longitude,
 		CreateAt:   emergenci.CreatedAt,
@@ -110,7 +147,30 @@ func EntityToModel(emergenci emergency.EmergencyEntity)Emergency{
 	return Emergency{
 		CallerID:   emergenci.CallerID,
 		ReceiverID: emergenci.ReceiverID,
+		Name: emergenci.Name,
 		Latitude:   emergenci.Latitude,
 		Longitude:  emergenci.Longitude,
+	}
+}
+
+func UnitModelToEntity(unit Unit)emergency.UnitEntity{
+	return emergency.UnitEntity{
+		Id:            unit.ID,
+		CreateAt:      unit.CreatedAt,
+		UpdateAt:      unit.UpdatedAt,
+		DeleteAt:      unit.DeletedAt.Time,
+		EmergenciesID: unit.EmergenciesID,
+		VehicleID:     unit.VehicleID,
+		GovermentType: unit.GovermentType,
+		SumOfUnit:     unit.SumOfUnit,
+	}
+}
+
+func UnitEntityToModel(unit emergency.UnitEntity)Unit{
+	return Unit{
+		EmergenciesID: unit.EmergenciesID,
+		VehicleID:     unit.VehicleID,
+		GovermentType: unit.GovermentType,
+		SumOfUnit:     unit.SumOfUnit,
 	}
 }

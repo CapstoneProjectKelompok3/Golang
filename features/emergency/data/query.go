@@ -1,25 +1,81 @@
 package data
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
 	usernodejs "project-capston/features/UserNodeJs"
 	"project-capston/features/emergency"
+	"project-capston/helper"
+	"time"
 
 	"strconv"
 
+	"github.com/go-redis/redis/v8"
 	"gorm.io/gorm"
 )
 
 type EmergencyData struct {
-	db *gorm.DB
+	db    *gorm.DB
+	redis *redis.Client
+}
+
+// CreateUnit implements emergency.EmergencyDataInterface.
+func (repo *EmergencyData) CreateUnit(input emergency.UnitEntity) (uint, error) {
+	inputModel:=UnitEntityToModel(input)
+	tx:=repo.db.Create(&inputModel)
+	if tx.Error != nil{
+		return 0,errors.New("failed insert unit")
+	}
+	if tx.RowsAffected ==0{
+		return 0, errors.New("row not affected")
+	}
+	return inputModel.ID,nil
+}
+
+// SumEmergency implements emergency.EmergencyDataInterface.
+func (repo *EmergencyData) SumEmergency() (int64, error) {
+	var inputModel []Emergency
+	tx := repo.db.Find(&inputModel)
+	if tx.Error != nil {
+		return 0, errors.New("error get all data")
+	}
+	count := tx.RowsAffected
+	return count, nil
+}
+
+// SelectUser implements emergency.EmergencyDataInterface.
+func (repo *EmergencyData) SelectUser(id string, token string) (emergency.UserEntity, error) {
+
+	data, err := usernodejs.GetByIdUser(id, token)
+	if err != nil {
+		return emergency.UserEntity{}, errors.New("user tidak ditemukan")
+	}
+	fmt.Println("data",data)
+	dataUser := UserNodeToUser(data)
+	dataEntity := UserToUserEntity(dataUser)
+	return dataEntity, nil
+
+}
+
+// SendNotification implements emergency.EmergencyDataInterface.
+func (repo *EmergencyData) SendNotification(input helper.MessageGomailE) (string, error) {
+
+	data, err := helper.SendGomailMessageE(input)
+	if err != nil {
+		return "", err
+	}
+	return data, nil
 }
 
 // ActionGmail implements emergency.EmergencyDataInterface.
 func (repo *EmergencyData) ActionGmail(input string) error {
 	var inputModel HistoryAdmin
-	inputModel.Status=input
-	tx:=repo.db.Create(&inputModel)
-	if tx.Error!=nil{
+	inputModel.Status = input
+	tx := repo.db.Create(&inputModel)
+	if tx.Error != nil {
 		return tx.Error
 	}
 	return nil
@@ -68,22 +124,77 @@ func (repo *EmergencyData) SelectAll(param emergency.QueryParams, token string) 
 		id := strconv.Itoa(int(v.CallerID))
 		idCaller = append(idCaller, id)
 	}
+
+	ctx := context.Background()
 	var emergenciEntity []emergency.EmergencyEntity
+	var userCallRedis User
+	var userReceiverRedis User
 	for i := 0; i < len(emergensiUser); i++ {
 		for j := 0; j < len(emergensiUser); j++ {
-			data, _ := usernodejs.GetByIdUser(idCaller[j], token)
+			redisKey := fmt.Sprintf("user:%s", idCaller[j])
+
+			cachedData, err := repo.redis.Get(ctx, redisKey).Result()
+			if err == nil {
+				var userRedis User
+				if err := json.Unmarshal([]byte(cachedData), &userRedis); err != nil {
+					return 0, nil, err
+				}
+				log.Println("Data ditemukan di Redis cache")
+				userCallRedis = userRedis
+			} else if err != redis.Nil {
+				return 0, nil, err
+			} else {
+				data, _ := usernodejs.GetByIdUser(idCaller[j], token)
+				user := UserNodeToUser(data)
+				jsonData, err := json.Marshal(user)
+				if err != nil {
+					return 0, nil, err
+				}
+				errSet := repo.redis.Set(ctx, redisKey, jsonData, 24*time.Hour).Err()
+				if errSet != nil {
+					log.Println("Gagal menyimpan data ke Redis:", errSet)
+				} else {
+					log.Println("Data disimpan di Redis cache")
+				}
+				userCallRedis = user
+			}
+
 			idConv, _ := strconv.Atoi(idCaller[j])
 			if uint(idConv) == emergensiUser[i].CallerID {
-				user := UserNodeToUser(data)
-				emergensiUser[i].Caller = user
+				emergensiUser[i].Caller = userCallRedis
 			}
 		}
 		for k := 0; k < len(emergensiUser); k++ {
-			data, _ := usernodejs.GetByIdUser(idReceiver[k], token)
+			redisKey := fmt.Sprintf("user:%s", idReceiver[k])
+
+			cachedData, err := repo.redis.Get(ctx, redisKey).Result()
+			if err == nil {
+				var userRedis User
+				if err := json.Unmarshal([]byte(cachedData), &userRedis); err != nil {
+					return 0, nil, err
+				}
+				log.Println("Data ditemukan di Redis cache")
+				userReceiverRedis = userRedis
+			} else if err != redis.Nil {
+				return 0, nil, err
+			} else {
+				data, _ := usernodejs.GetByIdUser(idReceiver[k], token)
+				user := UserNodeToUser(data)
+				jsonData, err := json.Marshal(user)
+				if err != nil {
+					return 0, nil, err
+				}
+				errSet := repo.redis.Set(ctx, redisKey, jsonData, 24*time.Hour).Err()
+				if errSet != nil {
+					log.Println("Gagal menyimpan data ke Redis:", errSet)
+				} else {
+					log.Println("Data disimpan di Redis cache")
+				}
+				userReceiverRedis = user
+			}
 			idConv, _ := strconv.Atoi(idReceiver[k])
 			if uint(idConv) == emergensiUser[i].ReceiverID {
-				user := UserNodeToUser(data)
-				emergensiUser[i].Receiver = user
+				emergensiUser[i].Receiver = userReceiverRedis
 			}
 		}
 		emergenciEntity = append(emergenciEntity, EmergencyUserToEntity(emergensiUser[i]))
@@ -155,20 +266,21 @@ func (repo *EmergencyData) Delete(id uint) error {
 }
 
 // Insert implements emergency.EmergencyDataInterface.
-func (repo *EmergencyData) Insert(input emergency.EmergencyEntity) error {
+func (repo *EmergencyData) Insert(input emergency.EmergencyEntity) (uint, error) {
 	inputModel := EntityToModel(input)
 	tx := repo.db.Create(&inputModel)
 	if tx.Error != nil {
-		return errors.New("failed create data emergency")
+		return 0, errors.New("failed create data emergency")
 	}
 	if tx.RowsAffected == 0 {
-		return errors.New("row not affected")
+		return 0, errors.New("row not affected")
 	}
-	return nil
+	return inputModel.ID, nil
 }
 
-func New(db *gorm.DB) emergency.EmergencyDataInterface {
+func New(db *gorm.DB, redis *redis.Client) emergency.EmergencyDataInterface {
 	return &EmergencyData{
-		db: db,
+		db:    db,
+		redis: redis,
 	}
 }

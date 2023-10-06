@@ -139,3 +139,39 @@ func (repo *governmentQuery) Delete(id uint) error {
 	}
 	return nil
 }
+
+func (repo *governmentQuery) SelectCountUnit() (goverment.UnitCount, error) {
+	
+	types := []string{"hospital", "firestation", "police", "SAR", "dishub"}
+
+	counts := make([]int64, len(types))
+
+	var unitCount goverment.UnitCount
+
+	var Model []Government
+	for i, govType := range types {
+		tx := repo.db.Where("type=?", govType).Find(&Model)
+		if tx.Error != nil {
+			return goverment.UnitCount{}, errors.New("error getting " + govType)
+		}
+		counts[i] = int64(tx.RowsAffected)
+	}
+
+	if len(counts) >= 1 {
+		unitCount.RumahSakit = counts[0]
+	}
+	if len(counts) >= 2 {
+		unitCount.Pemadam = counts[1]
+	}
+	if len(counts) >= 3 {
+		unitCount.Kepolisian = counts[2]
+	}
+	if len(counts) >= 4 {
+		unitCount.SAR = counts[3]
+	}
+	if len(counts) >= 5 {
+		unitCount.Dishub = counts[4]
+	}
+
+	return unitCount, nil
+}

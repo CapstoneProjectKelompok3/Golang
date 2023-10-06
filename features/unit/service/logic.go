@@ -12,6 +12,23 @@ type UnitService struct {
 	validate    *validator.Validate
 }
 
+// // CreateUnit implements unit.UnitServiceInterface.
+// func (service *UnitService) CreateUnit(id uint, input unit.UnitHistoryEntity) error {
+// 	errDelt:=service.unitService.Delete(id)
+// 	if errDelt != nil{
+// 		return errDelt
+// 	}
+// 	idUnit,errUnit:=service.unitService.CreateUnit()
+// 	if errUnit != nil{
+// 		return errUnit
+// 	}
+// 	_,err:=service.unitService.CreateUnitHistory(idUnit,input)
+// 	if err != nil{
+// 		return err
+// 	}
+// 	return nil
+// }
+
 // GetAll implements unit.UnitServiceInterface.
 func (service *UnitService) GetAll(param unit.QueryParams, token string) (bool, []unit.UnitEntity, error) {
 	var totalPages int64

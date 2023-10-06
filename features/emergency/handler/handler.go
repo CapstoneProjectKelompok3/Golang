@@ -24,11 +24,13 @@ func New(handler emergency.EmergencyServiceInterface) *EmergencyHandler{
 
 func (handler *EmergencyHandler) Add(c echo.Context)error{
 	idClaller,_:=middlewares.ExtractTokenUserId(c)
+	// idClaller:=4
 	idReceiver:=c.Param("receiver_id")
 	idConv,errConv:=strconv.Atoi(idReceiver)
 	if errConv != nil{
 		return c.JSON(http.StatusBadRequest,"id not valid")
 	}
+	fmt.Println("id receiver",idReceiver)
 	var input EmergencyRequest
 	errBind:=c.Bind(&input)
 	if errBind != nil{
@@ -38,7 +40,11 @@ func (handler *EmergencyHandler) Add(c echo.Context)error{
 	entity.CallerID=uint(idClaller)
 	entity.ReceiverID=uint(idConv)
 
-	err:=handler.emergencyHandler.Add(entity)
+	token,errToken:=usernodejs.GetTokenHandler(c)
+	if errToken != nil{
+		return c.JSON(http.StatusUnauthorized,"fail get token")
+	}
+	err:=handler.emergencyHandler.Add(entity,token)
 	if err != nil{
 		if strings.Contains(err.Error(),"validation"){
 			return c.JSON(http.StatusBadRequest,err.Error())
@@ -69,6 +75,7 @@ func (handler *EmergencyHandler)Edit(c echo.Context)error{
 	if errConv != nil{
 		return c.JSON(http.StatusBadRequest,"id not valid")
 	}
+	idUser,level:=middlewares.ExtractTokenUserId(c)
 	var input EmergencyRequest
 	errBind:=c.Bind(&input)
 	if errBind != nil{
@@ -76,7 +83,7 @@ func (handler *EmergencyHandler)Edit(c echo.Context)error{
 	}
 	
 	Entity:=RequestToEntity(input)
-	err:=handler.emergencyHandler.Edit(Entity,uint(idConv))
+	err:=handler.emergencyHandler.Edit(Entity,uint(idConv),level,uint(idUser))
 	if err != nil{
 		return c.JSON(http.StatusInternalServerError,err.Error())
 	}
@@ -161,4 +168,15 @@ func (handler *EmergencyHandler)ActionLogic(c echo.Context)error{
 		return c.JSON(http.StatusInternalServerError,err.Error())
 	}
 	return c.JSON(http.StatusOK,"action tersimpan")
+}
+
+func (handler *EmergencyHandler)CountEmergency(c echo.Context)error{
+	count,err:=handler.emergencyHandler.SumEmergency()
+	if err != nil{
+		return c.JSON(http.StatusInternalServerError,err.Error())
+	}
+	return c.JSON(http.StatusOK,map[string]any{
+		"status":"success",
+		"jumlah_kasus":count,
+	})
 }

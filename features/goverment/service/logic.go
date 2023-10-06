@@ -12,6 +12,8 @@ type govermentService struct {
 	validate       *validator.Validate
 }
 
+
+
 func New(repo goverment.GovernmentDataInterface) goverment.GovernmentServiceInterface {
 	return &govermentService{
 		governmentData: repo,
@@ -67,4 +69,16 @@ func (service *govermentService) GetNearestLocation(latitude float64, longitude 
 		return nil, err
 	}
 	return result, nil
+}
+
+// GetCountUnit implements goverment.GovernmentServiceInterface.
+func (service *govermentService) GetCountUnit(level string) (goverment.UnitCount, error) {
+	if level !="superadmin"{
+		return goverment.UnitCount{},errors.New("hanya superadmin yang dapat melihat jumlah unit")
+	}
+	data,err:=service.governmentData.SelectCountUnit()
+	if err != nil{
+		return goverment.UnitCount{},err
+	}
+	return data,nil
 }
