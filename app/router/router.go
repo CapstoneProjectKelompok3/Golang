@@ -10,10 +10,6 @@ import (
 	hV "project-capston/features/vehicles/handler"
 	sV "project-capston/features/vehicles/service"
 
-	dU "project-capston/features/unit/data"
-	hU "project-capston/features/unit/handler"
-	sU "project-capston/features/unit/service"
-
 	_governmentData "project-capston/features/goverment/data"
 	_governmentHandler "project-capston/features/goverment/handler"
 	_governmentService "project-capston/features/goverment/service"
@@ -30,15 +26,14 @@ import (
 	hH "project-capston/features/history/handler"
 	sH "project-capston/features/history/service"
 
-
 	"github.com/go-redis/redis/v8"
 
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
-func InitRouter(db *gorm.DB, c *echo.Echo,redis *redis.Client) {
-	dataE := dE.New(db,redis)
+func InitRouter(db *gorm.DB, c *echo.Echo, redis *redis.Client) {
+	dataE := dE.New(db, redis)
 	serviceE := sE.New(dataE)
 	handlerE := hE.New(serviceE)
 	c.POST("/users/:receiver_id/emergencies", handlerE.Add, middlewares.JWTMiddleware())
@@ -73,7 +68,7 @@ func InitRouter(db *gorm.DB, c *echo.Echo,redis *redis.Client) {
 
 	c.GET("/get-nearest-government", governmentHandlerAPI.GetNearestGovernment, middlewares.JWTMiddleware())
 
-	c.GET("/governments/count",governmentHandlerAPI.CountUnit,middlewares.JWTMiddleware())
+	c.GET("/governments/count", governmentHandlerAPI.CountUnit, middlewares.JWTMiddleware())
 
 	//Teguh Government
 	driverData := _driverData.New(db)
@@ -87,8 +82,7 @@ func InitRouter(db *gorm.DB, c *echo.Echo,redis *redis.Client) {
 	c.GET("/driver/profile", driverHandlerAPI.GetProfileDriver, middlewares.JWTMiddleware())
 	c.GET("/driver/confirm", driverHandlerAPI.DriverAcceptOrRejectOrder, middlewares.JWTMiddleware())
 	c.PUT("/driver/ontrip", driverHandlerAPI.DriverOnTrip, middlewares.JWTMiddleware())
-	c.GET("/drivers/count",driverHandlerAPI.GetCountDriver)
-
+	c.GET("/drivers/count", driverHandlerAPI.GetCountDriver)
 
 	dataU := dU.New(db)
 	serviceU := sU.New(dataU)
@@ -109,4 +103,3 @@ func InitRouter(db *gorm.DB, c *echo.Echo,redis *redis.Client) {
 	c.GET("/histories", handlerH.GetAll, middlewares.JWTMiddleware())
 
 }
-

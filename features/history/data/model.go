@@ -13,7 +13,6 @@ type History struct {
 	UnitID   uint
 	DriverID uint
 	Status   string
-	Reason   string
 }
 
 type HistoryUser struct {
@@ -24,7 +23,6 @@ type HistoryUser struct {
 	UnitID    uint
 	DriverID  uint
 	Status    string `gorm:"type:enum('Accepted','Rejected');default:'rejected';column:status"`
-	Reason    string
 	Unit      User
 	Driver    User
 }
@@ -57,7 +55,6 @@ func ModelToUnitUser(history History) HistoryUser {
 		UnitID:    history.UnitID,
 		DriverID:  history.DriverID,
 		Status:    history.Status,
-		Reason:    history.Reason,
 		CreatedAt: history.CreatedAt,
 		UpdatedAt: history.UpdatedAt,
 		DeletedAt: history.DeletedAt.Time,
@@ -69,7 +66,6 @@ func UnitUserToEntity(histori HistoryUser) history.HistoryEntity {
 		UnitID:   histori.UnitID,
 		DriverID: histori.DriverID,
 		Status:   histori.Status,
-		Reason:   histori.Reason,
 		CreateAt: histori.CreatedAt,
 		UpdateAt: histori.UpdatedAt,
 		DeleteAt: histori.DeletedAt,
@@ -82,7 +78,6 @@ func HistoryUserToEntity(histori HistoryUser) history.HistoryEntity {
 		UnitID:   histori.UnitID,
 		DriverID: histori.DriverID,
 		Status:   histori.Status,
-		Reason:   histori.Reason,
 		CreateAt: histori.CreatedAt,
 		UpdateAt: histori.UpdatedAt,
 		DeleteAt: histori.DeletedAt,
@@ -97,7 +92,6 @@ func ModelToEntity(histori History) history.HistoryEntity {
 		UnitID:   histori.UnitID,
 		DriverID: histori.DriverID,
 		Status:   histori.Status,
-		Reason:   histori.Reason,
 		CreateAt: histori.CreatedAt,
 		UpdateAt: histori.UpdatedAt,
 		DeleteAt: histori.DeletedAt.Time,
@@ -109,6 +103,5 @@ func EntityToModel(history history.HistoryEntity) History {
 		UnitID:   history.UnitID,
 		DriverID: history.DriverID,
 		Status:   history.Status,
-		Reason:   history.Reason,
 	}
 }
