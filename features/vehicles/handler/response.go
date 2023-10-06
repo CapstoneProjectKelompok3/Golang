@@ -15,6 +15,8 @@ type GovermentResponse struct{
 	NameGoverment string `json:"name_goverment"`
 	Address string `json:"address"`
 	Type string `json:"type"`
+	Latitude  float64 `json:"latitude"`
+    Longitude float64 `json:"longitude"`
 }
 
 func EntityToResponse(vehicle vehicles.VehicleEntity)VehicleResponse{
@@ -32,5 +34,7 @@ func GovermentRresponse(goverment vehicles.GovernmentEntity)GovermentResponse{
 		NameGoverment: goverment.Name,
 		Address:       goverment.Address,
 		Type:          goverment.Type,
+		Latitude:      goverment.Latitude,
+		Longitude:     goverment.Longitude,
 	}
 }
