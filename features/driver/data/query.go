@@ -23,15 +23,28 @@ type driverQuery struct {
 	db *gorm.DB
 }
 
+// Delete implements driver.DriverDataInterface.
+func (repo *driverQuery) Delete(id uint) error {
+	var inputModel Driver
+	tx:=repo.db.Delete(&inputModel,id)
+	if tx.Error != nil{
+		return errors.New("delete driver failed")
+	}
+	if tx.RowsAffected ==0{
+		return errors.New("id not found")
+	}
+	return nil
+}
+
 // SelectCountDriver implements driver.DriverDataInterface.
 func (repo *driverQuery) SelectCountDriver() (int64, error) {
 	var input []Driver
-	tx:=repo.db.Find(&input)
-	if tx.Error != nil{
+	tx := repo.db.Find(&input)
+	if tx.Error != nil {
 		return 0, errors.New("fail get driver")
 	}
-	count:=tx.RowsAffected
-	return count,nil
+	count := tx.RowsAffected
+	return count, nil
 }
 
 // FinishTrip implements driver.DriverDataInterface.

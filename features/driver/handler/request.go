@@ -26,6 +26,7 @@ type AcceptOrRejectOrderRequest struct {
 
 type DriverRequest struct {
 	GovernmentID  uint    `json:"government_id" form:"government_id"`
+	EmergencyID   uint     `json:"emergency_id" form:"emergency_id"`
 	Fullname      string  `json:"fullname" form:"fullname"`
 	Email         string  `json:"email"`
 	Password      string  `json:"password"`

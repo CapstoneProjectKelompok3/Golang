@@ -56,6 +56,7 @@ type DriverDataInterface interface {
 	DriverOnTrip(id int, lat float64, long float64) (DriverCore, error)
 	FinishTrip(id int, status string) error
 	SelectCountDriver()(int64,error)
+	Delete(id uint)error
 }
 
 type DriverServiceInterface interface {
@@ -69,4 +70,5 @@ type DriverServiceInterface interface {
 	DriverOnTrip(id int, lat float64, long float64) (DriverCore, error)
 	FinishTrip(id int, status string) error
 	GetCountDriver()(int64,error)
+	Delete(id uint)error
 }
