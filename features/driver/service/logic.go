@@ -13,7 +13,6 @@ type driverService struct {
 	validate   *validator.Validate
 }
 
-
 func New(repo driver.DriverDataInterface) driver.DriverServiceInterface {
 	return &driverService{
 		driverData: repo,
@@ -98,9 +97,18 @@ func (service *driverService) FinishTrip(id int, status string) error {
 
 // GetCountDriver implements driver.DriverServiceInterface.
 func (service *driverService) GetCountDriver() (int64, error) {
-	count,err:=service.driverData.SelectCountDriver()
-	if err != nil{
-		return 0,err
+	count, err := service.driverData.SelectCountDriver()
+	if err != nil {
+		return 0, err
 	}
-	return count,nil
+	return count, nil
+}
+
+// Delete implements driver.DriverServiceInterface.
+func (service *driverService) Delete(id uint) error {
+	err:=service.driverData.Delete(id)
+	if err != nil{
+		return err
+	}
+	return nil
 }

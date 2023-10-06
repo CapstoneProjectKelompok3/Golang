@@ -83,6 +83,7 @@ func InitRouter(db *gorm.DB, c *echo.Echo, redis *redis.Client) {
 	c.GET("/driver/confirm", driverHandlerAPI.DriverAcceptOrRejectOrder, middlewares.JWTMiddleware())
 	c.PUT("/driver/ontrip", driverHandlerAPI.DriverOnTrip, middlewares.JWTMiddleware())
 	c.GET("/drivers/count", driverHandlerAPI.GetCountDriver)
+	c.DELETE("/drivers/:driver_id",driverHandlerAPI.Delete)
 
 	dataU := dU.New(db)
 	serviceU := sU.New(dataU)

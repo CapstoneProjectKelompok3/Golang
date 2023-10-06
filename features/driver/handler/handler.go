@@ -154,15 +154,6 @@ func (handler *DriverHandler) KerahkanDriver(c echo.Context) error {
 	totalSAR := c.QueryParam("SAR")
 	totalSARConv, _ := strconv.Atoi(totalSAR)
 
-	var inputUnit helper.UnitCount
-	inputUnit.UnitAmbulance=totalHospitalConv
-	inputUnit.UnitDamkar=totalFirestationConv
-	inputUnit.UnitDishub=totalDishubConv
-	inputUnit.UnitPolisi=totalPoliceConv
-	inputUnit.UnitSAR=totalSARConv
-	unit:=helper.InputUnit(inputUnit)
-	fmt.Println("unit",unit)
-
 	result, err := handler.driverService.KerahkanDriver(lat, lon, totalPoliceConv, totalHospitalConv, totalFirestationConv, totalDishubConv, totalSARConv)
 	fmt.Println("Result", result)
 	if err != nil {
@@ -302,4 +293,17 @@ func (handler *DriverHandler)GetCountDriver(c echo.Context)error{
 		"status":"success",
 		"jumlah_petugas":count,
 	})
+}
+
+func (handler *DriverHandler) Delete(c echo.Context)error{
+	id:=c.Param("driver_id")
+	idConv,errConv:=strconv.Atoi(id)
+	if errConv != nil{
+		return c.JSON(http.StatusBadRequest,"id not valid")
+	}
+	err:=handler.driverService.Delete(uint(idConv))
+	if err!= nil{
+		return c.JSON(http.StatusInternalServerError,err.Error())
+	}
+	return c.JSON(http.StatusOK,"success delete driver")
 }
