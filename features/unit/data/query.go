@@ -37,23 +37,13 @@ func (repo *UnitData) SelectById(id uint, token string) (unit.UnitEntity, error)
 		return unit.UnitEntity{}, errUserE
 	}
 
-	idVehicle := strconv.Itoa(int(inputModel.VehicleID))
-	dataVehicle, errUserV := usernodejs.GetByIdUser(idVehicle, token)
-	if errUserV != nil {
-		return unit.UnitEntity{}, errUserV
-	}
-
 	userEmergencies := UserNodeToUser(dataEmergencies)
 	userEntityEmergencies := UserToUserEntity(userEmergencies)
-
-	userVehicle := UserNodeToUser(dataVehicle)
-	userEntityVehicle := UserToUserEntity(userVehicle)
 
 	unitUser := ModelToUnitUser(inputModel)
 
 	output := UnitUserToEntity(unitUser)
 	output.Emergencies = userEntityEmergencies
-	output.Vehicle = userEntityVehicle
 	return output, nil
 }
 
@@ -95,11 +85,6 @@ func (repo *UnitData) SelectAll(param unit.QueryParams, token string) (int64, []
 		idEmergencies = append(idEmergencies, id)
 	}
 
-	var idVehicle []string
-	for _, v := range uniitUser {
-		id := strconv.Itoa(int(v.VehicleID))
-		idVehicle = append(idVehicle, id)
-	}
 	var uniitEntity []unit.UnitEntity
 	for i := 0; i < len(uniitUser); i++ {
 		for j := 0; j < len(uniitUser); j++ {
@@ -108,14 +93,6 @@ func (repo *UnitData) SelectAll(param unit.QueryParams, token string) (int64, []
 			if uint(idConv) == uniitUser[i].EmergenciesID {
 				user := UserNodeToUser(data)
 				uniitUser[i].Emergencies = user
-			}
-		}
-		for k := 0; k < len(uniitUser); k++ {
-			data, _ := usernodejs.GetByIdUser(idVehicle[k], token)
-			idConv, _ := strconv.Atoi(idVehicle[k])
-			if uint(idConv) == uniitUser[i].VehicleID {
-				user := UserNodeToUser(data)
-				uniitUser[i].Vehicle = user
 			}
 		}
 		uniitEntity = append(uniitEntity, UnitUserToEntity(uniitUser[i]))
