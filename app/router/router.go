@@ -10,6 +10,10 @@ import (
 	hV "project-capston/features/vehicles/handler"
 	sV "project-capston/features/vehicles/service"
 
+	dU "project-capston/features/unit/data"
+	hU "project-capston/features/unit/handler"
+	sU "project-capston/features/unit/service"
+
 	_governmentData "project-capston/features/goverment/data"
 	_governmentHandler "project-capston/features/goverment/handler"
 	_governmentService "project-capston/features/goverment/service"
@@ -27,7 +31,8 @@ func InitRouter(db *gorm.DB, c *echo.Echo,redis *redis.Client) {
 	dataE := dE.New(db,redis)
 	serviceE := sE.New(dataE)
 	handlerE := hE.New(serviceE)
-	c.POST("/users/:receiver_id/emergencies", handlerE.Add, middlewares.JWTMiddleware())
+	// c.POST("/users/:receiver_id/emergencies", handlerE.Add, middlewares.JWTMiddleware())
+	c.POST("/users/:receiver_id/emergencies", handlerE.Add)
 	c.DELETE("/emergencies/:emergency_id", handlerE.Delete, middlewares.JWTMiddleware())
 	c.PUT("/emergencies/:emergency_id", handlerE.Edit, middlewares.JWTMiddleware())
 	c.GET("/emergencies/:emergency_id", handlerE.GetById, middlewares.JWTMiddleware())
@@ -74,4 +79,11 @@ func InitRouter(db *gorm.DB, c *echo.Echo,redis *redis.Client) {
 	c.GET("/driver/confirm", driverHandlerAPI.DriverAcceptOrRejectOrder, middlewares.JWTMiddleware())
 	c.PUT("/driver/ontrip", driverHandlerAPI.DriverOnTrip, middlewares.JWTMiddleware())
 	c.GET("/drivers/count",driverHandlerAPI.GetCountDriver)
+
+	unitData:=dU.New(db)
+	unitService:=sU.New(unitData)
+	unitHandler:=hU.New(unitService)
+
+	c.POST("/units",unitHandler.Add)
 }
+

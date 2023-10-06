@@ -24,6 +24,17 @@ type UserResponse struct{
 	Level           string `json:"level,omitempty"`
 }
 
+type Unit struct {
+	Id         	uint
+	CreateAt   	time.Time
+	UpdateAt 	time.Time
+	DeleteAt 	time.Time
+	EmergenciesID uint
+	VehicleID     uint
+	GovermentType string
+	SumOfUnit int 
+}
+
 func EntityToResponse(data emergency.EmergencyEntity)EmergencyResponse{
 	return EmergencyResponse{
 		Id:         data.Id,

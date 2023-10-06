@@ -24,6 +24,7 @@ func New(handler emergency.EmergencyServiceInterface) *EmergencyHandler{
 
 func (handler *EmergencyHandler) Add(c echo.Context)error{
 	idClaller,_:=middlewares.ExtractTokenUserId(c)
+	// idClaller:=4
 	idReceiver:=c.Param("receiver_id")
 	idConv,errConv:=strconv.Atoi(idReceiver)
 	if errConv != nil{

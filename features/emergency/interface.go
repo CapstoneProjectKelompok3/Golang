@@ -19,7 +19,16 @@ type EmergencyEntity struct {
 	Receiver   UserEntity
 	IsClose bool
 }
-
+type UnitEntity struct {
+	Id         	uint
+	CreateAt   	time.Time
+	UpdateAt 	time.Time
+	DeleteAt 	time.Time
+	EmergenciesID uint
+	VehicleID     uint
+	GovermentType string
+	SumOfUnit int 
+}
 type UserEntity struct{
 	ID        		int
 	Name 			string
@@ -37,6 +46,7 @@ type QueryParams struct {
 
 type EmergencyDataInterface interface{
 	Insert(input EmergencyEntity)(uint,error)
+	CreateUnit(input UnitEntity)(uint,error)
 	Delete(id uint)(error)
 	Update(input EmergencyEntity, id uint)(error)
 	SelectById(id uint,token string)(EmergencyEntity,error)

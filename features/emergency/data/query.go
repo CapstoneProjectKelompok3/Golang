@@ -22,15 +22,28 @@ type EmergencyData struct {
 	redis *redis.Client
 }
 
+// CreateUnit implements emergency.EmergencyDataInterface.
+func (repo *EmergencyData) CreateUnit(input emergency.UnitEntity) (uint, error) {
+	inputModel:=UnitEntityToModel(input)
+	tx:=repo.db.Create(&inputModel)
+	if tx.Error != nil{
+		return 0,errors.New("failed insert unit")
+	}
+	if tx.RowsAffected ==0{
+		return 0, errors.New("row not affected")
+	}
+	return inputModel.ID,nil
+}
+
 // SumEmergency implements emergency.EmergencyDataInterface.
 func (repo *EmergencyData) SumEmergency() (int64, error) {
 	var inputModel []Emergency
-	tx:=repo.db.Find(&inputModel)
-	if tx.Error != nil{
-		return 0,errors.New("error get all data")
+	tx := repo.db.Find(&inputModel)
+	if tx.Error != nil {
+		return 0, errors.New("error get all data")
 	}
-	count:=tx.RowsAffected
-	return count,nil
+	count := tx.RowsAffected
+	return count, nil
 }
 
 // SelectUser implements emergency.EmergencyDataInterface.
