@@ -2,6 +2,7 @@ package data
 
 import (
 	"errors"
+	"log"
 	"project-capston/features/vehicles"
 
 	"gorm.io/gorm"
@@ -27,7 +28,7 @@ func (repo *VehicleData) Delete(id uint) error {
 // SelectAll implements vehicles.VehicleDataInterface.
 func (repo *VehicleData) SelectAll() ([]vehicles.VehicleEntity, error) {
 	var inputModel []Vehicle
-	tx := repo.db.Find(&inputModel)
+	tx := repo.db.Preload("Goverments").Find(&inputModel)
 	if tx.Error != nil {
 		return nil, errors.New("get all failed")
 	}
@@ -41,11 +42,13 @@ func (repo *VehicleData) SelectAll() ([]vehicles.VehicleEntity, error) {
 // SelectById implements vehicles.VehicleDataInterface.
 func (repo *VehicleData) SelectById(id uint) (vehicles.VehicleEntity, error) {
 	var inputModel Vehicle
-	tx := repo.db.Preload("").First(&inputModel, id)
+	tx := repo.db.Preload("Goverments").First(&inputModel, id)
 	if tx.Error != nil {
 		return vehicles.VehicleEntity{}, errors.New("get vehicle by id failed")
 	}
+	log.Println("data vehicle",inputModel)
 	entity := ModelToEntity(inputModel)
+	log.Println("data vehicle",entity)
 	return entity, nil
 }
 

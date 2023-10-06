@@ -8,16 +8,35 @@ type UnitCount struct {
 	UnitSAR       int
 }
 
+var (
+	UnitPolisiInput    = 0
+	UnitAmbulanceInput = 0
+	UnitDamkarInput    = 0
+	UnitDishubInput    = 0
+	UnitSARInput       = 0
+)
+
 func InputUnit(input UnitCount) UnitCount {
+	UnitPolisiInput = input.UnitPolisi
+	UnitAmbulanceInput = input.UnitAmbulance
+	UnitDamkarInput = input.UnitDamkar
+	UnitDishubInput = input.UnitDishub
+	UnitSARInput = input.UnitSAR
 	return UnitCount{
-		UnitPolisi:    input.UnitPolisi,
-		UnitAmbulance: input.UnitAmbulance,
-		UnitDamkar:    input.UnitDamkar,
-		UnitDishub:    input.UnitDishub,
-		UnitSAR:       input.UnitSAR,
+		UnitPolisi:    UnitPolisiInput,
+		UnitAmbulance: UnitAmbulanceInput,
+		UnitDamkar:    UnitDamkarInput,
+		UnitDishub:    UnitDishubInput,
+		UnitSAR:       UnitSARInput,
 	}
 }
 
-func OutputUnit() UnitCount {
-	return UnitCount{}
+func UnitDriver() UnitCount {
+	return UnitCount{
+		UnitPolisi:    UnitPolisiInput,
+		UnitAmbulance: UnitAmbulanceInput,
+		UnitDamkar:    UnitDamkarInput,
+		UnitDishub:    UnitDishubInput,
+		UnitSAR:       UnitSARInput,
+	}
 }
