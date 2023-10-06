@@ -12,7 +12,7 @@ import (
 
 func main() {
 	cfg := config.InitConfig()
-	mysql:=database.InitMysql(cfg)
+	mysql := database.InitMysql(cfg)
 	database.InitialMigration(mysql)
 
 	redis:=middlewares.CreateRedisClient()

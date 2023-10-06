@@ -9,9 +9,9 @@ type UnitResponse struct {
 	Id            uint         `json:"id,omitempty"`
 	CreateAt      time.Time    `json:"create_at,omitempty"`
 	EmergenciesID uint         `json:"emergencies_id,omitempty"`
-	VehicleID     uint         `json:"vehicle_id,omitempty"`
+	GovermentType string       `json:"goverment_type,omitempty"`
+	SumOfUnit     int          `json:"sum_of_unit,omitempty"`
 	Emergencies   UserResponse `json:"emergencies,omitempty"`
-	Vehicle       UserResponse `json:"vehicle,omitempty"`
 }
 
 type UnitHistoryResponse struct {
@@ -32,9 +32,9 @@ func EntityToResponse(data unit.UnitEntity) UnitResponse {
 		Id:            data.Id,
 		CreateAt:      data.CreateAt,
 		EmergenciesID: data.EmergenciesID,
-		VehicleID:     data.VehicleID,
+		GovermentType: data.GovermentType,
+		SumOfUnit:     data.SumOfUnit,
 		Emergencies:   UserEntityToResponse(data.Emergencies),
-		Vehicle:       UserEntityToResponse(data.Vehicle),
 	}
 }
 
