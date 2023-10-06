@@ -34,10 +34,10 @@ func (service *EmergencyService) ActionGmail(input string) error {
 }
 
 // GetAll implements emergency.EmergencyServiceInterface.
-func (service *EmergencyService) GetAll(param emergency.QueryParams, token string) (bool, []emergency.EmergencyEntity, error) {
+func (service *EmergencyService) GetAll(param emergency.QueryParams, token string,idCall uint,level string) (bool, []emergency.EmergencyEntity, error) {
 	var totalPages int64
 	nextPage := true
-	count, data, err := service.emergencyService.SelectAll(param, token)
+	count, data, err := service.emergencyService.SelectAll(param, token,idCall,level)
 	if err != nil {
 		return true, nil, err
 	}

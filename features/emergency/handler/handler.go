@@ -113,6 +113,7 @@ func (handler *EmergencyHandler)GetById(c echo.Context)error{
 }
 
 func (handler *EmergencyHandler) GetAll(c echo.Context)error{
+	idCall,level:=middlewares.ExtractTokenUserId(c)
 	var qparams emergency.QueryParams
 	page:= c.QueryParam("page")
 	itemsPerPage:=c.QueryParam("itemsPerPage")
@@ -144,7 +145,7 @@ func (handler *EmergencyHandler) GetAll(c echo.Context)error{
 		return c.JSON(http.StatusUnauthorized,"fail get token")
 	}
 
-	bol,data,err:=handler.emergencyHandler.GetAll(qparams,token)
+	bol,data,err:=handler.emergencyHandler.GetAll(qparams,token,uint(idCall),level)
 	if err != nil{
 		return c.JSON(http.StatusInternalServerError,err.Error())
 	}
