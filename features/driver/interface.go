@@ -54,9 +54,10 @@ type DriverDataInterface interface {
 	SelectProfile(id int) (DriverCore, error)
 	AcceptOrRejectOrder(IsAccepted bool, idDriver int) error
 	DriverOnTrip(id int, lat float64, long float64) (DriverCore, error)
-	FinishTrip(id int, status string) error
-	SelectCountDriver()(int64,error)
-	Delete(id uint)error
+	FinishTrip(id int) error
+	Logout(id int) error
+	SelectCountDriver() (int64, error)
+	Delete(id uint) error
 }
 
 type DriverServiceInterface interface {
@@ -68,7 +69,8 @@ type DriverServiceInterface interface {
 	GetProfile(id int) (DriverCore, error)
 	AcceptOrRejectOrder(IsAccepted bool, idDriver int) error
 	DriverOnTrip(id int, lat float64, long float64) (DriverCore, error)
-	FinishTrip(id int, status string) error
-	GetCountDriver()(int64,error)
-	Delete(id uint)error
+	FinishTrip(id int) error
+	Logout(id int) error
+	GetCountDriver() (int64, error)
+	Delete(id uint) error
 }

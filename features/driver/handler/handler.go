@@ -284,26 +284,48 @@ func (handler *DriverHandler) DriverAcceptOrRejectOrder(c echo.Context) error {
 	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, message, nil))
 }
 
-func (handler *DriverHandler)GetCountDriver(c echo.Context)error{
-	count,err:=handler.driverService.GetCountDriver()
-	if err != nil{
-		return c.JSON(http.StatusInternalServerError,err.Error())
+func (handler *DriverHandler) GetCountDriver(c echo.Context) error {
+	count, err := handler.driverService.GetCountDriver()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-	return c.JSON(http.StatusOK,map[string]any{
-		"status":"success",
-		"jumlah_petugas":count,
+	return c.JSON(http.StatusOK, map[string]any{
+		"status":         "success",
+		"jumlah_petugas": count,
 	})
 }
 
-func (handler *DriverHandler) Delete(c echo.Context)error{
-	id:=c.Param("driver_id")
-	idConv,errConv:=strconv.Atoi(id)
-	if errConv != nil{
-		return c.JSON(http.StatusBadRequest,"id not valid")
+func (handler *DriverHandler) DriverLogout(c echo.Context) error {
+	idToken := middlewares.ExtractTokenDriverId(c)
+
+	err := handler.driverService.Logout(idToken)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusNotFound, err.Error(), nil))
 	}
-	err:=handler.driverService.Delete(uint(idConv))
-	if err!= nil{
-		return c.JSON(http.StatusInternalServerError,err.Error())
+	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "Success Logout", nil))
+}
+
+func (handler *DriverHandler) DriverFinishedTrip(c echo.Context) error {
+	idToken := middlewares.ExtractTokenDriverId(c)
+
+	err := handler.driverService.FinishTrip(idToken)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusNotFound, err.Error(), nil))
 	}
-	return c.JSON(http.StatusOK,"success delete driver")
+	return c.JSON(http.StatusOK, helper.WebResponse(http.StatusOK, "Success Finished your trip", nil))
+}
+
+func (handler *DriverHandler) Delete(c echo.Context) error {
+	id := c.Param("driver_id")
+	idConv, errConv := strconv.Atoi(id)
+	if errConv != nil {
+		return c.JSON(http.StatusBadRequest, "id not valid")
+	}
+	err := handler.driverService.Delete(uint(idConv))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err.Error())
+	}
+	return c.JSON(http.StatusOK, "success delete driver")
 }

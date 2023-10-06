@@ -26,11 +26,11 @@ type driverQuery struct {
 // Delete implements driver.DriverDataInterface.
 func (repo *driverQuery) Delete(id uint) error {
 	var inputModel Driver
-	tx:=repo.db.Delete(&inputModel,id)
-	if tx.Error != nil{
+	tx := repo.db.Delete(&inputModel, id)
+	if tx.Error != nil {
 		return errors.New("delete driver failed")
 	}
-	if tx.RowsAffected ==0{
+	if tx.RowsAffected == 0 {
 		return errors.New("id not found")
 	}
 	return nil
@@ -47,9 +47,22 @@ func (repo *driverQuery) SelectCountDriver() (int64, error) {
 	return count, nil
 }
 
+// Logout implements driver.DriverDataInterface.
+func (repo *driverQuery) Logout(id int) error {
+	tx := repo.db.Exec("UPDATE drivers SET status=0 WHERE id=?", id) // proses query insert
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
+}
+
 // FinishTrip implements driver.DriverDataInterface.
-func (*driverQuery) FinishTrip(id int, status string) error {
-	panic("unimplemented")
+func (repo *driverQuery) FinishTrip(id int) error {
+	tx := repo.db.Exec("UPDATE drivers SET driving_status='on_finished' WHERE id=?", id) // proses query insert
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
 }
 
 // DriverOnTrip implements driver.DriverDataInterface.

@@ -90,8 +90,14 @@ func (service *driverService) DriverOnTrip(id int, lat float64, long float64) (d
 }
 
 // FinishTrip implements driver.DriverServiceInterface.
-func (service *driverService) FinishTrip(id int, status string) error {
-	err := service.driverData.FinishTrip(id, status)
+func (service *driverService) FinishTrip(id int) error {
+	err := service.driverData.FinishTrip(id)
+	return err
+}
+
+// Logout implements driver.DriverServiceInterface.
+func (service *driverService) Logout(id int) error {
+	err := service.driverData.Logout(id)
 	return err
 }
 
@@ -106,8 +112,8 @@ func (service *driverService) GetCountDriver() (int64, error) {
 
 // Delete implements driver.DriverServiceInterface.
 func (service *driverService) Delete(id uint) error {
-	err:=service.driverData.Delete(id)
-	if err != nil{
+	err := service.driverData.Delete(id)
+	if err != nil {
 		return err
 	}
 	return nil
