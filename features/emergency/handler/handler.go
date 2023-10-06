@@ -24,12 +24,13 @@ func New(handler emergency.EmergencyServiceInterface) *EmergencyHandler{
 
 func (handler *EmergencyHandler) Add(c echo.Context)error{
 	idClaller,_:=middlewares.ExtractTokenUserId(c)
+	// idClaller:=4
 	idReceiver:=c.Param("receiver_id")
 	idConv,errConv:=strconv.Atoi(idReceiver)
 	if errConv != nil{
 		return c.JSON(http.StatusBadRequest,"id not valid")
 	}
-
+	fmt.Println("id receiver",idReceiver)
 	var input EmergencyRequest
 	errBind:=c.Bind(&input)
 	if errBind != nil{

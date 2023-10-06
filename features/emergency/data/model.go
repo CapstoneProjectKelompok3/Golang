@@ -19,6 +19,14 @@ type Emergency struct {
 	IsClose bool
 }
 
+type Unit struct {
+	gorm.Model
+	EmergenciesID uint
+	VehicleID     uint `gorm:"default:1"`
+	GovermentType string `gorm:"type:enum('hospital','police','firestation','dishub','SAR');column:type;default:hospital"`
+	SumOfUnit int 
+}
+
 type HistoryAdmin struct{
 	gorm.Model
 	AdminId uint
@@ -142,5 +150,27 @@ func EntityToModel(emergenci emergency.EmergencyEntity)Emergency{
 		Name: emergenci.Name,
 		Latitude:   emergenci.Latitude,
 		Longitude:  emergenci.Longitude,
+	}
+}
+
+func UnitModelToEntity(unit Unit)emergency.UnitEntity{
+	return emergency.UnitEntity{
+		Id:            unit.ID,
+		CreateAt:      unit.CreatedAt,
+		UpdateAt:      unit.UpdatedAt,
+		DeleteAt:      unit.DeletedAt.Time,
+		EmergenciesID: unit.EmergenciesID,
+		VehicleID:     unit.VehicleID,
+		GovermentType: unit.GovermentType,
+		SumOfUnit:     unit.SumOfUnit,
+	}
+}
+
+func UnitEntityToModel(unit emergency.UnitEntity)Unit{
+	return Unit{
+		EmergenciesID: unit.EmergenciesID,
+		VehicleID:     unit.VehicleID,
+		GovermentType: unit.GovermentType,
+		SumOfUnit:     unit.SumOfUnit,
 	}
 }

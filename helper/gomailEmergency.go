@@ -24,13 +24,13 @@ const (
 
 func SendGomailMessageE(input MessageGomailE) (string, error) {
 	m := gomail.NewMessage()
-	m.SetHeader("From", email_from)
+	m.SetHeader("From", email_fromE)
 	m.SetHeader("To", input.EmailReceiver)
 	m.SetHeader("Subject", input.Sucject)
 	htmlBody := HTMLImergencyE(input.Content,input.Name)
 	m.SetBody("text/html", htmlBody)
 
-	d := gomail.NewDialer("smtp.gmail.com", 587, email_from, pass_app)
+	d := gomail.NewDialer("smtp.gmail.com", 587, email_fromE, pass_appE)
 
 	if err := d.DialAndSend(m); err != nil {
 		return "", errors.New("gagal mengirim email")
