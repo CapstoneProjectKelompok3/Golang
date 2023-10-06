@@ -9,7 +9,6 @@ import (
 	history "project-capston/features/history/data"
 	unit "project-capston/features/unit/data"
 
-
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -30,7 +29,7 @@ func InitialMigration(db *gorm.DB) {
 	db.AutoMigrate(&emergency.Unit{})
 	db.AutoMigrate(&government.Government{})
 	db.AutoMigrate(&driver.Driver{})
-	db.AutoMigrate(&data.Vehicle{})
+	// db.AutoMigrate(&data.Vehicle{})
 	db.AutoMigrate(&unit.Unit{})
 	db.AutoMigrate(&history.History{})
 
