@@ -17,3 +17,7 @@ func InputUnit(input UnitCount) UnitCount {
 		UnitSAR:       input.UnitSAR,
 	}
 }
+
+func OutputUnit() UnitCount {
+	return UnitCount{}
+}

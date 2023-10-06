@@ -48,10 +48,12 @@ func (repo *EmergencyData) SumEmergency() (int64, error) {
 
 // SelectUser implements emergency.EmergencyDataInterface.
 func (repo *EmergencyData) SelectUser(id string, token string) (emergency.UserEntity, error) {
+
 	data, err := usernodejs.GetByIdUser(id, token)
 	if err != nil {
 		return emergency.UserEntity{}, errors.New("user tidak ditemukan")
 	}
+	fmt.Println("data",data)
 	dataUser := UserNodeToUser(data)
 	dataEntity := UserToUserEntity(dataUser)
 	return dataEntity, nil

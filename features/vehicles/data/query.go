@@ -41,7 +41,7 @@ func (repo *VehicleData) SelectAll() ([]vehicles.VehicleEntity, error) {
 // SelectById implements vehicles.VehicleDataInterface.
 func (repo *VehicleData) SelectById(id uint) (vehicles.VehicleEntity, error) {
 	var inputModel Vehicle
-	tx := repo.db.First(&inputModel, id)
+	tx := repo.db.Preload("").First(&inputModel, id)
 	if tx.Error != nil {
 		return vehicles.VehicleEntity{}, errors.New("get vehicle by id failed")
 	}

@@ -11,7 +11,17 @@ type VehicleEntity struct {
 	Plate       string `validate:"required"`
 	Status      bool
 }
-
+type GovernmentEntity struct {
+	ID        uint   
+	Name      string 
+	Type      string 
+	Address   string
+	Latitude  float64
+	Longitude float64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt time.Time
+}
 type VehicleDataInterface interface{
 	Insert(input VehicleEntity)(error)
 	Update(input VehicleEntity,id uint)error

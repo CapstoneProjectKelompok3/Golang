@@ -55,8 +55,8 @@ type UnitDataInterface interface {
 	Update(input UnitEntity, id uint) error
 	SelectById(id uint, token string) (UnitEntity, error)
 	SelectAll(param QueryParams, token string) (int64, []UnitEntity, error)
-	CreateUnit()(uint,error)
-	CreateUnitHistory(id uint, input UnitHistoryEntity)(uint,error)
+	// CreateUnit()(uint,error)
+	// CreateUnitHistory(id uint, input UnitHistoryEntity)(uint,error)
 }
 
 type UnitServiceInterface interface {
@@ -65,5 +65,5 @@ type UnitServiceInterface interface {
 	Edit(input UnitEntity, id uint) error
 	GetById(id uint, token string) (UnitEntity, error)
 	GetAll(param QueryParams, token string) (bool, []UnitEntity, error)
-	CreateUnit(id uint, input UnitHistoryEntity)(error)
+	// CreateUnit(id uint, input UnitHistoryEntity)(error)
 }

@@ -101,21 +101,6 @@ func (service *EmergencyService) Add(input emergency.EmergencyEntity, token stri
 	if errValidate != nil {
 		return errors.New("error validate, receiver_id/longitude/latitude require")
 	}
-	id := strconv.Itoa(int(input.ReceiverID))
-	dataUser, errUser := service.emergencyService.SelectUser(id, token)
-	if errUser != nil {
-		return errUser
-	}
-
-	idCall := strconv.Itoa(int(input.CallerID))
-	dataUserCall, errUserCall := service.emergencyService.SelectUser(idCall, token)
-	if errUserCall != nil {
-		return errUserCall
-	}
-
-	if dataUser.Level != "admin" {
-		return errors.New("receiver id harus berlevel admin")
-	}
 
 	idInsert, errInsert := service.emergencyService.Insert(input)
 	if errInsert != nil {
@@ -136,10 +121,15 @@ func (service *EmergencyService) Add(input emergency.EmergencyEntity, token stri
 		return errUpdate
 	}
 
+	idCall := strconv.Itoa(int(input.CallerID))
+	dataUserCall, errUserCall := service.emergencyService.SelectUser(idCall, token)
+	if errUserCall != nil {
+		return errUserCall
+	}
 	notif := helper.MessageGomailE{
-		EmailReceiver: dataUser.Email,
+		EmailReceiver: dataUserCall.Email,
 		Sucject:       name,
-		Content:       "Kasus terbaru yang harus ditangani, semoga admin dapat meluangkan waktunya untuk menangani masalah ini",
+		Content:       "Kasus terbaru yang harus sedang ditangani, semoga user dapat tenang dan menunggu notifikasi selanjutnya",
 		Name:          dataUserCall.Name,
 		Email:         dataUserCall.Email,
 	}

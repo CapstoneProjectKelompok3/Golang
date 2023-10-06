@@ -30,7 +30,7 @@ func (handler *EmergencyHandler) Add(c echo.Context)error{
 	if errConv != nil{
 		return c.JSON(http.StatusBadRequest,"id not valid")
 	}
-
+	fmt.Println("id receiver",idReceiver)
 	var input EmergencyRequest
 	errBind:=c.Bind(&input)
 	if errBind != nil{
