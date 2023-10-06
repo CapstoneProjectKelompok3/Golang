@@ -353,7 +353,8 @@ func (repo *driverQuery) Login(email string, password string) (dataLogin driver.
 		}
 
 		if tx.RowsAffected == 0 {
-			return driver.Core{}, errors.New("data not found")
+			fmt.Println("kwrjjerkekerwkew")
+			return driver.Core{}, errors.New("Wrong email or password")
 		}
 	} else {
 		return driver.Core{}, errors.New("data not found")

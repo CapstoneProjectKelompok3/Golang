@@ -36,7 +36,9 @@ func (handler *DriverHandler) CreateDriver(c echo.Context) error {
 	driverCore := RequestToCore(*driverInput)
 
 	err := handler.driverService.Create(driverCore)
-
+	if strings.Contains(err.Error(), "for key 'drivers.email'") {
+		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "Drivers with this", nil))
+	}
 	if err != nil {
 		if strings.Contains(err.Error(), "validation") {
 			return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, err.Error(), nil))
@@ -102,7 +104,7 @@ func (handler *DriverHandler) Login(c echo.Context) error {
 		if strings.Contains(err.Error(), "validation") {
 			return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, err.Error(), nil))
 		} else {
-			return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error login", nil))
+			return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, err.Error(), nil))
 
 		}
 	}
