@@ -76,6 +76,10 @@ func (service *UnitService) Add(input unit.UnitEntity) error {
 	if errValidate != nil {
 		return errors.New("error validate")
 	}
+
+	if input.GovermentType != "Polisi" && input.GovermentType != "Rumah Sakit" && input.GovermentType != "Damkar" && input.GovermentType != "DISHUB" && input.GovermentType != "SAR" {
+		return errors.New("input is wrong")
+	}
 	err := service.unitService.Insert(input)
 	if err != nil {
 		return err

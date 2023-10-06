@@ -12,7 +12,6 @@ type HistoryResponse struct {
 	UnitID   uint      `json:"unit_id,omitempty"`
 	DriverID uint      `json:"driver_id,omitempty"`
 	Status   string    `json:"status,omitempty"`
-	Reason   string    `json:"reason,omitempty"`
 }
 
 type UserResponse struct {
@@ -28,7 +27,6 @@ func EntityToResponse(data history.HistoryEntity) HistoryResponse {
 		UnitID:   data.UnitID,
 		DriverID: data.DriverID,
 		Status:   data.Status,
-		Reason:   data.Reason,
 	}
 }
 
