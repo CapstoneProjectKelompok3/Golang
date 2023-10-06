@@ -10,7 +10,6 @@ type HistoryEntity struct {
 	DeleteAt time.Time
 	DriverID uint
 	Status   string `gorm:"type:enum('Accepted','Rejected');default:'rejected';column:status"`
-	Reason   string
 	Unit     UserEntity
 	Driver   UserEntity
 }
