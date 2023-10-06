@@ -82,7 +82,7 @@ func (repo *EmergencyData) ActionGmail(input string) error {
 }
 
 // SelectAll implements emergency.EmergencyDataInterface.
-func (repo *EmergencyData) SelectAll(param emergency.QueryParams, token string) (int64, []emergency.EmergencyEntity, error) {
+func (repo *EmergencyData) SelectAll(param emergency.QueryParams, token string,idCall uint,level string) (int64, []emergency.EmergencyEntity, error) {
 	var inputModel []Emergency
 	var totalEmergency int64
 
@@ -103,10 +103,11 @@ func (repo *EmergencyData) SelectAll(param emergency.QueryParams, token string) 
 	// if param.SearchName !=""{
 	// 	query=query.Where("caller_id like ? or receiver_id=?","%"+param.SearchName+"%","%"+param.SearchName+"%")
 	// }
-	tx := query.Find(&inputModel)
-	if tx.Error != nil {
-		return 0, nil, errors.New("error get all emergency")
-	}
+	if level =="admin" ||level =="superadmin"{
+		tx := query.Find(&inputModel)
+			if tx.Error != nil {
+				return 0, nil, errors.New("error get all emergency")
+			}
 
 	var emergensiUser []EmergencyUser
 	for _, e := range inputModel {
@@ -200,8 +201,111 @@ func (repo *EmergencyData) SelectAll(param emergency.QueryParams, token string) 
 		emergenciEntity = append(emergenciEntity, EmergencyUserToEntity(emergensiUser[i]))
 
 	}
-
 	return totalEmergency, emergenciEntity, nil
+
+	}
+	if level == "user"{
+		tx := query.Where("caller_id=?",idCall).Find(&inputModel)
+			if tx.Error != nil {
+				return 0, nil, errors.New("error get all emergency")
+			}
+
+	var emergensiUser []EmergencyUser
+	for _, e := range inputModel {
+		emergensiUser = append(emergensiUser, ModelToEmergencyUser(e))
+	}
+
+	var idReceiver []string
+	for _, v := range emergensiUser {
+		id := strconv.Itoa(int(v.ReceiverID))
+		idReceiver = append(idReceiver, id)
+	}
+
+	var idCaller []string
+	for _, v := range emergensiUser {
+		id := strconv.Itoa(int(v.CallerID))
+		idCaller = append(idCaller, id)
+	}
+
+	ctx := context.Background()
+	var emergenciEntity []emergency.EmergencyEntity
+	var userCallRedis User
+	var userReceiverRedis User
+	for i := 0; i < len(emergensiUser); i++ {
+		for j := 0; j < len(emergensiUser); j++ {
+			redisKey := fmt.Sprintf("user:%s", idCaller[j])
+
+			cachedData, err := repo.redis.Get(ctx, redisKey).Result()
+			if err == nil {
+				var userRedis User
+				if err := json.Unmarshal([]byte(cachedData), &userRedis); err != nil {
+					return 0, nil, err
+				}
+				log.Println("Data ditemukan di Redis cache")
+				userCallRedis = userRedis
+			} else if err != redis.Nil {
+				return 0, nil, err
+			} else {
+				data, _ := usernodejs.GetByIdUser(idCaller[j], token)
+				user := UserNodeToUser(data)
+				jsonData, err := json.Marshal(user)
+				if err != nil {
+					return 0, nil, err
+				}
+				errSet := repo.redis.Set(ctx, redisKey, jsonData, 24*time.Hour).Err()
+				if errSet != nil {
+					log.Println("Gagal menyimpan data ke Redis:", errSet)
+				} else {
+					log.Println("Data disimpan di Redis cache")
+				}
+				userCallRedis = user
+			}
+
+			idConv, _ := strconv.Atoi(idCaller[j])
+			if uint(idConv) == emergensiUser[i].CallerID {
+				emergensiUser[i].Caller = userCallRedis
+			}
+		}
+		for k := 0; k < len(emergensiUser); k++ {
+			redisKey := fmt.Sprintf("user:%s", idReceiver[k])
+
+			cachedData, err := repo.redis.Get(ctx, redisKey).Result()
+			if err == nil {
+				var userRedis User
+				if err := json.Unmarshal([]byte(cachedData), &userRedis); err != nil {
+					return 0, nil, err
+				}
+				log.Println("Data ditemukan di Redis cache")
+				userReceiverRedis = userRedis
+			} else if err != redis.Nil {
+				return 0, nil, err
+			} else {
+				data, _ := usernodejs.GetByIdUser(idReceiver[k], token)
+				user := UserNodeToUser(data)
+				jsonData, err := json.Marshal(user)
+				if err != nil {
+					return 0, nil, err
+				}
+				errSet := repo.redis.Set(ctx, redisKey, jsonData, 24*time.Hour).Err()
+				if errSet != nil {
+					log.Println("Gagal menyimpan data ke Redis:", errSet)
+				} else {
+					log.Println("Data disimpan di Redis cache")
+				}
+				userReceiverRedis = user
+			}
+			idConv, _ := strconv.Atoi(idReceiver[k])
+			if uint(idConv) == emergensiUser[i].ReceiverID {
+				emergensiUser[i].Receiver = userReceiverRedis
+			}
+		}
+		emergenciEntity = append(emergenciEntity, EmergencyUserToEntity(emergensiUser[i]))
+
+	}
+	return totalEmergency, emergenciEntity, nil
+	}
+
+	return 0, nil, errors.New("failed get by id")
 
 }
 

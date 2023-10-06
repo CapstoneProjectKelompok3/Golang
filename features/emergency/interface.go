@@ -50,7 +50,7 @@ type EmergencyDataInterface interface{
 	Delete(id uint)(error)
 	Update(input EmergencyEntity, id uint)(error)
 	SelectById(id uint,token string)(EmergencyEntity,error)
-	SelectAll(param QueryParams,token string)(int64, []EmergencyEntity,error)
+	SelectAll(param QueryParams,token string,idCall uint,level string)(int64, []EmergencyEntity,error)
 	SendNotification(input helper.MessageGomailE)(string,error)
 	ActionGmail(input string)(error)
 	SelectUser(id string,token string) (UserEntity, error)
@@ -62,7 +62,7 @@ type EmergencyServiceInterface interface{
 	Delete(id uint)(error)
 	Edit(input EmergencyEntity,id uint,level string,idUser uint)error
 	GetById(id uint,token string)(EmergencyEntity,error)
-	GetAll(param QueryParams,token string)(bool,[]EmergencyEntity,error)
+	GetAll(param QueryParams,token string,idCall uint,level string)(bool,[]EmergencyEntity,error)
 	ActionGmail(input string)error
 	SumEmergency()(int64,error)
 }
