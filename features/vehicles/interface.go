@@ -10,6 +10,7 @@ type VehicleEntity struct {
 	GovermentID uint `validate:"required"`
 	Plate       string `validate:"required"`
 	Status      bool
+	Goverment GovernmentEntity
 }
 type GovernmentEntity struct {
 	ID        uint   

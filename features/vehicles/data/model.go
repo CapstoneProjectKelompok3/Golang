@@ -34,6 +34,7 @@ func ModelToEntity(vehicle Vehicle)vehicles.VehicleEntity{
 		GovermentID: vehicle.GovermentID,
 		Plate:       vehicle.Plate,
 		Status:      vehicle.Status,
+		Goverment: GovermentModelToEntity(vehicle.Goverments),
 	}
 }
 
@@ -45,6 +46,17 @@ func EntityToEntity(vehicle vehicles.VehicleEntity)Vehicle{
 	}
 }
 
-// func GovermentModelToEntity(goverment Government)vehicles.GovernmentEntity{
+func GovermentModelToEntity(goverment Government)vehicles.GovernmentEntity{
+	return vehicles.GovernmentEntity{
+		ID:        goverment.ID,
+		Name:      goverment.Name,
+		Type:      goverment.Type,
+		Address:   goverment.Address,
+		Latitude:  goverment.Latitude,
+		Longitude: goverment.Latitude,
+		CreatedAt: goverment.CreatedAt,
+		UpdatedAt: goverment.UpdatedAt,
+		DeletedAt: goverment.DeletedAt.Time,
+	}
+}
 
-// }
