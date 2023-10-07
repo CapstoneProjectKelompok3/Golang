@@ -37,7 +37,7 @@ func (handler *DriverHandler) CreateDriver(c echo.Context) error {
 
 	err := handler.driverService.Create(driverCore)
 	if strings.Contains(err.Error(), "for key 'drivers.email'") {
-		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "Drivers with this", nil))
+		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "Drivers with this account already exist", nil))
 	}
 	if err != nil {
 		if strings.Contains(err.Error(), "validation") {
