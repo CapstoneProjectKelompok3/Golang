@@ -36,12 +36,12 @@ func (handler *DriverHandler) CreateDriver(c echo.Context) error {
 	driverCore := RequestToCore(*driverInput)
 
 	err := handler.driverService.Create(driverCore)
-	if strings.Contains(err.Error(), "for key 'drivers.email'") {
-		return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "Drivers with this account already exist", nil))
-	}
+
 	if err != nil {
 		if strings.Contains(err.Error(), "validation") {
-			return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, err.Error(), nil))
+			return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "error validation", nil))
+		} else if strings.Contains(err.Error(), "for key 'drivers.email'") {
+			return c.JSON(http.StatusBadRequest, helper.WebResponse(http.StatusBadRequest, "Drivers with this account already exist", nil))
 		}
 	}
 
