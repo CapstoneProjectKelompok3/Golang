@@ -54,13 +54,44 @@ func (service *driverService) Login(email string, password string) (dataLogin dr
 }
 
 // AcceptOrRejectOrder implements driver.DriverServiceInterface.
-func (service *driverService) AcceptOrRejectOrder(IsAccepted bool, idDriver int) error {
+func (service *driverService) AcceptOrRejectOrder(idEmergenci uint,IsAccepted bool, idDriver int) error {
 	// errValidate := service.validate.Struct(IsAccepted)
 	// if errValidate != nil {
 	// 	return errors.New("validation error" + errValidate.Error())
 	// }
 
 	err := service.driverData.AcceptOrRejectOrder(IsAccepted, idDriver)
+
+	if IsAccepted {
+
+		data,errData:=service.driverData.SelectProfile(idDriver)
+		if errData != nil{
+			return errData
+		}
+		if data.Token ==""{
+			return errors.New("maaf anda telah mencancel orderan, token pindah ke driver lain")
+		}
+		id,tipeUnit,errUnit:=service.driverData.SelectUnit(idEmergenci)
+		if errUnit != nil{
+			return errUnit
+		}
+		var idUnit []uint
+		for i:=0;i<len(tipeUnit);i++{
+			if data.GovermentType == tipeUnit[i]{
+				idUnit=append(idUnit, id[i])
+			}
+		}
+		idHistory,errHis:=service.driverData.SelectHistori(idUnit[0])
+		if errHis != nil{
+			return errHis
+		}
+		errUpdate:=service.driverData.UpdateHistoryUnit(uint(idDriver),idHistory)
+		if errUpdate !=nil{
+			return errUpdate
+		}
+	
+	}
+	
 	return err
 }
 

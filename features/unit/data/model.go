@@ -21,8 +21,7 @@ type UnitHistory struct {
 	gorm.Model
 	UnitID   uint
 	DriverID uint `gorm:"default:0"`
-	Status  string `gorm:"default:-"`
-	Reason string `gorm:"default:-"`
+	Status  bool `gorm:"default:false"`
 }
 
 type UnitUser struct {

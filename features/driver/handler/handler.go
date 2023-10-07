@@ -266,7 +266,8 @@ func (handler *DriverHandler) DriverAcceptOrRejectOrder(c echo.Context) error {
 	idToken := middlewares.ExtractTokenDriverId(c)
 
 	fmt.Println(idToken)
-
+	idEmergensi:=c.QueryParam("emergensi_id")
+	idConv,_:=strconv.Atoi(idEmergensi)
 	driverInput := new(AcceptOrRejectOrderRequest)
 
 	errBind := c.Bind(&driverInput)
@@ -280,7 +281,7 @@ func (handler *DriverHandler) DriverAcceptOrRejectOrder(c echo.Context) error {
 		message = "Success Rejected order"
 	}
 
-	err := handler.driverService.AcceptOrRejectOrder(driverInput.IsAccepted, idToken)
+	err := handler.driverService.AcceptOrRejectOrder(uint(idConv),driverInput.IsAccepted, idToken)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusNotFound, err.Error(), nil))
