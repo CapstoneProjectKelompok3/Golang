@@ -106,16 +106,9 @@ func (service *EmergencyService) Add(input emergency.EmergencyEntity, token stri
 	if errInsert != nil {
 		return errInsert
 	}
-	var unit emergency.UnitEntity
-	unit.EmergenciesID=idInsert
 
-	_,errUnit:=service.emergencyService.CreateUnit(unit)
-	if errUnit !=nil{
-		return errUnit
-	}
 	name := fmt.Sprintf("Kasus %d", idInsert)
 	input.Name = name
-
 	errUpdate := service.emergencyService.Update(input, idInsert)
 	if errUpdate != nil {
 		return errUpdate

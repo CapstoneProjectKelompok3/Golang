@@ -8,7 +8,7 @@ import (
 type EmergencyEntity struct {
 	Id         	uint
 	Name string
-	CallerID   	uint `validate:"required"`
+	CallerID   	uint
 	ReceiverID 	uint `validate:"required"`
 	Latitude   	float64 `validate:"required"`
 	Longitude  	float64 `validate:"required"`
@@ -46,7 +46,6 @@ type QueryParams struct {
 
 type EmergencyDataInterface interface{
 	Insert(input EmergencyEntity)(uint,error)
-	CreateUnit(input UnitEntity)(uint,error)
 	Delete(id uint)(error)
 	Update(input EmergencyEntity, id uint)(error)
 	SelectById(id uint,token string)(EmergencyEntity,error)

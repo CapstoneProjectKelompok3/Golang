@@ -12,8 +12,7 @@ import (
 type Unit struct {
 	gorm.Model
 	EmergenciesID uint
-	VehicleID     uint
-	GovermentType string `gorm:"type:enum('hospital','police','firestation','dishub','SAR');column:type;default:hospital"`
+	Type string `gorm:"type:enum('hospital','police','firestation','dishub','SAR');column:type;default:hospital"`
 	SumOfUnit int 
 
 }
@@ -21,9 +20,9 @@ type Unit struct {
 type UnitHistory struct {
 	gorm.Model
 	UnitID   uint
-	DriverID uint
-	Status  string
-	Reason string
+	DriverID uint `gorm:"default:0"`
+	Status  string `gorm:"default:-"`
+	Reason string `gorm:"default:-"`
 }
 
 type UnitUser struct {
@@ -71,7 +70,7 @@ func ModelToUnitUser(unit Unit) UnitUser {
 	return UnitUser{
 		ID:            unit.ID,
 		EmergenciesID: unit.EmergenciesID,
-		GovermentType: unit.GovermentType,
+		GovermentType: unit.Type,
 		SumOfUnit:     unit.SumOfUnit,
 		CreatedAt:     unit.CreatedAt,
 		UpdatedAt:     unit.UpdatedAt,
@@ -95,7 +94,7 @@ func ModelToEntity(uniit Unit) unit.UnitEntity {
 	return unit.UnitEntity{
 		Id:            uniit.ID,
 		EmergenciesID: uniit.EmergenciesID,
-		GovermentType: uniit.GovermentType,
+		GovermentType: uniit.Type,
 		SumOfUnit:     uniit.SumOfUnit,
 		CreateAt:      uniit.CreatedAt,
 		UpdateAt:      uniit.UpdatedAt,
@@ -106,7 +105,7 @@ func ModelToEntity(uniit Unit) unit.UnitEntity {
 func EntityToModel(unit unit.UnitEntity) Unit {
 	return Unit{
 		EmergenciesID: unit.EmergenciesID,
-		GovermentType: unit.GovermentType,
+		Type: unit.GovermentType,
 		SumOfUnit:     unit.SumOfUnit,
 	}
 }

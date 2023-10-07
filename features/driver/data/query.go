@@ -10,6 +10,7 @@ import (
 	"project-capston/app/middlewares"
 	"project-capston/features/driver"
 	goverment "project-capston/features/goverment/data"
+	unit "project-capston/features/unit/data"
 	"strconv"
 	"time"
 
@@ -22,6 +23,56 @@ var ctx = context.Background()
 type driverQuery struct {
 	db *gorm.DB
 }
+
+// CreateUnit implements driver.DriverDataInterface.
+func (repo *driverQuery) CreateUnit(idEmergency uint, tipe []string, count []int) error {
+
+	for i := 0; i < len(tipe); i++ {
+		if count[i] != 0 {
+			unitData := unit.Unit{
+				EmergenciesID: idEmergency,
+				Type:         tipe[i],
+				SumOfUnit:    count[i],
+			}
+			tx := repo.db.Create(&unitData)
+			if tx.Error != nil {
+				return errors.New("failed create unit")
+			}
+			if tx.RowsAffected == 0 {
+				return errors.New("row not affected")
+			}
+		}
+	}
+	return nil
+}
+
+func (repo *driverQuery) CreateUnitHistori(idEmergency uint) error {
+    var inputUnit []unit.Unit
+    txx := repo.db.Where("emergencies_id=?", idEmergency).Find(&inputUnit)
+    if txx.Error != nil {
+        return errors.New("failed get unit history")
+    }
+
+    tx := repo.db.Begin()
+    for _, v := range inputUnit {
+        for j := 0; j < v.SumOfUnit; j++ {
+            inputModel := unit.UnitHistory{
+                UnitID: v.ID,
+            }
+            if err := tx.Create(&inputModel).Error; err != nil {
+                tx.Rollback()
+                return err
+            }
+        }
+    }
+
+    if err := tx.Commit().Error; err != nil {
+        return err
+    }
+
+    return nil
+}
+
 
 // Delete implements driver.DriverDataInterface.
 func (repo *driverQuery) Delete(id uint) error {

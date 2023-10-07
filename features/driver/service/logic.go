@@ -65,11 +65,23 @@ func (service *driverService) AcceptOrRejectOrder(IsAccepted bool, idDriver int)
 }
 
 // KerahkanDriver implements driver.DriverServiceInterface.
-func (service *driverService) KerahkanDriver(lat string, long string, police int, hospital int, firestation int, dishub int, SAR int) ([]driver.DriverCore, error) {
+func (service *driverService) KerahkanDriver(id uint,lat string, long string, police int, hospital int, firestation int, dishub int, SAR int) ([]driver.DriverCore, error) {
+
 	result, err := service.driverData.KerahkanDriver(lat, long, police, hospital, firestation, dishub, SAR)
 	if err != nil {
 		return nil, err
 	}
+	count := []int{police, hospital, firestation, dishub, SAR}
+	tipe :=[]string{"police", "hospital", "firestation", "dishub", "SAR"}
+	errUnit:=service.driverData.CreateUnit(id,tipe,count)
+	if errUnit != nil{
+		return nil,errUnit
+	}
+	errHistori:=service.driverData.CreateUnitHistori(id)
+	if errHistori != nil{
+		return nil,errUnit
+	}
+
 	return result, nil
 }
 

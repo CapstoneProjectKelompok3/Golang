@@ -156,7 +156,10 @@ func (handler *DriverHandler) KerahkanDriver(c echo.Context) error {
 	totalSAR := c.QueryParam("SAR")
 	totalSARConv, _ := strconv.Atoi(totalSAR)
 
-	result, err := handler.driverService.KerahkanDriver(lat, lon, totalPoliceConv, totalHospitalConv, totalFirestationConv, totalDishubConv, totalSARConv)
+	idEmergency:=c.QueryParam("emergency_id")
+	idEmergencyConv,_:=strconv.Atoi(idEmergency)
+
+	result, err := handler.driverService.KerahkanDriver(uint(idEmergencyConv), lat, lon, totalPoliceConv, totalHospitalConv, totalFirestationConv, totalDishubConv, totalSARConv)
 	fmt.Println("Result", result)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error read data", nil))
