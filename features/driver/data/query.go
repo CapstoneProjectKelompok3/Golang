@@ -10,7 +10,7 @@ import (
 	"project-capston/app/middlewares"
 	"project-capston/features/driver"
 	goverment "project-capston/features/goverment/data"
-	unit "project-capston/features/unit/data"
+	unites "project-capston/features/unit/data"
 	"strconv"
 	"time"
 
@@ -24,15 +24,64 @@ type driverQuery struct {
 	db *gorm.DB
 }
 
+// SelectHistori implements driver.DriverDataInterface.
+func (repo *driverQuery) SelectHistori(idUnit uint) (uint, error) {
+	
+	var unit unites.Unit
+	tx:=repo.db.First(&unit,idUnit)
+	if tx.Error != nil{
+		return 0,errors.New("error select unit")
+	}
+
+	var history unites.UnitHistory
+	txx:=repo.db.Where("unit_id=? and status=? and driver_id=?",unit.ID,"-",uint(0)).First(&history)
+	if txx.Error != nil{
+		return 0,errors.New("error select histori")
+	}	
+	return history.ID,nil
+}
+
+// SelectUnit implements driver.DriverDataInterface.
+func (repo *driverQuery) SelectUnit(idEmergenci uint) ([]uint, []string, error) {
+	var inputModel []unites.Unit
+	tx := repo.db.Where("emergencies_id=?", idEmergenci).Find(&inputModel)
+	if tx.Error != nil {
+		return nil, nil, errors.New("failed get type unit")
+	}
+	var tipe []string
+	for _, v := range inputModel {
+		tipe = append(tipe, v.Type)
+	}
+
+	var id []uint
+	for _, v := range inputModel {
+		id = append(id, v.ID)
+	}
+	return id, tipe, nil
+}
+
+func (repo *driverQuery) UpdateHistoryUnit(idDriver uint, idUnitHistori uint) error {
+	var units unites.UnitHistory
+	units.DriverID = idDriver
+	tx := repo.db.Model(&unites.UnitHistory{}).Where("id=?", idUnitHistori).Updates(units)
+	if tx.Error != nil {
+		return errors.New("failed update histori")
+	}
+	if tx.RowsAffected == 0 {
+		return errors.New("id not found")
+	}
+	return nil
+}
+
 // CreateUnit implements driver.DriverDataInterface.
 func (repo *driverQuery) CreateUnit(idEmergency uint, tipe []string, count []int) error {
 
 	for i := 0; i < len(tipe); i++ {
 		if count[i] != 0 {
-			unitData := unit.Unit{
+			unitData := unites.Unit{
 				EmergenciesID: idEmergency,
-				Type:         tipe[i],
-				SumOfUnit:    count[i],
+				Type:          tipe[i],
+				SumOfUnit:     count[i],
 			}
 			tx := repo.db.Create(&unitData)
 			if tx.Error != nil {
@@ -47,32 +96,31 @@ func (repo *driverQuery) CreateUnit(idEmergency uint, tipe []string, count []int
 }
 
 func (repo *driverQuery) CreateUnitHistori(idEmergency uint) error {
-    var inputUnit []unit.Unit
-    txx := repo.db.Where("emergencies_id=?", idEmergency).Find(&inputUnit)
-    if txx.Error != nil {
-        return errors.New("failed get unit history")
-    }
+	var inputUnit []unites.Unit
+	txx := repo.db.Where("emergencies_id=?", idEmergency).Find(&inputUnit)
+	if txx.Error != nil {
+		return errors.New("failed get unit history")
+	}
 
-    tx := repo.db.Begin()
-    for _, v := range inputUnit {
-        for j := 0; j < v.SumOfUnit; j++ {
-            inputModel := unit.UnitHistory{
-                UnitID: v.ID,
-            }
-            if err := tx.Create(&inputModel).Error; err != nil {
-                tx.Rollback()
-                return err
-            }
-        }
-    }
+	tx := repo.db.Begin()
+	for _, v := range inputUnit {
+		for j := 0; j < v.SumOfUnit; j++ {
+			inputModel := unites.UnitHistory{
+				UnitID: v.ID,
+			}
+			if err := tx.Create(&inputModel).Error; err != nil {
+				tx.Rollback()
+				return err
+			}
+		}
+	}
 
-    if err := tx.Commit().Error; err != nil {
-        return err
-    }
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
 
-    return nil
+	return nil
 }
-
 
 // Delete implements driver.DriverDataInterface.
 func (repo *driverQuery) Delete(id uint) error {

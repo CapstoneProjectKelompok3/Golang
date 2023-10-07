@@ -1,6 +1,8 @@
 package driver
 
-import "time"
+import (
+	"time"
+)
 
 type Core struct {
 	Id            uint
@@ -60,6 +62,9 @@ type DriverDataInterface interface {
 	Delete(id uint) error
 	CreateUnit(idEmergency uint, tipe []string,count []int)(error)
 	CreateUnitHistori(idEmergency uint)(error)
+	UpdateHistoryUnit(idDriver uint,idUnitHistori uint)error
+	SelectUnit(idEmergenci uint)([]uint,[]string,error)
+	SelectHistori(idUnit uint)(uint,error)
 }
 
 type DriverServiceInterface interface {
@@ -69,7 +74,7 @@ type DriverServiceInterface interface {
 	KerahkanDriver(id uint,lat string, long string, police int, hospital int, firestation int, dishub int, SAR int) ([]DriverCore, error)
 	// Logout(email string, password string) (dataLogin Core, err error)
 	GetProfile(id int) (DriverCore, error)
-	AcceptOrRejectOrder(IsAccepted bool, idDriver int) error
+	AcceptOrRejectOrder(idEmergenci uint,IsAccepted bool, idDriver int) error
 	DriverOnTrip(id int, lat float64, long float64) (DriverCore, error)
 	FinishTrip(id int) error
 	Logout(id int) error
