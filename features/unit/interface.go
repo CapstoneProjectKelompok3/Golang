@@ -8,7 +8,7 @@ type UnitEntity struct {
 	UpdateAt      time.Time
 	DeleteAt      time.Time
 	EmergenciesID uint   `validate:"required"`
-	GovermentType string `gorm:"type:enum('Polisi','Rumah Sakit','DISHUB','SAR','Damkar');column:goverment_type"`
+	GovermentType string 
 	SumOfUnit     int    `validate:"required"`
 	Emergencies   UserEntity
 }
@@ -18,7 +18,6 @@ type UnitEntit struct{
 	UpdateAt      time.Time
 	DeleteAt      time.Time	
 	EmergenciesID uint
-	VehicleID     uint
 	GovermentType string 
 	SumOfUnit int 
 }

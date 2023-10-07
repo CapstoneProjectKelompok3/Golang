@@ -58,13 +58,15 @@ type DriverDataInterface interface {
 	Logout(id int) error
 	SelectCountDriver() (int64, error)
 	Delete(id uint) error
+	CreateUnit(idEmergency uint, tipe []string,count []int)(error)
+	CreateUnitHistori(idEmergency uint)(error)
 }
 
 type DriverServiceInterface interface {
 	Create(input Core) error
 	GetAll(pageNumber int, pageSize int) ([]DriverCore, error)
 	Login(email string, password string) (dataLogin Core, token string, err error)
-	KerahkanDriver(lat string, long string, police int, hospital int, firestation int, dishub int, SAR int) ([]DriverCore, error)
+	KerahkanDriver(id uint,lat string, long string, police int, hospital int, firestation int, dishub int, SAR int) ([]DriverCore, error)
 	// Logout(email string, password string) (dataLogin Core, err error)
 	GetProfile(id int) (DriverCore, error)
 	AcceptOrRejectOrder(IsAccepted bool, idDriver int) error
