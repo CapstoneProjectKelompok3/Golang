@@ -52,7 +52,7 @@ func InitRouter(db *gorm.DB, c *echo.Echo, redis *redis.Client) {
 	c.POST("/vehicles", handlerV.Add, middlewares.JWTMiddleware())
 	c.PUT("/vehicles/:vehicle_id", handlerV.Edit, middlewares.JWTMiddleware())
 	c.GET("/vehicles/:vehicle_id", handlerV.GetById, middlewares.JWTMiddleware())
-	c.GET("/vehicles", handlerV.GetAll, middlewares.JWTMiddleware())
+	c.GET("/vehicles", handlerV.GetAll)
 	c.DELETE("/vehicles/:vehicle_id", handlerV.Delete, middlewares.JWTMiddleware())
 
 	//Teguh Government
