@@ -6,6 +6,7 @@ import (
 	"project-capston/app/middlewares"
 	usernodejs "project-capston/features/UserNodeJs"
 	"project-capston/features/emergency"
+	"project-capston/helper"
 	"strconv"
 	"strings"
 
@@ -44,7 +45,7 @@ func (handler *EmergencyHandler) Add(c echo.Context)error{
 	if errToken != nil{
 		return c.JSON(http.StatusUnauthorized,"fail get token")
 	}
-	err:=handler.emergencyHandler.Add(entity,token)
+	idEm,err:=handler.emergencyHandler.Add(entity,token)
 	if err != nil{
 		if strings.Contains(err.Error(),"validation"){
 			return c.JSON(http.StatusBadRequest,err.Error())
@@ -52,7 +53,9 @@ func (handler *EmergencyHandler) Add(c echo.Context)error{
 			return c.JSON(http.StatusInternalServerError,err.Error())
 		}
 	}
-	return c.JSON(http.StatusCreated,"success create data emergency")
+	return c.JSON(http.StatusCreated,helper.WebResponse(201, "success create emergency", map[string]any{
+		"id":idEm,
+	}))
 
 }
 
