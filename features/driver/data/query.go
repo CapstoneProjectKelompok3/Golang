@@ -384,7 +384,7 @@ func (repo *driverQuery) SelectProfile(id int) (driver.DriverCore, error) {
 		goverment.Government
 	}
 
-	tx := repo.db.Table("drivers").
+	repo.db.Table("drivers").
 		Select("drivers.* ,drivers.id AS DriverID,emergencies.name AS EmergencyName, governments.name,governments.type").
 		Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
 		Joins("INNER JOIN emergencies ON drivers.emergency_id=emergencies.id").
@@ -392,22 +392,48 @@ func (repo *driverQuery) SelectProfile(id int) (driver.DriverCore, error) {
 		Scan(&driversWithGovernments)
 
 	// tx := repo.db.First(&driverData, id).Scan(&driverData) //
+	var driverCore driver.DriverCore
+	if driversWithGovernments.EmergencyId != 0 {
+		repo.db.Table("drivers").
+			Select("drivers.* ,drivers.id AS DriverID,emergencies.name AS EmergencyName, governments.name,governments.type").
+			Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
+			Joins("INNER JOIN emergencies ON drivers.emergency_id=emergencies.id").
+			Where("drivers.id=?", id).
+			Scan(&driversWithGovernments)
+		driverCore.EmergencyName = driversWithGovernments.EmergencyName
+	} else {
+		repo.db.Table("drivers").
+			Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
+			Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
+			// Joins("INNER JOIN emergencies ON drivers.emergency_id=emergencies.id").
+			Where("drivers.id=?", id).
+			Scan(&driversWithGovernments)
+		fmt.Println("salaj")
+		driverCore.Fullname = driversWithGovernments.Driver.Fullname
+	}
 
-	if tx.Error != nil {
-		return driver.DriverCore{}, tx.Error
-	}
-	if tx.RowsAffected == 0 {
-		repo.db.Raw("SELECT * FROM drivers WHERE drivers.id=?", id).Scan(&driversWithGovernments)
-		return driver.DriverCore{}, errors.New("data not found")
-	}
+	// if tx.Error != nil {
+	// 	fmt.Println("Errror", tx.Error)
+	// 	repo.db.Raw("SELECT * FROM drivers WHERE drivers.id=?", id).Scan(&driversWithGovernments)
+	// 	return driver.DriverCore{}, tx.Error
+	// }
+	// if tx.RowsAffected == 0 {
+	// 	fmt.Println("Errror Not found", tx.Error)
+	// 	repo.db.Raw("SELECT * FROM drivers WHERE id=?", id).Scan(&driversWithGovernments)
+	// 	var driverCore driver.DriverCore
+	// 	driverCore.Id = driversWithGovernments.DriverID
+	// 	driverCore.EmergencyName = driversWithGovernments.EmergencyName
+	// 	driverCore.Fullname = driversWithGovernments.Driver.Fullname
+	// 	driverCore.Email = driversWithGovernments.Driver.Email
+	// 	fmt.Println("Errror Not found core", driverCore)
+	// 	return driverCore, errors.New("data not found 2")
+	// }
 
 	// var driversCore = ModelToCore(driversWithGovernments)
 
-	var driverCore driver.DriverCore
-
 	driverCore.Id = driversWithGovernments.DriverID
 	driverCore.EmergenciesID = driversWithGovernments.Driver.EmergencyId
-	driverCore.EmergencyName = driversWithGovernments.EmergencyName
+	// driverCore.EmergencyName = driversWithGovernments.EmergencyName
 	driverCore.Fullname = driversWithGovernments.Driver.Fullname
 	driverCore.Status = driversWithGovernments.Status
 	driverCore.Email = driversWithGovernments.Driver.Email
