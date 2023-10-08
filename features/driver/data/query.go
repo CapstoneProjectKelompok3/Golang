@@ -24,7 +24,6 @@ type driverQuery struct {
 	db *gorm.DB
 }
 
-
 // // IsCloseEmergency implements driver.DriverDataInterface.
 // func (repo *driverQuery) IsCloseEmergency(status bool, idEmergency uint) error {
 // 	var emergenci emergenciesy.Emergency
@@ -73,14 +72,14 @@ func (repo *driverQuery) UpdateFinish(id uint, idE uint) error {
 		return errors.New("failed get emergensi")
 	}
 	var unitId []uint
-	for _,v:=range emergesiUnit{
+	for _, v := range emergesiUnit {
 		unitId = append(unitId, v.ID)
 	}
 	var histori unites.UnitHistory
-	txxx := repo.db.Where("unit_id in ? and driver_id=?", unitId,id).First(&histori)
+	txxx := repo.db.Where("unit_id in ? and driver_id=?", unitId, id).First(&histori)
 	if txxx.Error != nil {
 		return errors.New("failed get history")
-	}	
+	}
 	var history unites.UnitHistory
 	history.Status = true
 	tx := repo.db.Model(&unites.UnitHistory{}).Where("id=?", histori.ID).Updates(&history)
@@ -377,13 +376,15 @@ func (repo *driverQuery) DriverOnTrip(id int, lat float64, long float64) (driver
 func (repo *driverQuery) SelectProfile(id int) (driver.DriverCore, error) {
 	var driversWithGovernments struct {
 		Driver
-		DriverID uint
+		DriverID      uint
+		EmergencyName string
 		goverment.Government
 	}
 
 	tx := repo.db.Table("drivers").
-		Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
+		Select("drivers.* ,drivers.id AS DriverID,emergencies.name AS EmergencyName, governments.name,governments.type").
 		Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
+		Joins("INNER JOIN emergencies ON drivers.emergency_id=emergencies.id").
 		Where("drivers.id=?", id).
 		Scan(&driversWithGovernments)
 
@@ -401,6 +402,8 @@ func (repo *driverQuery) SelectProfile(id int) (driver.DriverCore, error) {
 	var driverCore driver.DriverCore
 
 	driverCore.Id = driversWithGovernments.DriverID
+	driverCore.EmergenciesID = driversWithGovernments.Driver.EmergencyId
+	driverCore.EmergencyName = driversWithGovernments.EmergencyName
 	driverCore.Fullname = driversWithGovernments.Driver.Fullname
 	driverCore.Status = driversWithGovernments.Status
 	driverCore.Email = driversWithGovernments.Driver.Email
@@ -531,7 +534,7 @@ func (repo *driverQuery) Login(email string, password string) (dataLogin driver.
 }
 
 // KerahkanDriver implements driver.DriverDataInterface.
-func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hospital int, firestation int, dishub int, SAR int) ([]driver.DriverCore, error) {
+func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hospital int, firestation int, dishub int, SAR int, emergency_id int) ([]driver.DriverCore, error) {
 	//1. Simpan Lat Long di dalam redis
 	redisClient := middlewares.CreateRedisClient()
 
@@ -554,7 +557,8 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 
 	var driversWithGovernments []struct {
 		Driver
-		DriverID uint
+		DriverID      uint
+		EmergenciesID uint
 		goverment.Government
 		Distance float64
 	}
@@ -786,8 +790,9 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 	for _, u := range driversWithGovernments {
 		fmt.Printf("ID : %d,Nama: %s, Email: %s\n", u.DriverID, u.Name, u.Email)
 
+		fmt.Println("Emergency_id", emergency_id)
 		//3 Update Token
-		repo.db.Exec("UPDATE drivers SET token = ? WHERE id = ? ", tokenKasus, u.DriverID)
+		repo.db.Exec("UPDATE drivers SET token = ?,emergency_id=? WHERE id = ? ", tokenKasus, emergency_id, u.DriverID)
 
 		//4. Set driving status menjadi on_demand
 		result := repo.db.Model(&Driver{}).Where("id = ?", u.DriverID).Update("driving_status", "on_demand")
@@ -829,6 +834,7 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 			Password:      value.Password,
 			Token:         value.Token,
 			GovermentName: value.Government.Name,
+			EmergencyID:   value.EmergenciesID,
 			GovermentType: value.Government.Type,
 			Status:        value.Status,
 			DrivingStatus: value.DrivingStatus,

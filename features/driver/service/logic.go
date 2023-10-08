@@ -56,7 +56,7 @@ func (service *driverService) Login(email string, password string) (dataLogin dr
 }
 
 // AcceptOrRejectOrder implements driver.DriverServiceInterface.
-func (service *driverService) AcceptOrRejectOrder(idEmergenci uint,IsAccepted bool, idDriver int) error {
+func (service *driverService) AcceptOrRejectOrder(idEmergenci uint, IsAccepted bool, idDriver int) error {
 	// errValidate := service.validate.Struct(IsAccepted)
 	// if errValidate != nil {
 	// 	return errors.New("validation error" + errValidate.Error())
@@ -66,53 +66,53 @@ func (service *driverService) AcceptOrRejectOrder(idEmergenci uint,IsAccepted bo
 
 	if IsAccepted {
 
-		data,errData:=service.driverData.SelectProfile(idDriver)
-		if errData != nil{
+		data, errData := service.driverData.SelectProfile(idDriver)
+		if errData != nil {
 			return errData
 		}
-		if data.Token ==""{
+		if data.Token == "" {
 			return errors.New("maaf anda telah mencancel orderan, token pindah ke driver lain")
 		}
-		id,tipeUnit,errUnit:=service.driverData.SelectUnit(idEmergenci)
-		if errUnit != nil{
+		id, tipeUnit, errUnit := service.driverData.SelectUnit(idEmergenci)
+		if errUnit != nil {
 			return errUnit
 		}
 		var idUnit []uint
-		for i:=0;i<len(tipeUnit);i++{
-			if data.GovermentType == tipeUnit[i]{
-				idUnit=append(idUnit, id[i])
+		for i := 0; i < len(tipeUnit); i++ {
+			if data.GovermentType == tipeUnit[i] {
+				idUnit = append(idUnit, id[i])
 			}
 		}
-		idHistory,errHis:=service.driverData.SelectHistori(idUnit[0])
-		if errHis != nil{
+		idHistory, errHis := service.driverData.SelectHistori(idUnit[0])
+		if errHis != nil {
 			return errHis
 		}
-		errUpdate:=service.driverData.UpdateHistoryUnit(uint(idDriver),idHistory)
-		if errUpdate !=nil{
+		errUpdate := service.driverData.UpdateHistoryUnit(uint(idDriver), idHistory)
+		if errUpdate != nil {
 			return errUpdate
 		}
-	
+
 	}
-	
+
 	return err
 }
 
 // KerahkanDriver implements driver.DriverServiceInterface.
-func (service *driverService) KerahkanDriver(id uint,lat string, long string, police int, hospital int, firestation int, dishub int, SAR int) ([]driver.DriverCore, error) {
+func (service *driverService) KerahkanDriver(id uint, lat string, long string, police int, hospital int, firestation int, dishub int, SAR int, emergency_id int) ([]driver.DriverCore, error) {
 
-	result, err := service.driverData.KerahkanDriver(lat, long, police, hospital, firestation, dishub, SAR)
+	result, err := service.driverData.KerahkanDriver(lat, long, police, hospital, firestation, dishub, SAR, emergency_id)
 	if err != nil {
 		return nil, err
 	}
 	count := []int{police, hospital, firestation, dishub, SAR}
-	tipe :=[]string{"police", "hospital", "firestation", "dishub", "SAR"}
-	errUnit:=service.driverData.CreateUnit(id,tipe,count)
-	if errUnit != nil{
-		return nil,errUnit
+	tipe := []string{"police", "hospital", "firestation", "dishub", "SAR"}
+	errUnit := service.driverData.CreateUnit(id, tipe, count)
+	if errUnit != nil {
+		return nil, errUnit
 	}
-	errHistori:=service.driverData.CreateUnitHistori(id)
-	if errHistori != nil{
-		return nil,errUnit
+	errHistori := service.driverData.CreateUnitHistori(id)
+	if errHistori != nil {
+		return nil, errUnit
 	}
 
 	return result, nil
@@ -135,15 +135,15 @@ func (service *driverService) DriverOnTrip(id int, lat float64, long float64) (d
 }
 
 // FinishTrip implements driver.DriverServiceInterface.
-func (service *driverService) FinishTrip(id int,idE uint) error {
+func (service *driverService) FinishTrip(id int, idE uint) error {
 	err := service.driverData.FinishTrip(id)
-	if err !=nil{
-		log.Println("error finish",err)
+	if err != nil {
+		log.Println("error finish", err)
 		return err
 	}
-	fmt.Println("id emergency",idE)
-	errUpdate:=service.driverData.UpdateFinish(uint(id),idE)
-	if errUpdate != nil{
+	fmt.Println("id emergency", idE)
+	errUpdate := service.driverData.UpdateFinish(uint(id), idE)
+	if errUpdate != nil {
 		return errUpdate
 	}
 

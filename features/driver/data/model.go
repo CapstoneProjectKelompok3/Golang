@@ -19,10 +19,10 @@ type Driver struct {
 	VehicleID     uint
 	Latitude      float64
 	Longitude     float64
-	// EmergencyId   int
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	EmergencyId   uint
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	DeletedAt     gorm.DeletedAt `gorm:"index"`
 }
 
 func CoreToModel(dataCore driver.Core) Driver {
@@ -33,6 +33,7 @@ func CoreToModel(dataCore driver.Core) Driver {
 		Password:      dataCore.Password,
 		GovermentID:   dataCore.GovermentID,
 		Status:        dataCore.Status,
+		EmergencyId:   dataCore.EmergenciesID,
 		DrivingStatus: dataCore.DrivingStatus,
 		VehicleID:     dataCore.VehicleID,
 		Latitude:      dataCore.Latitude,
@@ -52,6 +53,7 @@ func ModelToCore(dataModel Driver) driver.Core {
 		GovermentID:   dataModel.GovermentID,
 		Status:        dataModel.Status,
 		DrivingStatus: dataModel.DrivingStatus,
+		EmergenciesID: dataModel.EmergencyId,
 		VehicleID:     dataModel.VehicleID,
 		Latitude:      dataModel.Latitude,
 		Longitude:     dataModel.Longitude,
