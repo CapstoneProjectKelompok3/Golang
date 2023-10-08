@@ -977,7 +977,7 @@ func (repo *driverQuery) AcceptOrRejectOrder(IsAccepted bool, idDriver int) erro
 			sqlAssignedTokenToOTherDriver := "UPDATE drivers SET token=?,driving_status='on_demand',emergency_id=? WHERE ID=?"
 			repo.db.Exec(sqlAssignedTokenToOTherDriver, token, emergencyId, otherDriver.Driver.ID)
 
-			sqlRemoveMyToken := "UPDATE drivers SET token=?,emergency_id=NULL WHERE ID=?"
+			sqlRemoveMyToken := "UPDATE drivers SET token=? WHERE ID=?"
 			repo.db.Exec(sqlRemoveMyToken, "", driversWithGovernments.DriverID)
 
 		}
