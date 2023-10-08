@@ -330,6 +330,8 @@ func (handler *DriverHandler) DriverFinishedTrip(c echo.Context) error {
 
 	err := handler.driverService.FinishTrip(idToken, uint(idConv))
 
+	fmt.Println(err)
+
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusNotFound, err.Error(), nil))
 	}

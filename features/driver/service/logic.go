@@ -142,12 +142,13 @@ func (service *driverService) FinishTrip(id int, idE uint) error {
 		return err
 	}
 	fmt.Println("id emergency", idE)
-	errUpdate := service.driverData.UpdateFinish(uint(id), idE)
-	if errUpdate != nil {
-		return errUpdate
-	}
+	// errUpdate := service.driverData.UpdateFinish(uint(id), idE)
+	// fmt.Println("jsjadjajdad", errUpdate)
+	// if errUpdate != nil {
+	// 	return errUpdate
+	// }
 
-	return errUpdate
+	return err
 }
 
 // Logout implements driver.DriverServiceInterface.

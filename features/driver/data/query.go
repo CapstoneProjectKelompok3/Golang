@@ -48,7 +48,7 @@ type driverQuery struct {
 // 	var idUnit []uint
 // 	for _, v := range emergenci {
 // 		idUnit = append(idUnit, v.ID)
-// 	}
+// 	}F
 
 // 	var history []unites.UnitHistory
 // 	txx := repo.db.Where("unit_id in ? and status=?", idUnit, false).Find(&history)
@@ -226,6 +226,8 @@ func (repo *driverQuery) FinishTrip(id int) error {
 	if tx.Error != nil {
 		return tx.Error
 	}
+	fmt.Println("finished")
+	fmt.Println(tx)
 	return nil
 }
 
