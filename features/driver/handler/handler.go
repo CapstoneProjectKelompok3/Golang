@@ -210,7 +210,7 @@ func (handler *DriverHandler) GetProfileDriver(c echo.Context) error {
 
 	result, err := handler.driverService.GetProfile(idToken)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error read data", nil))
+		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, err.Error(), nil))
 	}
 
 	driverResponse := DriverResponse{
