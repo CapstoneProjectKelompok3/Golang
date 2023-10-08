@@ -276,6 +276,7 @@ func (handler *DriverHandler) DriverAcceptOrRejectOrder(c echo.Context) error {
 	idEmergensi := c.QueryParam("emergensi_id")
 	idConv, _ := strconv.Atoi(idEmergensi)
 	driverInput := new(AcceptOrRejectOrderRequest)
+	fmt.Println("driver input", driverInput.IsAccepted)
 
 	errBind := c.Bind(&driverInput)
 	if errBind != nil {

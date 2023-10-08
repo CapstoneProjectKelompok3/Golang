@@ -73,24 +73,27 @@ func (service *driverService) AcceptOrRejectOrder(idEmergenci uint, IsAccepted b
 		if data.Token == "" {
 			return errors.New("maaf anda telah mencancel orderan, token pindah ke driver lain")
 		}
-		id, tipeUnit, errUnit := service.driverData.SelectUnit(idEmergenci)
-		if errUnit != nil {
-			return errUnit
-		}
-		var idUnit []uint
-		for i := 0; i < len(tipeUnit); i++ {
-			if data.GovermentType == tipeUnit[i] {
-				idUnit = append(idUnit, id[i])
-			}
-		}
-		idHistory, errHis := service.driverData.SelectHistori(idUnit[0])
-		if errHis != nil {
-			return errHis
-		}
-		errUpdate := service.driverData.UpdateHistoryUnit(uint(idDriver), idHistory)
-		if errUpdate != nil {
-			return errUpdate
-		}
+		// id, tipeUnit, errUnit := service.driverData.SelectUnit(idEmergenci)
+		// if errUnit != nil {
+		// 	return errUnit
+		// }
+
+		// fmt.Println("select unit", tipeUnit, errUnit)
+		// var idUnit []uint
+		// for i := 0; i < len(tipeUnit); i++ {
+		// 	if data.GovermentType == tipeUnit[i] {
+		// 		idUnit = append(idUnit, id[i])
+		// 	}
+		// }
+		// idHistory, errHis := service.driverData.SelectHistori(idUnit[0])
+		// fmt.Println("history", idUnit[0], errUnit)
+		// if errHis != nil {
+		// 	return errHis
+		// }
+		// errUpdate := service.driverData.UpdateHistoryUnit(uint(idDriver), idHistory)
+		// if errUpdate != nil {
+		// 	return errUpdate
+		// }
 
 	}
 

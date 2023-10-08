@@ -99,6 +99,7 @@ func (repo *driverQuery) SelectHistori(idUnit uint) (uint, error) {
 	}
 
 	var history unites.UnitHistory
+	fmt.Println("unit id", unit.ID)
 	txx := repo.db.Where("unit_id=? and status=? and driver_id=?", unit.ID, "-", uint(0)).First(&history)
 	if txx.Error != nil {
 		return 0, errors.New("error select histori")
@@ -122,7 +123,7 @@ func (repo *driverQuery) SelectUnit(idEmergenci uint) ([]uint, []string, error) 
 	for _, v := range inputModel {
 		id = append(id, v.ID)
 	}
-	return id, tipe, nil
+	return id, tipe, tx.Error
 }
 
 func (repo *driverQuery) UpdateHistoryUnit(idDriver uint, idUnitHistori uint) error {
