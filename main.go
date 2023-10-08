@@ -16,8 +16,7 @@ func main() {
 	mysql := database.InitMysql(cfg)
 	database.InitialMigration(mysql)
 
-	redis:=middlewares.CreateRedisClient()
-
+	redis := middlewares.CreateRedisClient()
 
 	e := echo.New()
 	e.Pre(middleware.RemoveTrailingSlash())
@@ -26,11 +25,11 @@ func main() {
 		Format: `[${time_rfc3339}] ${status} ${method} ${host}${path} ${latency_human}` + "\n",
 	}))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-        AllowOrigins: []string{"https://api.flattenbot.site"}, // Ganti dengan origin yang diizinkan Anda.
-        AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
-        AllowHeaders: []string{echo.HeaderContentType, echo.HeaderAuthorization},
-    }))
-	router.InitRouter(mysql, e,redis)
+		AllowOrigins: []string{"*"}, // Ganti dengan origin yang diizinkan Anda.
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
+		AllowHeaders: []string{echo.HeaderContentType, echo.HeaderAuthorization},
+	}))
+	router.InitRouter(mysql, e, redis)
 	e.Logger.Fatal(e.Start(":80"))
 
 }
