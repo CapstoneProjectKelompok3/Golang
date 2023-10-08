@@ -184,3 +184,17 @@ func (handler *EmergencyHandler)CountEmergency(c echo.Context)error{
 		"jumlah_kasus":count,
 	})
 }
+
+func (handler *EmergencyHandler)CloseEmergencies(c echo.Context)error{
+	id:=c.Param("emergencies_id")
+	
+	idConv,errConv:=strconv.Atoi(id)
+	if errConv != nil{
+		return c.JSON(http.StatusBadRequest,helper.WebResponse(400,"id not valid",nil))
+	}
+	err:=handler.emergencyHandler.IncloseEmergency(uint(idConv))
+	if err != nil{
+		return c.JSON(http.StatusInternalServerError,helper.WebResponse(500,err.Error(),nil))
+	}
+	return c.JSON(http.StatusOK,helper.WebResponse(200,"close emergencies success",true))
+}

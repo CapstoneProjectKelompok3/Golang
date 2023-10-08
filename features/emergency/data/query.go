@@ -22,9 +22,23 @@ type EmergencyData struct {
 	redis *redis.Client
 }
 
+// IncloseEmergency implements emergency.EmergencyDataInterface.
+func (repo *EmergencyData) IncloseEmergency(idEmergency uint) error {
+	var inputModel Emergency
+	inputModel.IsClose=true
+	tx:=repo.db.Model(&Emergency{}).Where("id=?",idEmergency).Updates(inputModel)
+	if tx.Error !=nil{
+		return errors.New("failed inclose")
+	}
+	if tx.RowsAffected ==0{
+		return errors.New("id not found")
+	}
+	return nil
+}
+
 // // IncloseEmergency implements emergency.EmergencyDataInterface.
 // func (repo *EmergencyData) IncloseEmergency(idEmergency uint) error {
-// 	var inputModel 
+// 	var inputModel
 // 	repo.db.Model()
 // }
 
