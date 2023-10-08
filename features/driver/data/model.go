@@ -19,9 +19,10 @@ type Driver struct {
 	VehicleID     uint
 	Latitude      float64
 	Longitude     float64
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-	DeletedAt     gorm.DeletedAt `gorm:"index"`
+	// EmergencyId   int
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 func CoreToModel(dataCore driver.Core) Driver {
