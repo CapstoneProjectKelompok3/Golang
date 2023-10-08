@@ -24,21 +24,87 @@ type driverQuery struct {
 	db *gorm.DB
 }
 
+
+// // IsCloseEmergency implements driver.DriverDataInterface.
+// func (repo *driverQuery) IsCloseEmergency(status bool, idEmergency uint) error {
+// 	var emergenci emergenciesy.Emergency
+// 	emergenci.IsClose = status
+// 	tx := repo.db.Model(&emergenciesy.Emergency{}).Where("id=?", idEmergency).Updates(emergenci)
+// 	if tx.Error != nil {
+// 		return errors.New("failed update is Close")
+// 	}
+// 	if tx.RowsAffected == 0 {
+// 		return errors.New("id not failed")
+// 	}
+// 	return nil
+// }
+
+// // SelectAllEmergencyInUnit implements driver.DriverDataInterface.
+// func (repo *driverQuery) SelectAllEmergencyInUnit(idEmergency uint) (bool, error) {
+// 	var emergenci []unites.Unit
+// 	tx := repo.db.Where("emergencies_id=?", idEmergency).Find(&emergenci)
+// 	if tx.Error != nil {
+// 		return false, errors.New("failed get unit")
+// 	}
+// 	var idUnit []uint
+// 	for _, v := range emergenci {
+// 		idUnit = append(idUnit, v.ID)
+// 	}
+
+// 	var history []unites.UnitHistory
+// 	txx := repo.db.Where("unit_id in ? and status=?", idUnit, false).Find(&history)
+// 	if txx.Error != nil {
+// 		return false, errors.New("fail get history")
+// 	}
+// 	var status bool
+// 	if txx.RowsAffected == 0 {
+// 		status = true
+// 	} else {
+// 		status = false
+// 	}
+// 	return status, nil
+// }
+
+// UpdateFinish implements driver.DriverDataInterface.
+func (repo *driverQuery) UpdateFinish(id uint, idE uint) error {
+	var emergesiUnit []unites.Unit
+	txx := repo.db.Where("emergencies_id=?", idE).Find(&emergesiUnit)
+	if txx.Error != nil {
+		return errors.New("failed get emergensi")
+	}
+	var unitId []uint
+	for _,v:=range emergesiUnit{
+		unitId = append(unitId, v.ID)
+	}
+	var histori unites.UnitHistory
+	txxx := repo.db.Where("unit_id in ? and driver_id=?", unitId,id).First(&histori)
+	if txxx.Error != nil {
+		return errors.New("failed get history")
+	}	
+	var history unites.UnitHistory
+	history.Status = true
+	tx := repo.db.Model(&unites.UnitHistory{}).Where("id=?", histori.ID).Updates(&history)
+	if tx.Error != nil {
+		return errors.New("failed update histori")
+	}
+	return nil
+}
+
 // SelectHistori implements driver.DriverDataInterface.
 func (repo *driverQuery) SelectHistori(idUnit uint) (uint, error) {
-	
+
 	var unit unites.Unit
-	tx:=repo.db.First(&unit,idUnit)
-	if tx.Error != nil{
-		return 0,errors.New("error select unit")
+	tx := repo.db.First(&unit, idUnit)
+	if tx.Error != nil {
+		return 0, errors.New("error select unit")
 	}
 
 	var history unites.UnitHistory
-	txx:=repo.db.Where("unit_id=? and status=? and driver_id=?",unit.ID,"-",uint(0)).First(&history)
-	if txx.Error != nil{
-		return 0,errors.New("error select histori")
-	}	
-	return history.ID,nil
+	txx := repo.db.Where("unit_id=? and status=? and driver_id=?", unit.ID, "-", uint(0)).First(&history)
+	if txx.Error != nil {
+		return 0, errors.New("error select histori")
+	}
+	return history.ID, nil
 }
 
 // SelectUnit implements driver.DriverDataInterface.

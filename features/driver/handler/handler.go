@@ -314,8 +314,14 @@ func (handler *DriverHandler) DriverLogout(c echo.Context) error {
 
 func (handler *DriverHandler) DriverFinishedTrip(c echo.Context) error {
 	idToken := middlewares.ExtractTokenDriverId(c)
+	id:=c.QueryParam("emergenci_id")
+	
+	idConv,errConv:=strconv.Atoi(id)
+	if errConv != nil{
+		return errConv
+	}
 
-	err := handler.driverService.FinishTrip(idToken)
+	err := handler.driverService.FinishTrip(idToken,uint(idConv))
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusNotFound, err.Error(), nil))
