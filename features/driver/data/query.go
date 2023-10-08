@@ -397,6 +397,7 @@ func (repo *driverQuery) SelectProfile(id int) (driver.DriverCore, error) {
 		return driver.DriverCore{}, tx.Error
 	}
 	if tx.RowsAffected == 0 {
+		repo.db.Raw("SELECT * FROM drivers WHERE drivers.id=?", id).Scan(&driversWithGovernments)
 		return driver.DriverCore{}, errors.New("data not found")
 	}
 
