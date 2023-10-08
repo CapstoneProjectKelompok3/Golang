@@ -964,7 +964,8 @@ func (repo *driverQuery) AcceptOrRejectOrder(IsAccepted bool, idDriver int) erro
 			//8 Dapatkan serta lempar token dari user login ke user other yang di assigned
 			fmt.Printf(" Type: %s \n", driversWithGovernments.Driver.Token)
 			token := driversWithGovernments.Driver.Token
-			fmt.Println("Token", token)
+			emergencyId := driversWithGovernments.Driver.EmergencyId
+			fmt.Println("Token emergency id", emergencyId)
 
 			otherDriver := &otherDriverWithGovernments
 
@@ -973,10 +974,10 @@ func (repo *driverQuery) AcceptOrRejectOrder(IsAccepted bool, idDriver int) erro
 			//9. Tampilkan Driver lain yang di dapatkan
 			fmt.Println("Driver Id lain", otherDriver.Driver.ID)
 
-			sqlAssignedTokenToOTherDriver := "UPDATE drivers SET token=?,driving_status='on_demand' WHERE ID=?"
-			repo.db.Exec(sqlAssignedTokenToOTherDriver, token, otherDriver.Driver.ID)
+			sqlAssignedTokenToOTherDriver := "UPDATE drivers SET token=?,driving_status='on_demand',emergency_id=? WHERE ID=?"
+			repo.db.Exec(sqlAssignedTokenToOTherDriver, token, emergencyId, otherDriver.Driver.ID)
 
-			sqlRemoveMyToken := "UPDATE drivers SET token=? WHERE ID=?"
+			sqlRemoveMyToken := "UPDATE drivers SET token=?,emergency_id=NULL WHERE ID=?"
 			repo.db.Exec(sqlRemoveMyToken, "", driversWithGovernments.DriverID)
 
 		}
