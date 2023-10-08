@@ -54,7 +54,7 @@ type EmergencyDataInterface interface{
 	ActionGmail(input string)(error)
 	SelectUser(id string,token string) (UserEntity, error)
 	SumEmergency()(int64,error)
-	// IncloseEmergency(idEmergency uint)error
+	IncloseEmergency(idEmergency uint)error
 }
 
 type EmergencyServiceInterface interface{
@@ -65,5 +65,5 @@ type EmergencyServiceInterface interface{
 	GetAll(param QueryParams,token string,idCall uint,level string)(bool,[]EmergencyEntity,error)
 	ActionGmail(input string)error
 	SumEmergency()(int64,error)
-	// IncloseEmergency(idEmergency uint)error
+	IncloseEmergency(idEmergency uint)error
 }
