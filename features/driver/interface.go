@@ -65,6 +65,10 @@ type DriverDataInterface interface {
 	UpdateHistoryUnit(idDriver uint,idUnitHistori uint)error
 	SelectUnit(idEmergenci uint)([]uint,[]string,error)
 	SelectHistori(idUnit uint)(uint,error)
+	UpdateFinish(id uint,idE uint)error
+	// IsCloseEmergency(status bool,idEmergency uint)error
+	// SelectAllEmergencyInUnit(idEmergency uint)(bool,error)
+
 }
 
 type DriverServiceInterface interface {
@@ -76,7 +80,7 @@ type DriverServiceInterface interface {
 	GetProfile(id int) (DriverCore, error)
 	AcceptOrRejectOrder(idEmergenci uint,IsAccepted bool, idDriver int) error
 	DriverOnTrip(id int, lat float64, long float64) (DriverCore, error)
-	FinishTrip(id int) error
+	FinishTrip(id int,idE uint) error
 	Logout(id int) error
 	GetCountDriver() (int64, error)
 	Delete(id uint) error

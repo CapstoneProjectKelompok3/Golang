@@ -2,6 +2,8 @@ package service
 
 import (
 	"errors"
+	"fmt"
+	"log"
 	"project-capston/app/middlewares"
 	"project-capston/features/driver"
 
@@ -133,9 +135,19 @@ func (service *driverService) DriverOnTrip(id int, lat float64, long float64) (d
 }
 
 // FinishTrip implements driver.DriverServiceInterface.
-func (service *driverService) FinishTrip(id int) error {
+func (service *driverService) FinishTrip(id int,idE uint) error {
 	err := service.driverData.FinishTrip(id)
-	return err
+	if err !=nil{
+		log.Println("error finish",err)
+		return err
+	}
+	fmt.Println("id emergency",idE)
+	errUpdate:=service.driverData.UpdateFinish(uint(id),idE)
+	if errUpdate != nil{
+		return errUpdate
+	}
+
+	return errUpdate
 }
 
 // Logout implements driver.DriverServiceInterface.
