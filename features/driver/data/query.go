@@ -481,7 +481,7 @@ func (repo *driverQuery) SelectAll(pageNumber int, pageSize int) ([]driver.Drive
 
 	tx := repo.db.Table("drivers").
 		Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
-		Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
+		Joins("INNER JOIN governments ON drivers.goverment_id=governments.id WHERE drivers.deleted_at IS NULL").
 		Scan(&driversWithGovernments)
 
 	for _, u := range driversWithGovernments {
