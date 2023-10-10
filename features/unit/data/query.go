@@ -2,6 +2,7 @@ package data
 
 import (
 	"errors"
+	"fmt"
 	usernodejs "project-capston/features/UserNodeJs"
 	"project-capston/features/unit"
 	"strconv"
@@ -69,6 +70,79 @@ func (repo *UnitData) CreateUnitHistori(idEmergency uint) error {
 		return err
 	}
 
+	return nil
+}
+func (repo *UnitData) UpdateFinish(id uint, idE uint) error {
+	var emergesiUnit []Unit
+	txx := repo.db.Where("emergencies_id=?", idE).Find(&emergesiUnit)
+	if txx.Error != nil {
+		return errors.New("failed get emergensi")
+	}
+	var unitId []uint
+	for _, v := range emergesiUnit {
+		unitId = append(unitId, v.ID)
+	}
+	var histori UnitHistory
+	txxx := repo.db.Where("unit_id in ? and driver_id=?", unitId, id).First(&histori)
+	if txxx.Error != nil {
+		return errors.New("failed get history")
+	}
+	var history UnitHistory
+	history.Status = true
+	tx := repo.db.Model(&UnitHistory{}).Where("id=?", histori.ID).Updates(&history)
+	if tx.Error != nil {
+		return errors.New("failed update histori")
+	}
+	return nil
+}
+
+// SelectHistori implements driver.DriverDataInterface.
+func (repo *UnitData) SelectHistori(idUnit uint) (uint, error) {
+
+	var unit Unit
+	tx := repo.db.First(&unit, idUnit)
+	if tx.Error != nil {
+		return 0, errors.New("error select unit")
+	}
+
+	var history UnitHistory
+	fmt.Println("unit id", unit.ID)
+	txx := repo.db.Where("unit_id=? and status=? and driver_id=?", unit.ID, "-", uint(0)).First(&history)
+	if txx.Error != nil {
+		return 0, errors.New("error select histori")
+	}
+	return history.ID, nil
+}
+
+// SelectUnit implements driver.DriverDataInterface.
+func (repo *UnitData) SelectUnit(idEmergenci uint) ([]uint, []string, error) {
+	var inputModel []Unit
+	tx := repo.db.Where("emergencies_id=?", idEmergenci).Find(&inputModel)
+	if tx.Error != nil {
+		return nil, nil, errors.New("failed get type unit")
+	}
+	var tipe []string
+	for _, v := range inputModel {
+		tipe = append(tipe, v.Type)
+	}
+
+	var id []uint
+	for _, v := range inputModel {
+		id = append(id, v.ID)
+	}
+	return id, tipe, tx.Error
+}
+
+func (repo *UnitData) UpdateHistoryUnit(idDriver uint, idUnitHistori uint) error {
+	var units UnitHistory
+	units.DriverID = idDriver
+	tx := repo.db.Model(&UnitHistory{}).Where("id=?", idUnitHistori).Updates(units)
+	if tx.Error != nil {
+		return errors.New("failed update histori")
+	}
+	if tx.RowsAffected == 0 {
+		return errors.New("id not found")
+	}
 	return nil
 }
 
