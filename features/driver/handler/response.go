@@ -10,6 +10,8 @@ type DriverResponse struct {
 	Status        bool    `json:"status"`
 	DrivingStatus string  `json:"driving_status,omitempty"`
 	VehicleID     uint    `json:"vehicle_id,omitempty"`
+	EmergenciesID uint    `json:"emergency_id,omitempty"`
+	EmergencyName string  `json:"emergency_name,omitempty"`
 	Latitude      float64 `json:"latitude,omitempty"`
 	Longitude     float64 `json:"longitude,omitempty"`
 }
@@ -21,6 +23,8 @@ type DriverAvailableResponse struct {
 	Email         string  `json:"email"`
 	Fullname      string  `json:"fullname,omitempty"`
 	Token         string  `json:"token,omitempty"`
+	EmergencyID   uint    `json:"emergency_id,omitempty"`
+	EmergencyName string  `json:"emergency_name,omitempty"`
 	Status        bool    `json:"status"`
 	DrivingStatus string  `json:"driving_status,omitempty"`
 	VehicleID     uint    `json:"vehicle_id,omitempty"`

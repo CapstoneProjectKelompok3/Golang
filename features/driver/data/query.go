@@ -23,14 +23,119 @@ type driverQuery struct {
 	db *gorm.DB
 }
 
-// CreateUnit implements driver.DriverDataInterface.
-func (*driverQuery) CreateUnit(idEmergency uint, tipe []string, count []int) error {
-	panic("unimplemented")
+// // IsCloseEmergency implements driver.DriverDataInterface.
+// func (repo *driverQuery) IsCloseEmergency(status bool, idEmergency uint) error {
+// 	var emergenci emergenciesy.Emergency
+// 	emergenci.IsClose = status
+// 	tx := repo.db.Model(&emergenciesy.Emergency{}).Where("id=?", idEmergency).Updates(emergenci)
+// 	if tx.Error != nil {
+// 		return errors.New("failed update is Close")
+// 	}
+// 	if tx.RowsAffected == 0 {
+// 		return errors.New("id not failed")
+// 	}
+// 	return nil
+// }
+
+// // SelectAllEmergencyInUnit implements driver.DriverDataInterface.
+// func (repo *driverQuery) SelectAllEmergencyInUnit(idEmergency uint) (bool, error) {
+// 	var emergenci []unites.Unit
+// 	tx := repo.db.Where("emergencies_id=?", idEmergency).Find(&emergenci)
+// 	if tx.Error != nil {
+// 		return false, errors.New("failed get unit")
+// 	}
+// 	var idUnit []uint
+// 	for _, v := range emergenci {
+// 		idUnit = append(idUnit, v.ID)
+// 	}F
+
+// 	var history []unites.UnitHistory
+// 	txx := repo.db.Where("unit_id in ? and status=?", idUnit, false).Find(&history)
+// 	if txx.Error != nil {
+// 		return false, errors.New("fail get history")
+// 	}
+// 	var status bool
+// 	if txx.RowsAffected == 0 {
+// 		status = true
+// 	} else {
+// 		status = false
+// 	}
+// 	return status, nil
+// }
+
+// UpdateFinish implements driver.DriverDataInterface.
+func (repo *driverQuery) UpdateFinish(id uint, idE uint) error {
+	var emergesiUnit []unites.Unit
+	txx := repo.db.Where("emergencies_id=?", idE).Find(&emergesiUnit)
+	if txx.Error != nil {
+		return errors.New("failed get emergensi")
+	}
+	var unitId []uint
+	for _, v := range emergesiUnit {
+		unitId = append(unitId, v.ID)
+	}
+	var histori unites.UnitHistory
+	txxx := repo.db.Where("unit_id in ? and driver_id=?", unitId, id).First(&histori)
+	if txxx.Error != nil {
+		return errors.New("failed get history")
+	}
+	var history unites.UnitHistory
+	history.Status = true
+	tx := repo.db.Model(&unites.UnitHistory{}).Where("id=?", histori.ID).Updates(&history)
+	if tx.Error != nil {
+		return errors.New("failed update histori")
+	}
+	return nil
 }
 
-// CreateUnitHistori implements driver.DriverDataInterface.
-func (*driverQuery) CreateUnitHistori(idEmergency uint) error {
-	panic("unimplemented")
+// SelectHistori implements driver.DriverDataInterface.
+func (repo *driverQuery) SelectHistori(idUnit uint) (uint, error) {
+
+	var unit unites.Unit
+	tx := repo.db.First(&unit, idUnit)
+	if tx.Error != nil {
+		return 0, errors.New("error select unit")
+	}
+
+	var history unites.UnitHistory
+	fmt.Println("unit id", unit.ID)
+	txx := repo.db.Where("unit_id=? and status=? and driver_id=?", unit.ID, "-", uint(0)).First(&history)
+	if txx.Error != nil {
+		return 0, errors.New("error select histori")
+	}
+	return history.ID, nil
+}
+
+// SelectUnit implements driver.DriverDataInterface.
+func (repo *driverQuery) SelectUnit(idEmergenci uint) ([]uint, []string, error) {
+	var inputModel []unites.Unit
+	tx := repo.db.Where("emergencies_id=?", idEmergenci).Find(&inputModel)
+	if tx.Error != nil {
+		return nil, nil, errors.New("failed get type unit")
+	}
+	var tipe []string
+	for _, v := range inputModel {
+		tipe = append(tipe, v.Type)
+	}
+
+	var id []uint
+	for _, v := range inputModel {
+		id = append(id, v.ID)
+	}
+	return id, tipe, tx.Error
+}
+
+func (repo *driverQuery) UpdateHistoryUnit(idDriver uint, idUnitHistori uint) error {
+	var units unites.UnitHistory
+	units.DriverID = idDriver
+	tx := repo.db.Model(&unites.UnitHistory{}).Where("id=?", idUnitHistori).Updates(units)
+	if tx.Error != nil {
+		return errors.New("failed update histori")
+	}
+	if tx.RowsAffected == 0 {
+		return errors.New("id not found")
+	}
+	return nil
 }
 
 // Delete implements driver.DriverDataInterface.
@@ -72,6 +177,8 @@ func (repo *driverQuery) FinishTrip(id int) error {
 	if tx.Error != nil {
 		return tx.Error
 	}
+	fmt.Println("finished")
+	fmt.Println(tx)
 	return nil
 }
 
@@ -222,30 +329,61 @@ func (repo *driverQuery) DriverOnTrip(id int, lat float64, long float64) (driver
 func (repo *driverQuery) SelectProfile(id int) (driver.DriverCore, error) {
 	var driversWithGovernments struct {
 		Driver
-		DriverID uint
+		DriverID      uint
+		EmergencyName string
 		goverment.Government
 	}
 
-	tx := repo.db.Table("drivers").
-		Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
+	repo.db.Table("drivers").
+		Select("drivers.* ,drivers.id AS DriverID,emergencies.name AS EmergencyName, governments.name,governments.type").
 		Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
+		Joins("INNER JOIN emergencies ON drivers.emergency_id=emergencies.id").
 		Where("drivers.id=?", id).
 		Scan(&driversWithGovernments)
 
 	// tx := repo.db.First(&driverData, id).Scan(&driverData) //
+	var driverCore driver.DriverCore
+	if driversWithGovernments.EmergencyId != 0 {
+		repo.db.Table("drivers").
+			Select("drivers.* ,drivers.id AS DriverID,emergencies.name AS EmergencyName, governments.name,governments.type").
+			Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
+			Joins("INNER JOIN emergencies ON drivers.emergency_id=emergencies.id").
+			Where("drivers.id=?", id).
+			Scan(&driversWithGovernments)
+		driverCore.EmergencyName = driversWithGovernments.EmergencyName
+	} else {
+		repo.db.Table("drivers").
+			Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
+			Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
+			// Joins("INNER JOIN emergencies ON drivers.emergency_id=emergencies.id").
+			Where("drivers.id=?", id).
+			Scan(&driversWithGovernments)
+		fmt.Println("salaj")
+		driverCore.Fullname = driversWithGovernments.Driver.Fullname
+	}
 
-	if tx.Error != nil {
-		return driver.DriverCore{}, tx.Error
-	}
-	if tx.RowsAffected == 0 {
-		return driver.DriverCore{}, errors.New("data not found")
-	}
+	// if tx.Error != nil {
+	// 	fmt.Println("Errror", tx.Error)
+	// 	repo.db.Raw("SELECT * FROM drivers WHERE drivers.id=?", id).Scan(&driversWithGovernments)
+	// 	return driver.DriverCore{}, tx.Error
+	// }
+	// if tx.RowsAffected == 0 {
+	// 	fmt.Println("Errror Not found", tx.Error)
+	// 	repo.db.Raw("SELECT * FROM drivers WHERE id=?", id).Scan(&driversWithGovernments)
+	// 	var driverCore driver.DriverCore
+	// 	driverCore.Id = driversWithGovernments.DriverID
+	// 	driverCore.EmergencyName = driversWithGovernments.EmergencyName
+	// 	driverCore.Fullname = driversWithGovernments.Driver.Fullname
+	// 	driverCore.Email = driversWithGovernments.Driver.Email
+	// 	fmt.Println("Errror Not found core", driverCore)
+	// 	return driverCore, errors.New("data not found 2")
+	// }
 
 	// var driversCore = ModelToCore(driversWithGovernments)
 
-	var driverCore driver.DriverCore
-
 	driverCore.Id = driversWithGovernments.DriverID
+	driverCore.EmergenciesID = driversWithGovernments.Driver.EmergencyId
+	// driverCore.EmergencyName = driversWithGovernments.EmergencyName
 	driverCore.Fullname = driversWithGovernments.Driver.Fullname
 	driverCore.Status = driversWithGovernments.Status
 	driverCore.Email = driversWithGovernments.Driver.Email
@@ -293,7 +431,7 @@ func (repo *driverQuery) SelectAll(pageNumber int, pageSize int) ([]driver.Drive
 
 	tx := repo.db.Table("drivers").
 		Select("drivers.* ,drivers.id AS DriverID, governments.name,governments.type").
-		Joins("INNER JOIN governments ON drivers.goverment_id=governments.id").
+		Joins("INNER JOIN governments ON drivers.goverment_id=governments.id WHERE drivers.deleted_at IS NULL").
 		Scan(&driversWithGovernments)
 
 	for _, u := range driversWithGovernments {
@@ -376,7 +514,7 @@ func (repo *driverQuery) Login(email string, password string) (dataLogin driver.
 }
 
 // KerahkanDriver implements driver.DriverDataInterface.
-func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hospital int, firestation int, dishub int, SAR int) ([]driver.DriverCore, error) {
+func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hospital int, firestation int, dishub int, SAR int, emergency_id int) ([]driver.DriverCore, error) {
 	//1. Simpan Lat Long di dalam redis
 	redisClient := middlewares.CreateRedisClient()
 
@@ -399,7 +537,8 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 
 	var driversWithGovernments []struct {
 		Driver
-		DriverID uint
+		DriverID      uint
+		EmergenciesID uint
 		goverment.Government
 		Distance float64
 	}
@@ -631,8 +770,9 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 	for _, u := range driversWithGovernments {
 		fmt.Printf("ID : %d,Nama: %s, Email: %s\n", u.DriverID, u.Name, u.Email)
 
+		fmt.Println("Emergency_id", emergency_id)
 		//3 Update Token
-		repo.db.Exec("UPDATE drivers SET token = ? WHERE id = ? ", tokenKasus, u.DriverID)
+		repo.db.Exec("UPDATE drivers SET token = ?,emergency_id=? WHERE id = ? ", tokenKasus, emergency_id, u.DriverID)
 
 		//4. Set driving status menjadi on_demand
 		result := repo.db.Model(&Driver{}).Where("id = ?", u.DriverID).Update("driving_status", "on_demand")
@@ -674,6 +814,7 @@ func (repo *driverQuery) KerahkanDriver(lat string, lon string, police int, hosp
 			Password:      value.Password,
 			Token:         value.Token,
 			GovermentName: value.Government.Name,
+			EmergencyID:   value.EmergenciesID,
 			GovermentType: value.Government.Type,
 			Status:        value.Status,
 			DrivingStatus: value.DrivingStatus,
@@ -800,7 +941,8 @@ func (repo *driverQuery) AcceptOrRejectOrder(IsAccepted bool, idDriver int) erro
 			//8 Dapatkan serta lempar token dari user login ke user other yang di assigned
 			fmt.Printf(" Type: %s \n", driversWithGovernments.Driver.Token)
 			token := driversWithGovernments.Driver.Token
-			fmt.Println("Token", token)
+			emergencyId := driversWithGovernments.Driver.EmergencyId
+			fmt.Println("Token emergency id", emergencyId)
 
 			otherDriver := &otherDriverWithGovernments
 
@@ -809,8 +951,8 @@ func (repo *driverQuery) AcceptOrRejectOrder(IsAccepted bool, idDriver int) erro
 			//9. Tampilkan Driver lain yang di dapatkan
 			fmt.Println("Driver Id lain", otherDriver.Driver.ID)
 
-			sqlAssignedTokenToOTherDriver := "UPDATE drivers SET token=?,driving_status='on_demand' WHERE ID=?"
-			repo.db.Exec(sqlAssignedTokenToOTherDriver, token, otherDriver.Driver.ID)
+			sqlAssignedTokenToOTherDriver := "UPDATE drivers SET token=?,driving_status='on_demand',emergency_id=? WHERE ID=?"
+			repo.db.Exec(sqlAssignedTokenToOTherDriver, token, emergencyId, otherDriver.Driver.ID)
 
 			sqlRemoveMyToken := "UPDATE drivers SET token=? WHERE ID=?"
 			repo.db.Exec(sqlRemoveMyToken, "", driversWithGovernments.DriverID)

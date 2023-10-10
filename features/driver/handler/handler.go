@@ -144,6 +144,9 @@ func (handler *DriverHandler) KerahkanDriver(c echo.Context) error {
 	totalPolice := c.QueryParam("police")
 	totalPoliceConv, _ := strconv.Atoi(totalPolice)
 
+	emergencyId := c.QueryParam("emergency_id")
+	emergencyIdConv, _ := strconv.Atoi(emergencyId)
+
 	totalHospital := c.QueryParam("hospital")
 	totalHospitalConv, _ := strconv.Atoi(totalHospital)
 
@@ -156,11 +159,11 @@ func (handler *DriverHandler) KerahkanDriver(c echo.Context) error {
 	totalSAR := c.QueryParam("SAR")
 	totalSARConv, _ := strconv.Atoi(totalSAR)
 
-	idEmergency:=c.QueryParam("emergency_id")
-	idEmergencyConv,_:=strconv.Atoi(idEmergency)
+	idEmergency := c.QueryParam("emergency_id")
+	idEmergencyConv, _ := strconv.Atoi(idEmergency)
 
-	result, err := handler.driverService.KerahkanDriver(uint(idEmergencyConv), lat, lon, totalPoliceConv, totalHospitalConv, totalFirestationConv, totalDishubConv, totalSARConv)
-	fmt.Println("Result", result)
+	result, err := handler.driverService.KerahkanDriver(uint(idEmergencyConv), lat, lon, totalPoliceConv, totalHospitalConv, totalFirestationConv, totalDishubConv, totalSARConv, emergencyIdConv)
+	fmt.Println("Result", idEmergencyConv)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error read data", nil))
 	}
@@ -180,6 +183,8 @@ func (handler *DriverHandler) KerahkanDriver(c echo.Context) error {
 			Fullname:      value.Fullname,
 			Token:         value.Token,
 			Status:        value.Status,
+			EmergencyID:   value.EmergencyID,
+			EmergencyName: value.EmergencyName,
 			DrivingStatus: value.DrivingStatus,
 			VehicleID:     value.VehicleID,
 			Latitude:      value.Latitude,
@@ -205,7 +210,7 @@ func (handler *DriverHandler) GetProfileDriver(c echo.Context) error {
 
 	result, err := handler.driverService.GetProfile(idToken)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, "error read data", nil))
+		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusInternalServerError, err.Error(), nil))
 	}
 
 	driverResponse := DriverResponse{
@@ -218,6 +223,8 @@ func (handler *DriverHandler) GetProfileDriver(c echo.Context) error {
 		Status:        result.Status,
 		DrivingStatus: result.DrivingStatus,
 		VehicleID:     result.VehicleID,
+		EmergenciesID: result.EmergenciesID,
+		EmergencyName: result.EmergencyName,
 		Latitude:      result.Latitude,
 		Longitude:     result.Longitude,
 	}
@@ -266,8 +273,10 @@ func (handler *DriverHandler) DriverAcceptOrRejectOrder(c echo.Context) error {
 	idToken := middlewares.ExtractTokenDriverId(c)
 
 	fmt.Println(idToken)
-
+	idEmergensi := c.QueryParam("emergensi_id")
+	idConv, _ := strconv.Atoi(idEmergensi)
 	driverInput := new(AcceptOrRejectOrderRequest)
+	fmt.Println("driver input", driverInput.IsAccepted)
 
 	errBind := c.Bind(&driverInput)
 	if errBind != nil {
@@ -280,7 +289,7 @@ func (handler *DriverHandler) DriverAcceptOrRejectOrder(c echo.Context) error {
 		message = "Success Rejected order"
 	}
 
-	err := handler.driverService.AcceptOrRejectOrder(driverInput.IsAccepted, idToken)
+	err := handler.driverService.AcceptOrRejectOrder(uint(idConv), driverInput.IsAccepted, idToken)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusNotFound, err.Error(), nil))
@@ -313,8 +322,16 @@ func (handler *DriverHandler) DriverLogout(c echo.Context) error {
 
 func (handler *DriverHandler) DriverFinishedTrip(c echo.Context) error {
 	idToken := middlewares.ExtractTokenDriverId(c)
+	id := c.QueryParam("emergenci_id")
 
-	err := handler.driverService.FinishTrip(idToken)
+	idConv, errConv := strconv.Atoi(id)
+	if errConv != nil {
+		return errConv
+	}
+
+	err := handler.driverService.FinishTrip(idToken, uint(idConv))
+
+	fmt.Println(err)
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, helper.WebResponse(http.StatusNotFound, err.Error(), nil))

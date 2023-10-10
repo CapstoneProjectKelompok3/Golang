@@ -15,13 +15,31 @@ type EmergencyService struct {
 	validate         *validator.Validate
 }
 
+// IncloseEmergency implements emergency.EmergencyServiceInterface.
+func (repo *EmergencyService) IncloseEmergency(idEmergency uint) error {
+	err:=repo.emergencyService.IncloseEmergency(idEmergency)
+	if err !=nil{
+		return err
+	}
+	return nil
+}
+
+// // IncloseEmergency implements emergency.EmergencyServiceInterface.
+// func (service *EmergencyService) IncloseEmergency(idEmergency uint) error {
+// 	err:=service.emergencyService.IncloseEmergency(idEmergency)
+// 	if err != nil{
+// 		return err
+// 	}
+// 	return nil
+// }
+
 // SumEmergency implements emergency.EmergencyServiceInterface.
 func (service *EmergencyService) SumEmergency() (int64, error) {
-	count,err:=service.emergencyService.SumEmergency()
-	if err != nil{
-		return 0,err
+	count, err := service.emergencyService.SumEmergency()
+	if err != nil {
+		return 0, err
 	}
-	return count,nil
+	return count, nil
 }
 
 // ActionGmail implements emergency.EmergencyServiceInterface.
@@ -34,10 +52,10 @@ func (service *EmergencyService) ActionGmail(input string) error {
 }
 
 // GetAll implements emergency.EmergencyServiceInterface.
-func (service *EmergencyService) GetAll(param emergency.QueryParams, token string,idCall uint,level string) (bool, []emergency.EmergencyEntity, error) {
+func (service *EmergencyService) GetAll(param emergency.QueryParams, token string, idCall uint, level string) (bool, []emergency.EmergencyEntity, error) {
 	var totalPages int64
 	nextPage := true
-	count, data, err := service.emergencyService.SelectAll(param, token,idCall,level)
+	count, data, err := service.emergencyService.SelectAll(param, token, idCall, level)
 	if err != nil {
 		return true, nil, err
 	}
@@ -96,28 +114,28 @@ func (service *EmergencyService) Delete(id uint) error {
 }
 
 // Add implements emergency.EmergencyServiceInterface.
-func (service *EmergencyService) Add(input emergency.EmergencyEntity, token string) error {
+func (service *EmergencyService) Add(input emergency.EmergencyEntity, token string) (uint, error) {
 	errValidate := service.validate.Struct(input)
 	if errValidate != nil {
-		return errors.New("error validate, receiver_id/longitude/latitude require")
+		return 0, errors.New("error validate, receiver_id/longitude/latitude require")
 	}
 
 	idInsert, errInsert := service.emergencyService.Insert(input)
 	if errInsert != nil {
-		return errInsert
+		return 0, errInsert
 	}
 
 	name := fmt.Sprintf("Kasus %d", idInsert)
 	input.Name = name
 	errUpdate := service.emergencyService.Update(input, idInsert)
 	if errUpdate != nil {
-		return errUpdate
+		return 0, errUpdate
 	}
 
 	idCall := strconv.Itoa(int(input.CallerID))
 	dataUserCall, errUserCall := service.emergencyService.SelectUser(idCall, token)
 	if errUserCall != nil {
-		return errUserCall
+		return 0, errUserCall
 	}
 	notif := helper.MessageGomailE{
 		EmailReceiver: dataUserCall.Email,
@@ -128,11 +146,11 @@ func (service *EmergencyService) Add(input emergency.EmergencyEntity, token stri
 	}
 	status, errEmail := service.emergencyService.SendNotification(notif)
 	if errEmail != nil {
-		return errors.New("gagal send email from admin")
+		return 0, errors.New("gagal send email from admin")
 	}
 	fmt.Println("status email", status)
 
-	return nil
+	return idInsert, nil
 }
 
 func New(service emergency.EmergencyDataInterface) emergency.EmergencyServiceInterface {

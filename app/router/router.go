@@ -44,6 +44,7 @@ func InitRouter(db *gorm.DB, c *echo.Echo, redis *redis.Client) {
 
 	c.GET("/emergencies/action", handlerE.ActionLogic)
 	c.GET("/emergencies/count", handlerE.CountEmergency)
+	c.PUT("/emergencies/in_close/:emergencies_id", handlerE.CloseEmergencies)
 
 	dataV := dV.New(db)
 	serviceV := sV.New(dataV)
@@ -78,9 +79,9 @@ func InitRouter(db *gorm.DB, c *echo.Echo, redis *redis.Client) {
 	c.POST("/drivers", driverHandlerAPI.CreateDriver)
 	c.GET("/drivers", driverHandlerAPI.GetAllDriver)
 	c.POST("/drivers/login", driverHandlerAPI.Login)
-	c.GET("/drivers/assign", driverHandlerAPI.KerahkanDriver)
+	c.POST("/drivers/assign", driverHandlerAPI.KerahkanDriver)
 	c.GET("/driver/profile", driverHandlerAPI.GetProfileDriver, middlewares.JWTMiddleware())
-	c.GET("/driver/confirm", driverHandlerAPI.DriverAcceptOrRejectOrder, middlewares.JWTMiddleware())
+	c.POST("/driver/confirm", driverHandlerAPI.DriverAcceptOrRejectOrder, middlewares.JWTMiddleware())
 	c.PUT("/driver/ontrip", driverHandlerAPI.DriverOnTrip, middlewares.JWTMiddleware())
 	c.GET("/drivers/count", driverHandlerAPI.GetCountDriver)
 	c.DELETE("/drivers/:driver_id", driverHandlerAPI.Delete)

@@ -54,14 +54,16 @@ type EmergencyDataInterface interface{
 	ActionGmail(input string)(error)
 	SelectUser(id string,token string) (UserEntity, error)
 	SumEmergency()(int64,error)
+	IncloseEmergency(idEmergency uint)error
 }
 
 type EmergencyServiceInterface interface{
-	Add(input EmergencyEntity,token string)(error)
+	Add(input EmergencyEntity,token string)(uint,error)
 	Delete(id uint)(error)
 	Edit(input EmergencyEntity,id uint,level string,idUser uint)error
 	GetById(id uint,token string)(EmergencyEntity,error)
 	GetAll(param QueryParams,token string,idCall uint,level string)(bool,[]EmergencyEntity,error)
 	ActionGmail(input string)error
 	SumEmergency()(int64,error)
+	IncloseEmergency(idEmergency uint)error
 }
