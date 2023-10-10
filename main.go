@@ -15,8 +15,7 @@ func main() {
 	mysql := database.InitMysql(cfg)
 	database.InitialMigration(mysql)
 
-	redis:=middlewares.CreateRedisClient()
-
+	redis := middlewares.CreateRedisClient()
 
 	e := echo.New()
 	e.Pre(middleware.RemoveTrailingSlash())
@@ -24,7 +23,6 @@ func main() {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: `[${time_rfc3339}] ${status} ${method} ${host}${path} ${latency_human}` + "\n",
 	}))
-	router.InitRouter(mysql, e,redis)
+	router.InitRouter(mysql, e, redis)
 	e.Logger.Fatal(e.Start(":80"))
-
 }

@@ -4,9 +4,15 @@ import (
 	"errors"
 	"project-capston/app/middlewares"
 	"project-capston/features/driver"
+	"project-capston/features/unit"
 
 	"github.com/go-playground/validator/v10"
 )
+
+type UnitService struct {
+	unitService unit.UnitDataInterface
+	validate    *validator.Validate
+}
 
 type driverService struct {
 	driverData driver.DriverDataInterface
@@ -65,21 +71,21 @@ func (service *driverService) AcceptOrRejectOrder(IsAccepted bool, idDriver int)
 }
 
 // KerahkanDriver implements driver.DriverServiceInterface.
-func (service *driverService) KerahkanDriver(id uint,lat string, long string, police int, hospital int, firestation int, dishub int, SAR int) ([]driver.DriverCore, error) {
+func (service *driverService) KerahkanDriver(id uint, lat string, long string, police int, hospital int, firestation int, dishub int, SAR int) ([]driver.DriverCore, error) {
 
 	result, err := service.driverData.KerahkanDriver(lat, long, police, hospital, firestation, dishub, SAR)
 	if err != nil {
 		return nil, err
 	}
 	count := []int{police, hospital, firestation, dishub, SAR}
-	tipe :=[]string{"police", "hospital", "firestation", "dishub", "SAR"}
-	errUnit:=service.driverData.CreateUnit(id,tipe,count)
-	if errUnit != nil{
-		return nil,errUnit
+	tipe := []string{"police", "hospital", "firestation", "dishub", "SAR"}
+	errUnit := service.driverData.CreateUnit(id, tipe, count)
+	if errUnit != nil {
+		return nil, errUnit
 	}
-	errHistori:=service.driverData.CreateUnitHistori(id)
-	if errHistori != nil{
-		return nil,errUnit
+	errHistori := service.driverData.CreateUnitHistori(id)
+	if errHistori != nil {
+		return nil, errUnit
 	}
 
 	return result, nil
