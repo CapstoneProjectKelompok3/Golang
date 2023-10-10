@@ -3,6 +3,7 @@ package data
 import (
 	"errors"
 	"log"
+
 	"project-capston/features/vehicles"
 
 	"gorm.io/gorm"
@@ -15,11 +16,11 @@ type VehicleData struct {
 // Delete implements vehicles.VehicleDataInterface.
 func (repo *VehicleData) Delete(id uint) error {
 	var inputModel Vehicle
-	tx:=repo.db.Delete(&inputModel,id)
-	if tx.Error != nil{
+	tx := repo.db.Delete(&inputModel, id)
+	if tx.Error != nil {
 		return errors.New("fail delete")
 	}
-	if tx.RowsAffected==0{
+	if tx.RowsAffected == 0 {
 		return errors.New("row not affected")
 	}
 	return nil
@@ -46,9 +47,9 @@ func (repo *VehicleData) SelectById(id uint) (vehicles.VehicleEntity, error) {
 	if tx.Error != nil {
 		return vehicles.VehicleEntity{}, errors.New("get vehicle by id failed")
 	}
-	log.Println("data vehicle",inputModel)
+	log.Println("data vehicle", inputModel)
 	entity := ModelToEntity(inputModel)
-	log.Println("data vehicle",entity)
+	log.Println("data vehicle", entity)
 	return entity, nil
 }
 

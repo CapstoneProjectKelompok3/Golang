@@ -6,9 +6,15 @@ import (
 	"log"
 	"project-capston/app/middlewares"
 	"project-capston/features/driver"
+	"project-capston/features/unit"
 
 	"github.com/go-playground/validator/v10"
 )
+
+type UnitService struct {
+	unitService unit.UnitDataInterface
+	validate    *validator.Validate
+}
 
 type driverService struct {
 	driverData driver.DriverDataInterface
@@ -101,6 +107,7 @@ func (service *driverService) AcceptOrRejectOrder(idEmergenci uint, IsAccepted b
 }
 
 // KerahkanDriver implements driver.DriverServiceInterface.
+
 func (service *driverService) KerahkanDriver(id uint, lat string, long string, police int, hospital int, firestation int, dishub int, SAR int, emergency_id int) ([]driver.DriverCore, error) {
 
 	result, err := service.driverData.KerahkanDriver(lat, long, police, hospital, firestation, dishub, SAR, emergency_id)

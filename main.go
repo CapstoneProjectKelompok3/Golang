@@ -24,6 +24,7 @@ func main() {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: `[${time_rfc3339}] ${status} ${method} ${host}${path} ${latency_human}` + "\n",
 	}))
+
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"}, // Ganti dengan origin yang diizinkan Anda.
 		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
@@ -31,5 +32,4 @@ func main() {
 	}))
 	router.InitRouter(mysql, e, redis)
 	e.Logger.Fatal(e.Start(":80"))
-
 }

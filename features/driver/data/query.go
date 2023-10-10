@@ -10,7 +10,6 @@ import (
 	"project-capston/app/middlewares"
 	"project-capston/features/driver"
 	goverment "project-capston/features/goverment/data"
-	unites "project-capston/features/unit/data"
 	"strconv"
 	"time"
 
@@ -136,55 +135,6 @@ func (repo *driverQuery) UpdateHistoryUnit(idDriver uint, idUnitHistori uint) er
 	if tx.RowsAffected == 0 {
 		return errors.New("id not found")
 	}
-	return nil
-}
-
-// CreateUnit implements driver.DriverDataInterface.
-func (repo *driverQuery) CreateUnit(idEmergency uint, tipe []string, count []int) error {
-
-	for i := 0; i < len(tipe); i++ {
-		if count[i] != 0 {
-			unitData := unites.Unit{
-				EmergenciesID: idEmergency,
-				Type:          tipe[i],
-				SumOfUnit:     count[i],
-			}
-			tx := repo.db.Create(&unitData)
-			if tx.Error != nil {
-				return errors.New("failed create unit")
-			}
-			if tx.RowsAffected == 0 {
-				return errors.New("row not affected")
-			}
-		}
-	}
-	return nil
-}
-
-func (repo *driverQuery) CreateUnitHistori(idEmergency uint) error {
-	var inputUnit []unites.Unit
-	txx := repo.db.Where("emergencies_id=?", idEmergency).Find(&inputUnit)
-	if txx.Error != nil {
-		return errors.New("failed get unit history")
-	}
-
-	tx := repo.db.Begin()
-	for _, v := range inputUnit {
-		for j := 0; j < v.SumOfUnit; j++ {
-			inputModel := unites.UnitHistory{
-				UnitID: v.ID,
-			}
-			if err := tx.Create(&inputModel).Error; err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return err
-	}
-
 	return nil
 }
 
